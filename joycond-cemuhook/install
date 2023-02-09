@@ -31,14 +31,14 @@ provide() {
 install_package() {
   name="${1}"
   log "Installing ${name}"
-  wget --quiet -O- "https://archlinux.org/packages/extra/x86_64/${name}/download/" | zstd -d | tar x -C /
+  wget --quiet -O- "https://archlinux.org/packages/extra/$(uname -m)/${name}/download/" | zstd -d | tar x -C /
 }
 
 install_app() {
   source="${1}"
   log "Installing ${source}"
   mkdir -p "${app_dir}"
-  gunzip <"${source}" | tar x --strip-components 1 -C "${app_dir}" 
+  gunzip <"${source}" | tar x --strip-components 1 -C "${app_dir}"
 }
 
 patch_app() {
@@ -49,7 +49,7 @@ patch_app() {
    "${app_dir}/joycond-cemuhook.py"
    for name in "Pro Controller" "Nintendo Co., Ltd. Pro Controller"; do
      if [ ! -e "${app_dir}/profiles/${name}.json" ]; then
-       ln -s "Nintendo Switch Pro Controller.json" "${app_dir}/profiles/${name}.json" 
+       ln -s "Nintendo Switch Pro Controller.json" "${app_dir}/profiles/${name}.json"
      fi
    done
 }
