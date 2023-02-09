@@ -1,0 +1,10 @@
+#!/bin/sh
+. "$(dirname $(readlink -f "$0"))/.env"
+
+{
+  if [ -r "${tls_cert}" ] && [ -r "${tls_key}" ]; then
+    printf '%s\0' "--filesystem=${tls_home}:ro" "${app_id}" -cert "${tls_cert}" -key "${tls_key}"
+  else
+    printf '%s\0' "${app_id}"
+  fi
+} | xargs -0 sh -c "DISPLAY=:0 flatpak run \"\${@}\" >\"${log_file}\" 2>&1 &" -

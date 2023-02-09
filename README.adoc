@@ -1,0 +1,87 @@
+= batocera-extra
+:url-batocera: https://github.com/batocera-linux/batocera.linux/
+Additional features for batocera
+:toc: preamble
+
+This repository contains extra features for {url-batocera}[batocera].
+
+## Installation
+
+. Copy this directory to `/userdata/extra` to your batocera host.
+. Follow the installation instructions of the extras you're interested in.
+. Modify your `/userdata/system/custom.sh` according to your needs. See `bin/custom.sh` for an example.
++
+If you don't have a `custom.sh` yet, you can simply create a link to the example:
++
+[source,console]
+----
+$ ln -s /userdata/extra/bin/custom.sh /userdata/system/custom.sh
+----
+
+## Content
+
+### joycond-cemuhook
+
+See link:joycond-cemuhook/README.adoc[joycond-cemuhook].
+
+### ds4drv-cemuhook
+
+See link:ds4drv-cemuhook/README.adoc[ds4drv-cemuhook].
+
+### remote-touchpad
+
+See link:remote-touchpad/README.adoc[remote-touchpad].
+
+### Patches
+#### `bin/patch-batocera-info-for-pro-controller`
+A script that patches `batocera-info` for Switch Pro Controllers.
+
+For Nintendo controllers, the kernel module https://github.com/emilyst/hid-nx-dkms[hid-nx] is used which provides the battery status as https://github.com/emilyst/hid-nx-dkms/blob/974d6c407296c47390d99f008933846c86f52bb9/hid-nx.c#L1533[level enum] (e.g. `low` and `high`) instead of a percentage.
+
+This patch has only an effect on the `batocera-info` script and not on the battery level shown in the Emulation Station UI.
+
+#### `bin/patch-citra-generator-for-language`
+
+A patch for the configuration generator of Citra. It fixes broken language detection.
+
+Related pull request: https://github.com/batocera-linux/batocera.linux/pull/8073[#8073]
+
+May be applied to batocera v35, will be available in v36.
+
+#### `bin/patch-citra-generator-for-cemuhook`
+
+A patch for the configuration generator of Citra. It adds support for motion and touch configuration in Citra.
+
+Related pull request: https://github.com/batocera-linux/batocera.linux/pull/8080[#8080]
+
+#### `bin/patch-cemu-generator-for-squashfs`
+
+A patch for the configuration generator of Cemu. It adds support for arbitrary location of `.rpx` files within Loadiine roms.
+
+Related pull requests: https://github.com/batocera-linux/batocera.linux/pull/8052[#8052] & https://github.com/batocera-linux/batocera.linux/pull/8033[#8052]
+
+May be applied to batocera v35, will be available in v36.
+
+#### `bin/patch-cemu-generator-for-cemuhook`
+
+A patch for the configuration generator of Cemu. It adds generation of the cemuhook configuration file `cemuhook.ini` allowing configuration of motion control.
+
+Written for batocera v35 which contains the Windows build of cemu. This patch will probably not work in batocera v36 and above, because v36 introduces the linux version of cemu.
+
+### Scripts
+#### `bin/custom.sh`
+An example for `/userdata/system/custom.sh` that enables all extras of this project.
+
+#### `bin/read-temperature`
+A script to read the CPU temperature from `hwmon` instead of `thermal_zone`. Useful for hosts where `/sys/devices/virtual/thermal` is not available.
+
+May be bound to a controller button, e.g.:
+
+./userdata/system/configs/multimedia_keys.conf
+[source.conf]
+----
+KEY_F12 1 /userdata/custom/bin/read-temperature | LANG=en_US HOME=/userdata/system XAUTHORITY=/var/lib/.Xauthority DISPLAY=:0.0 osd_cat -f -*-*-bold-*-*-*-38-120-*-*-*-*-*-* -cred -s 3 -d 4
+----
+
+#### `bin/on-game-condition`
+A template for files in the `/userdata/system/scripts` directory.

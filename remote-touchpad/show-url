@@ -1,0 +1,9 @@
+#!/bin/sh
+. "$(dirname $(readlink -f "$0"))/.env"
+
+if ! "${base_dir}/is-up"; then
+  "${base_dir}/start"
+  sleep 1
+fi
+
+"${base_dir}/show-url-of-started-app"

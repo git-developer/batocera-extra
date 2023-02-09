@@ -1,0 +1,4 @@
+#!/bin/sh
+. "$(dirname $(readlink -f "$0"))/.env"
+
+LANG=C DISPLAY=:0 xterm -en C.UTF-8 -e "$(dirname $0)/show-url; sleep \"${timeout}\""

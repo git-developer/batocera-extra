@@ -1,0 +1,61 @@
+#!/bin/sh
+set -eu
+
+generator="$(find /usr/lib/python*.*/site-packages/configgen/generators/cemu -name cemuGenerator.py)"
+cp -a "${generator}" "${generator}.backup-cemuhook"
+patch "${generator}" << 'EOF'
+--- "${generator}"
++++ cemuGenerator.py
+@@ -13,6 +13,7 @@
+ import filecmp
+ import glob
+ from . import cemuControllers
++import configparser
+
+ cemuConfig  = batoceraFiles.CONF + '/cemu'
+ cemuHomedir = 'Z:\\userdata\\roms\\wiiu'
+@@ -75,6 +76,7 @@
+             shutil.copyfile(cemuDatadir + "/cemuhook.dll", cemuhook_dll)
+
+         cemuControllers.generateControllerConfig(system, playersControllers)
++        CemuGenerator.writeCemuhookConfig("/usr/cemu/cemuhook.ini", batoceraFiles.CONF + "/cemu/cemuhook.ini", system)
+
+         if rom == "config":
+             commandArray = ["/usr/wine/lutris/bin/wine64", "/userdata/system/configs/cemu/Cemu.exe"]
+@@ -231,6 +233,33 @@
+         else:
+             xml_elt.appendChild(config.createTextNode(value))
+
++    @staticmethod
++    def writeCemuhookConfig(sourceFile, targetFile, system):
++
++        # ini file
++        cemuhookConfig = configparser.RawConfigParser(strict=False)
++        cemuhookConfig.optionxform=str             # enable case-sensitivity
++        if os.path.exists(sourceFile):
++            cemuhookConfig.read(sourceFile)
++
++        ## [Input]
++        if not cemuhookConfig.has_section("Input"):
++            cemuhookConfig.add_section("Input")
++
++        if system.isOptSet('cemuhook_motion_source'):
++            cemuhookConfig.set("Input", "motionSource", system.config["cemuhook_motion_source"])
++        if system.isOptSet('cemuhook_motion_source_is_button_source') and system.config["cemuhook_motion_source_is_button_source"] == '1':
++            cemuhookConfig.set("Input", "motionSourceIsBtnSource", "true")
++        if system.isOptSet('cemuhook_server_ip'):
++            cemuhookConfig.set("Input", "serverIP", system.config["cemuhook_server_ip"])
++        if system.isOptSet('cemuhook_server_port'):
++            cemuhookConfig.set("Input", "serverPort", system.config["cemuhook_server_port"])
++
++        ## Update the configuration file
++        if not os.path.exists(os.path.dirname(targetFile)):
++            os.makedirs(os.path.dirname(targetFile))
++        with open(targetFile, 'w') as configfile:
++            cemuhookConfig.write(configfile)
+
+ # Lauguage auto setting
+ def getCemuLangFromEnvironment():
+EOF
+
+echo >&2 "Cemu Generator was patched for cemuhook."

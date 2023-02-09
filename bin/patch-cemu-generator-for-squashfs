@@ -1,0 +1,36 @@
+#!/bin/sh
+set -eu
+
+generator="$(find /usr/lib/python*.*/site-packages/configgen/generators/cemu -name cemuGenerator.py)"
+cp -a "${generator}" "${generator}.backup-squashfs"
+patch "${generator}" << 'EOF'
+--- "${generator}"
++++ cemuGenerator.py
+@@ -11,6 +11,7 @@
+ import controllersConfig
+ import shutil
+ import filecmp
++import glob
+ from . import cemuControllers
+
+ cemuConfig  = batoceraFiles.CONF + '/cemu'
+@@ -28,12 +29,9 @@
+
+         # in case of squashfs, the root directory is passed
+         rpxrom = rom
+-        if os.path.isdir(rom + "/code"):
+-            rpxInDir = os.listdir(rom + "/code")
+-            for file in rpxInDir:
+-                basename, extension = os.path.splitext(file)
+-                if extension == ".rpx":
+-                    rpxrom = rom + "/code/" + basename + extension
++        paths = list(glob.iglob(os.path.join(glob.escape(rom), '**/code/*.rpx'), recursive=True))
++        if len(paths) >= 1:
++            rpxrom = paths[0]
+
+         game_dir = cemuConfig + "/gameProfiles"
+         resources_dir = cemuConfig + "/resources"
+EOF
+
+echo >&2 "Cemu Generator was patched for squashfs support."
+

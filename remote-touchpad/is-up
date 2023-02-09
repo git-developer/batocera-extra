@@ -1,0 +1,9 @@
+#!/bin/sh
+. "$(dirname $(readlink -f "$0"))/.env"
+
+instances="$(flatpak ps --columns=child-pid,instance,application | grep "^.*\s\+${app_id}$")"
+ps -oppid,pid,comm | grep ".*${app_name}$" | while read ppid pid name; do
+  if ! echo "${instances}" | grep "^${ppid}\s\+.*"; then
+    printf '%s\t%s\n' "${pid}" "${name}"
+  fi
+done | grep .

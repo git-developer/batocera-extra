@@ -1,0 +1,77 @@
+#!/bin/sh
+set -eu
+. "$(dirname $(readlink -f "$0"))/.env"
+
+app_dir="${base_dir}/joycond-cemuhook"
+
+prepare_pip() {
+  if ! command -V pip >/dev/null 2>&1; then
+    python -m ensurepip --upgrade
+    python -m pip install --upgrade pip
+  fi
+}
+
+provide() {
+  url="${1}"
+  filename="$(wget --quiet --spider --server-response "${url}" 2>&1 | sed -nE 's/\s*content-disposition.+filename=(.+)/\1/p')"
+  if [ "${filename}" ]; then
+    source="${download_dir}/${filename}"
+    if [ ! -s "${source}" ]; then
+      mkdir -p "${download_dir}"
+      wget --quiet "--output-document=${source}" "${url}"
+    else
+      log "Using up-to-date local file ${source}"
+    fi
+  else
+    source="${url}"
+  fi
+  echo "${source}"
+}
+
+install_package() {
+  name="${1}"
+  log "Installing ${name}"
+  wget --quiet -O- "https://archlinux.org/packages/extra/x86_64/${name}/download/" | zstd -d | tar x -C /
+}
+
+install_app() {
+  source="${1}"
+  log "Installing ${source}"
+  mkdir -p "${app_dir}"
+  gunzip <"${source}" | tar x --strip-components 1 -C "${app_dir}" 
+}
+
+patch_app() {
+  sed -i.backup -E \
+    -e 's/(hid[_-])nintendo/\1nx/g' \
+    -e 's/^(\s*)"Nintendo Switch Pro Controller",$/\0\n\1"Pro Controller",\n\1"Nintendo Co., Ltd. Pro Controller",/g' \
+    -e 's/self\.dbus_interface, self\.dbus_properties_interface = .+/self.dbus_interface, self.dbus_properties_interface = None, None/g' \
+   "${app_dir}/joycond-cemuhook.py"
+   for name in "Pro Controller" "Nintendo Co., Ltd. Pro Controller"; do
+     if [ ! -e "${app_dir}/profiles/${name}.json" ]; then
+       ln -s "Nintendo Switch Pro Controller.json" "${app_dir}/profiles/${name}.json" 
+     fi
+   done
+}
+
+install_dependencies() {
+  # dbus-python requires a compiler, so exclude it and download the binary
+  sed <"${app_dir}/requirements.txt" 's/dbus-python//g' | xargs pip install
+  install_package dbus-python
+
+  # update evdev from 0.7.0 to latest
+  install_package python-evdev
+
+  # install upower
+  #install_package upower
+}
+
+main() {
+  prepare_pip
+  source="${1:-$(provide "${1:-${url}}")}"
+  install_app "${source}"
+  patch_app
+  install_dependencies
+}
+
+main "${@}"

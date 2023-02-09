@@ -1,0 +1,9 @@
+#!/bin/sh
+. "$(dirname $(readlink -f "$0"))/.env"
+
+flatpak ps --columns=instance,application \
+  | sed -nE "s/([^\s]+)\s${app_id}/\1/p" \
+  | xargs -r -n 1 flatpak kill
+pgrep "${app_name}" | xargs -r kill
+
+if [ -f "${log_file}" ]; then rm "${log_file}"; fi

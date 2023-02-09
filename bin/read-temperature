@@ -1,0 +1,2 @@
+#!/bin/sh
+printf "Temperature: %.0f C\n" $(($(cat "/sys/class/hwmon/hwmon0/temp1_input") / 1000))

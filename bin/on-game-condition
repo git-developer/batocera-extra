@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+echo "$(date -Iseconds)" "${0}" "${@}" >&2
+
+condition="${1-}"
+system="${2-}"
+emulator="${3-}"
+core="${4-}"
+rom="${5-}"
+
+case "${condition}" in
+  gameStart) ;;
+  gameStop)  ;;
+  *)
+esac
