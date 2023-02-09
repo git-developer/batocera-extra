@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eu
 
-pgrep -f 'python3 -m ds4drv --udp'
+pgrep -f 'python3 -m ds4drv '
