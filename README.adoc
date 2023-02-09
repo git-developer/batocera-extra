@@ -58,7 +58,7 @@ Related pull request: https://github.com/batocera-linux/batocera.linux/pull/8080
 
 A patch for the configuration generator of Cemu. It adds support for arbitrary location of `.rpx` files within Loadiine roms.
 
-Related pull requests: https://github.com/batocera-linux/batocera.linux/pull/8052[#8052] & https://github.com/batocera-linux/batocera.linux/pull/8033[#8052]
+Related pull requests: https://github.com/batocera-linux/batocera.linux/pull/8052[#8052] & https://github.com/batocera-linux/batocera.linux/pull/8053[#8053]
 
 May be applied to batocera v35, will be available in v36.
 
