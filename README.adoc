@@ -24,7 +24,7 @@ run on other architectures, too, but this is currently untested.
 +
 [source,console]
 ----
-$ mkdir -p /userdata/extra && wget -O - https://github.com/git-developer/batocera-extra/tarball/main | gunzip | tar --strip-components 1 -C /userdata/extra
+$ mkdir -p /userdata/extra && wget -O - https://github.com/git-developer/batocera-extra/tarball/main | gunzip | tar x --strip-components 1 -C /userdata/extra
 ----
 . Follow the installation instructions of the features you're interested in. Each feature has its own subdirectory containing a README file.
 . Modify your `/userdata/system/custom.sh` according to your needs.
