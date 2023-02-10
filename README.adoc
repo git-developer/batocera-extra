@@ -98,3 +98,64 @@ KEY_F12 1 /userdata/extra/bin/read-temperature | LANG=en_US HOME=/userdata/syste
 
 #### `on-game-condition`
 * A template for files in the `/userdata/system/scripts` directory.
+
+## Emulator configuration
+This section explains the emulator configuration that is required to play games with touch and motion control. This configuration has to be performed once only, it will be persisted across boots.
+
+* Touch input is read from the emulator window. This enables the following sources for touch input:
+** The touchpad of a DS4 controller
+** A smartphone connected via remote touchpad
+** A mouse connected to the batocera host
+
+* Motion input is read from a cemuhook server.
+** For a Nintendo controller connected to joycond-cemuhook, use `localhost` and `26761`.
+** For a DS4 controller connected to ds4drv-cemuhook, use `localhost` and `26762`.
+** For a smartphone, use the hostname/ip of the smartphone and the port configured in the _MotionSource_ app.
+
+### Patching the configuration generators
+In batocera v35, the configuration generators for Citra and Cemu don't offer support for touch and motion control. Actually, they even prevent it because they override custom changes in the affected configuration files. To avoid this, the generators have to be patched (see <<Patches>>).
+
+### Citra
+./userdata/system/configs/citra-emu/qt-config.ini
+----
+[Controls]
+profiles\1\touch_device=engine:emu_window
+profiles\1\touch_device\default=true
+profiles\1\motion_device=engine:cemuhookudp
+profiles\1\motion_device\default=false
+profiles\1\udp_input_address=localhost
+profiles\1\udp_input_address\default=false
+profiles\1\udp_input_port=26761
+profiles\1\udp_input_port\default=false
+----
+
+Notes:
+
+* The settings may be set by either editing the configuration file using a text editor or using the UI: File Manager -> Applications -> citra-emu-config -> Menu _Emulation_ -> Entry _Configure_ -> List Entry _Controls_ -> Tab _Input_ -> Button _Motion / Touch Control..._
+* Without patch, the Citra configuration generator will overwrite these settings on game start.
+
+### Cemu
+./userdata/system/batocera.conf
+----
+wiiu.cemuhook_motion_source=DSU1
+wiiu.cemuhook_motion_source_is_button_source=1
+wiiu.cemuhook_server_ip=127.0.0.1
+wiiu.cemuhook_server_port=26761
+----
+
+Notes:
+
+* The settings must be set by editing the configuration file using a text editor.
+* Without patching the Cemu configuration generator, these settings have no effect.
+* Implementation details:
+** Without patch, the generator overwrites `/userdata/system/configs/cemu/cemuhook.ini` with `/usr/cemu/cemuhook.ini` on each game start.
+** The patch reads the settings from `batocera.conf` and adds them to `/userdata/system/configs/cemu/cemuhook.ini` resulting in
++
+./userdata/system/configs/cemu/cemuhook.ini
+----
+[Input]
+motionSource = DSU1
+motionSourceIsBtnSource = true
+serverIP = localhost
+serverPort = 26761
+----
