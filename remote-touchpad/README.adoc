@@ -12,7 +12,7 @@ This directory contains files to install and manage {url-remote-touchpad}[remote
 $ ./install
 ----
 
-. Bind the command `show-url` to a controller key combination in `multimedia_keys.conf` on the host:
+. Bind the command `open-url-window` to a controller key combination in `multimedia_keys.conf` on the host:
 +
 ./userdata/system/configs/multimedia_keys.conf
 [source,conf]
