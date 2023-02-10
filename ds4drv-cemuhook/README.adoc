@@ -2,7 +2,7 @@
 :url-ds4drv-cemuhook: https://github.com/Unrud/remote-touchpad/
 Motion and touch control for Sony DualShock 4 controllers
 
-This directory contains files to install and manage {url-ds4drv-cemuhook}[ds4drv-cemuhook] which enables motion and touch control for Sony DualShock 4 controllers.
+This directory contains files to install and manage {url-ds4drv-cemuhook}[ds4drv-cemuhook] which enables motion and touch control for Sony DualShock 4 controllers. Controllers may be connected via USB or Bluetooth.
 
 == Installation
 . Add `install-and-start` to your `/userdata/system/custom.sh`. This will perform the following steps when the host boots:

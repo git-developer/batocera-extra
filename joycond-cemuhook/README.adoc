@@ -2,7 +2,7 @@
 :url-joycond-cemuhook: https://github.com/joaorb64/joycond-cemuhook
 Motion control for Nintendo controllers
 
-This directory contains files to install and manage {url-joycond-cemuhook}[joycond-cemuhook] which enables motion control for Nintendo controllers.
+This directory contains files to install and manage {url-joycond-cemuhook}[joycond-cemuhook] which enables motion control for Nintendo controllers. Controllers may be connected via USB or Bluetooth.
 
 == Installation
 . Add `install-and-start` to your `/userdata/system/custom.sh`. This will perform the following steps when the host boots:
@@ -23,7 +23,7 @@ NOTE: The default port for the cemuhook protocol is `26760`. The custom port `26
 NOTE: Please pay attention to the patches for Citra and Cemu in this project, they are required when you'd like to run the emulators from ES.
 
 == Troubleshooting
-* The log file is located at `/userdata/system/logs/joyncond-cemuhook.log` (location is configurable in the `.env` file).
+* The log file is located at `/userdata/system/logs/joycond-cemuhook.log` (location is configurable in the `.env` file).
 * The other scripts (e.g. `is-up`, `stop`) may help to analyse problems, their names should be self-explaining.
 
 == Implementation details
@@ -33,4 +33,4 @@ NOTE: Please pay attention to the patches for Citra and Cemu in this project, th
 - Details about the patches and support for _hid-nx_ in joycond-cemuhook is discussed in https://github.com/joaorb64/joycond-cemuhook/issues/71[joycond-cemuhook #71]
 - batocera does not contain tools to build the dependencies for joycond-cemuhook. Thus, these dependencies are downloaded as binary packages from the Arch Linux package repository.
 - The https://github.com/gvalkov/python-evdev[python-evdev] version in batocera v35 (0.7.0 from 2017-06-16) seems to be too old for joycond-cemuhook, so the package is updated to the latest version.
-- https://upower.freedesktop.org/docs/UPower.html[UPower] seems to be unavailable to joycond-cemuhook (at least over the D-Bus interface), so the battery status is disabled (within joycond-cemuhook only).
+- https://upower.freedesktop.org/docs/UPower.html[UPower] seems to be unavailable to joycond-cemuhook, at least over the D-Bus interface. When joycond-cemuhook tires to read battery status, it fails with an error message: `Could not get owner of name 'org.freedesktop.UPower': no such name`. Thus, a patch is applied to joycond-cemuhook that disables the battery status (within joycond-cemuhook only).
