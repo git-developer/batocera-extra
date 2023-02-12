@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+version_fallback=1.2.18
+
+branch="${1:-$(wget -q -O- https://api.github.com/repos/batocera-linux/buildroot | jq -r .default_branch)}"
+url="https://github.com/batocera-linux/buildroot/raw/${branch}/package/dbus-python/dbus-python.mk"
+DBUS_PYTHON_VERSION="${DBUS_PYTHON_VERSION:-$(wget -q -O- "${url}" | sed -nE 's/DBUS_PYTHON_VERSION\s*=\s*(.*)/\1/p')}"
+DBUS_PYTHON_VERSION="${DBUS_PYTHON_VERSION:-${version_fallback}}"
+
+for path in /usr/lib/python3*/site-packages; do
+  marker_file="${path}/dbus_python-${DBUS_PYTHON_VERSION}.egg-info"
+  if [ ! -e "${marker_file}" ]; then
+    touch "${marker_file}"
+    echo >&2 "Marked dbus-python==${DBUS_PYTHON_VERSION} as installed."
+  fi
+done

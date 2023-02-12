@@ -64,8 +64,7 @@ patch_app() {
 }
 
 install_dependencies() {
-  # dbus-python is included and would require a compiler, so exclude it
-  sed <"${app_dir}/requirements.txt" 's/dbus-python//g' | xargs pip install
+  pip install -r "${app_dir}/requirements.txt"
 
   # update evdev from 0.7.0 to latest
   install_package python-evdev
