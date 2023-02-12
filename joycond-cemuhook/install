@@ -14,6 +14,7 @@ prepare_pip() {
 provide() {
   url="${1}"
   filename="$(wget --quiet --spider --server-response "${url}" 2>&1 | sed -nE 's/\s*content-disposition.+filename=(.+)/\1/p')"
+  filename="${filename:-${url##*/}}"
   if [ "${filename}" ]; then
     source="${download_dir}/${filename}"
     if [ ! -s "${source}" ]; then
@@ -34,6 +35,15 @@ install_package() {
   wget --quiet -O- "https://archlinux.org/packages/extra/$(uname -m)/${name}/download/" | zstd -d | tar x -C /
 }
 
+install_package_from_archive() {
+  name="${1}"
+  version="${2}"
+  log "Installing ${name} in version ${version}"
+  first_letter="${name%"${name#?}"}"
+  archive="$(provide "https://archive.archlinux.org/packages/${first_letter}/${name}/${name}-${version}-$(uname -m).pkg.tar.zst")"
+  zstd -d <"${archive}" | tar x -C /
+}
+
 install_app() {
   source="${1}"
   log "Installing ${source}"
@@ -45,7 +55,6 @@ patch_app() {
   sed -i.backup -E \
     -e 's/(hid[_-])nintendo/\1nx/g' \
     -e 's/^(\s*)"Nintendo Switch Pro Controller",$/\0\n\1"Pro Controller",\n\1"Nintendo Co., Ltd. Pro Controller",/g' \
-    -e 's/self\.dbus_interface, self\.dbus_properties_interface = .+/self.dbus_interface, self.dbus_properties_interface = None, None/g' \
    "${app_dir}/joycond-cemuhook.py"
    for name in "Pro Controller" "Nintendo Co., Ltd. Pro Controller"; do
      if [ ! -e "${app_dir}/profiles/${name}.json" ]; then
@@ -55,15 +64,18 @@ patch_app() {
 }
 
 install_dependencies() {
-  # dbus-python requires a compiler, so exclude it and download the binary
+  # dbus-python is included and would require a compiler, so exclude it
   sed <"${app_dir}/requirements.txt" 's/dbus-python//g' | xargs pip install
-  install_package dbus-python
 
   # update evdev from 0.7.0 to latest
   install_package python-evdev
 
-  # install upower
-  #install_package upower
+  # install upower with dependencies compatible with glibc 2.33
+  install_package_from_archive upower 0.99.15-1
+  install_package_from_archive libimobiledevice 1.3.0-5
+  install_package libusbmuxd
+  ln -s /run/dbus /var/run/dbus
+  /usr/lib/upowerd 2>&1 | logger &
 }
 
 main() {
