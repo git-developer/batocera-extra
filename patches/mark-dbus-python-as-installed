@@ -7,10 +7,9 @@ url="https://github.com/batocera-linux/buildroot/raw/${branch}/package/dbus-pyth
 DBUS_PYTHON_VERSION="${DBUS_PYTHON_VERSION:-$(wget -q -O- "${url}" | sed -nE 's/DBUS_PYTHON_VERSION\s*=\s*(.*)/\1/p')}"
 DBUS_PYTHON_VERSION="${DBUS_PYTHON_VERSION:-${version_fallback}}"
 
-for path in /usr/lib/python3*/site-packages; do
-  marker_file="${path}/dbus_python-${DBUS_PYTHON_VERSION}.egg-info"
-  if [ ! -e "${marker_file}" ]; then
-    touch "${marker_file}"
-    echo >&2 "Marked dbus-python==${DBUS_PYTHON_VERSION} as installed."
-  fi
-done
+site_packages_path="$(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")"
+marker_file="${site_packages_path}/dbus_python-${DBUS_PYTHON_VERSION}.egg-info"
+if [ ! -e "${marker_file}" ]; then
+  touch "${marker_file}"
+  echo >&2 "Marked dbus-python==${DBUS_PYTHON_VERSION} as installed."
+fi
