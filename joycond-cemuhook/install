@@ -53,7 +53,6 @@ install_app() {
 
 patch_app() {
   sed -i.backup -E \
-    -e 's/(hid[_-])nintendo/\1nx/g' \
     -e 's/^(\s*)"Nintendo Switch Pro Controller",$/\0\n\1"Pro Controller",\n\1"Nintendo Co., Ltd. Pro Controller",/g' \
    "${app_dir}/joycond-cemuhook.py"
    for name in "Pro Controller" "Nintendo Co., Ltd. Pro Controller"; do
