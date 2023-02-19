@@ -87,13 +87,16 @@ Scripts are located in the `bin/` directory.
 #### `custom.sh`
 * An example for `/userdata/system/custom.sh` that enables all features of this project.
 
-#### `read-temperature`
-* A script to read the CPU temperature from `hwmon` instead of `thermal_zone`. Useful for hosts where `/sys/devices/virtual/thermal` is not available. May be bound to a controller button, e.g.:
+#### `read-temperatures`
+* A script to read system temperatures from `hwmon` instead of `thermal_zone`. Useful for hosts where `/sys/devices/virtual/thermal` is not available.
+
+#### `system-summary`
+* A script to create a system summary (cpu, memory). May be bound to a key or controller button, e.g.:
 +
 ./userdata/system/configs/multimedia_keys.conf
 [source.conf]
 ----
-KEY_F12 1 /userdata/extra/bin/read-temperature | LANG=en_US HOME=/userdata/system XAUTHORITY=/var/lib/.Xauthority DISPLAY=:0.0 osd_cat -f -*-*-bold-*-*-*-38-120-*-*-*-*-*-* -cred -s 3 -d 4
+KEY_F12 1 /userdata/extra/bin/system-summary | sed 's/°/ /' | HOME=/userdata/system XAUTHORITY=/var/lib/.Xauthority DISPLAY=:0.0 osd_cat -f -*-*-bold-*-*-*-38-120-*-*-*-*-*-* -cred -s 3 -d 4
 ----
 
 #### `on-game-condition`
