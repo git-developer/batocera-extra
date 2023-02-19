@@ -11,6 +11,5 @@ else
   if ! pgrep upowerd; then
     /usr/lib/upowerd 2>&1 | logger &
   fi
-  cd "${base_dir}/joycond-cemuhook"
-  python3 -u joycond-cemuhook.py ${ip:+--ip "${ip}"} ${port:+--port "${port}"} >"${log_file}" 2>&1 &
+  PYTHONUNBUFFERED=true joycond-cemuhook ${ip:+--ip "${ip}"} ${port:+--port "${port}"} >"${log_file}" 2>&1 &
 fi

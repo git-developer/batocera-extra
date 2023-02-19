@@ -44,27 +44,7 @@ install_package_from_archive() {
   zstd -d <"${archive}" | tar x -C /
 }
 
-install_app() {
-  source="${1}"
-  log "Installing ${source}"
-  mkdir -p "${app_dir}"
-  gunzip <"${source}" | tar x --strip-components 1 -C "${app_dir}"
-}
-
-patch_app() {
-  sed -i.backup -E \
-    -e 's/^(\s*)"Nintendo Switch Pro Controller",$/\0\n\1"Pro Controller",\n\1"Nintendo Co., Ltd. Pro Controller",/g' \
-   "${app_dir}/joycond-cemuhook.py"
-   for name in "Pro Controller" "Nintendo Co., Ltd. Pro Controller"; do
-     if [ ! -e "${app_dir}/profiles/${name}.json" ]; then
-       ln -s "Nintendo Switch Pro Controller.json" "${app_dir}/profiles/${name}.json"
-     fi
-   done
-}
-
 install_dependencies() {
-  pip install -r "${app_dir}/requirements.txt"
-
   # update evdev from 0.7.0 to latest
   install_package python-evdev
 
@@ -72,14 +52,14 @@ install_dependencies() {
   install_package_from_archive upower 0.99.15-1
   install_package_from_archive libimobiledevice 1.3.0-5
   install_package libusbmuxd
-  ln -s /run/dbus /var/run/dbus
+  if [ ! -e /var/run/dbus ]; then
+    ln -s /run/dbus /var/run/dbus
+  fi
 }
 
 main() {
   prepare_pip
-  source="${1:-$(provide "${1:-${url}}")}"
-  install_app "${source}"
-  patch_app
+  pip install "$(provide "${url}")"
   install_dependencies
 }
 
