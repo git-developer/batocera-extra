@@ -1,2 +1,2 @@
 #!/bin/sh
-printf "Temperature: %.0f C\n" $(($(cat "/sys/class/hwmon/hwmon0/temp1_input") / 1000))
+printf "Temperature: %.0f C\n" $(($(cat /sys/class/hwmon/hwmon*/temp*_input | sort -rn | head -1)))e-3

@@ -1,0 +1,56 @@
+#!/bin/sh
+#
+# Collect system temperatures and write them to stdout.
+#
+# Format: <path><TAB><value><TAB><name>[<TAB><category>]
+#
+#  path:     path of the file that contains the temperature value
+#  value:    temperature value formatted as XX.YYY°C
+#  name:     human-readable name of the temperature
+#  category: (optional) A category for the temperature
+#
+set -eu
+
+read_file() {
+  local file="${1}"
+  if [ -r "${file}" ]; then cat "${file}"; fi
+}
+
+enumerate_files() {
+  local path="${1}" glob="${2}"
+  if [ -r "${path}" ]; then
+    find -L "${path}" -maxdepth 2 -name "${glob}" 2>/dev/null | sort
+  fi
+}
+
+format_temperature() {
+  local path="${1}" name="${2}" category="${3-}"
+  temperature="$(($(cat "${path}")))e-3"
+  printf '%s\t%.2f°C\t%s' "${path}" "${temperature}" "${name}"
+  if [ "${category}" ]; then printf '\t%s' "${category}"; fi
+  printf '\n'
+}
+
+traverse_hwmon() {
+  enumerate_files /sys/class/hwmon 'temp*_input' | while read -r input_file; do
+    base_path="${input_file%_input}"
+    label="$(read_file "${base_path}_label")"
+    name="$(read_file "$(dirname "${input_file}")/name")"
+    format_temperature "${input_file}" "${label:-${name:-${base_path##*/}}}" "${label:+${name}}"
+  done
+}
+
+traverse_thermal() {
+  enumerate_files /sys/devices/virtual/thermal temp | while read -r temp_file; do
+    base_path="$(dirname "${temp_file}")"
+    type="$(read_file ${base_path}/type)"
+    format_temperature "${temp_file}" "${type:-${base_path##*/}}"
+  done
+}
+
+main() {
+  traverse_hwmon
+  traverse_thermal
+}
+
+main "${@}"
