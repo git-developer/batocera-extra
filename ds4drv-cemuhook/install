@@ -2,30 +2,11 @@
 set -eu
 . "$(dirname $(readlink -f "$0"))/.env"
 
-if ! command -V pip >/dev/null 2>&1; then
-  python -m ensurepip --upgrade
-  python -m pip install --upgrade pip
-fi
-# simpler 'grep -q ds4drv' would cause a python message on SIGPIPE
-if pip list | grep ds4drv | grep -q .; then
-  log "${app_name} is already installed."
-else
-  if [ -r "${1-}" ]; then
-    source="${1}"
-  else
-    filename="$(wget --quiet --spider --server-response "${url}" 2>&1 | sed -nE 's/\s*content-disposition.+filename=(.+)/\1/p')"
-    if [ "${filename}" ]; then
-      source="${download_dir}/${filename}"
-      if [ ! -s "${source}" ]; then
-        mkdir -p "${download_dir}"
-        wget --quiet "--output-document=${source}" "${url}"
-      else
-        log "Using up-to-date local file ${source}"
-      fi
-    else
-      source="${url}"
-    fi
+main() {
+  package_source="$(find_package_source "${package_name}" "${url}")"
+  if [ "${package_source}" ]; then
+    pip install --use-pep517 "${package_source}"
   fi
-  log "Installing ${source}"
-  pip install --use-pep517 "${source}"
-fi
+}
+
+main "${@}"

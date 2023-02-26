@@ -2,65 +2,20 @@
 set -eu
 . "$(dirname $(readlink -f "$0"))/.env"
 
-app_dir="${base_dir}/joycond-cemuhook"
-
-prepare_pip() {
-  if ! command -V pip >/dev/null 2>&1; then
-    python -m ensurepip --upgrade
-    python -m pip install --upgrade pip
-  fi
-}
-
-provide() {
-  url="${1}"
-  filename="$(wget --quiet --spider --server-response "${url}" 2>&1 | sed -nE 's/\s*content-disposition.+filename=(.+)/\1/p')"
-  filename="${filename:-${url##*/}}"
-  if [ "${filename}" ]; then
-    source="${download_dir}/${filename}"
-    if [ ! -s "${source}" ]; then
-      mkdir -p "${download_dir}"
-      wget --quiet "--output-document=${source}" "${url}"
-    else
-      log "Using up-to-date local file ${source}"
-    fi
-  else
-    source="${url}"
-  fi
-  echo "${source}"
-}
-
-install_package() {
-  name="${1}"
-  log "Installing ${name}"
-  wget --quiet -O- "https://archlinux.org/packages/extra/$(uname -m)/${name}/download/" | zstd -d | tar x -C /
-}
-
-install_package_from_archive() {
-  name="${1}"
-  version="${2}"
-  log "Installing ${name} in version ${version}"
-  first_letter="${name%"${name#?}"}"
-  archive="$(provide "https://archive.archlinux.org/packages/${first_letter}/${name}/${name}-${version}-$(uname -m).pkg.tar.zst")"
-  zstd -d <"${archive}" | tar x -C /
-}
-
-install_dependencies() {
-  # update evdev from 0.7.0 to latest
-  install_package python-evdev
-
-  # install upower with dependencies compatible with glibc 2.33
-  install_package_from_archive upower 0.99.15-1
-  install_package_from_archive libimobiledevice 1.3.0-5
-  install_package libusbmuxd
-  if [ ! -e /var/run/dbus ]; then
-    ln -s /run/dbus /var/run/dbus
-  fi
-}
-
 main() {
-  prepare_pip
-  pip install "$(provide "${url}")"
-  install_dependencies
+  package_source="$(find_package_source "${app_name}" "${url}")"
+  if [ "${package_source}" ]; then
+    pip install "${package_source}"
+
+    # update evdev from outdated 0.7.0 to latest
+    install-from-arch python-evdev===extra
+
+    # install and prepare upower with dependencies, compatible with glibc 2.33
+    install-from-arch upower=0.99.15-1 libimobiledevice=1.3.0-5 libusbmuxd===extra
+    if [ ! -e /var/run/dbus ]; then
+      ln -s /run/dbus /var/run/dbus
+    fi
+  fi
 }
 
 main "${@}"

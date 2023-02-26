@@ -1,0 +1,101 @@
+#!/bin/sh
+set -eu
+
+ARCH_PACKAGE_CACHE="${ARCH_PACKAGE_CACHE:-${XDG_CACHE_HOME:-/userdata/system/.cache}/arch-packages}"
+
+log() {
+  echo >&2 "${@}"
+}
+
+find_package_url() {
+  local name="${1}" version="${2}" arch="${3:-$(uname -m)}" repo="${4:-core}"
+
+  if [ "${version}" ]; then
+    first_letter="${name%"${name#?}"}"
+    filename="${name}-${version}-${arch}.pkg.tar.zst"
+    url="https://archive.archlinux.org/packages/${first_letter}/${name}/${filename}"
+  else
+    url="$(wget --quiet --spider --server-response "https://archlinux.org/packages/${repo}/${arch}/${name}/download/" 2>&1 | sed -nE 's/\s*Location:\s*(.+)/\1/p')"
+  fi
+
+  if [ -z "${url}" ]; then
+    log "Error: No URL found in repo '${repo}' for package '${name}'${version:+ in version '${version}'} and arch '${arch}'"
+    return 1
+  fi
+  printf '%s\n' "${url}"
+}
+
+provide_package() {
+  local url="${1}"
+  filename="${filename:-${url##*/}}"
+  package="${ARCH_PACKAGE_CACHE}/${filename}"
+  if [ -s "${package}" ]; then
+    log "Using locally cached file ${package}"
+  else
+    log "Downloading package from ${url}"
+    if [ "${DOWNLOAD:-true}" = 'true' ]; then
+      mkdir -p "${ARCH_PACKAGE_CACHE}"
+      wget --quiet "--output-document=${package}" "${url}" || {
+        log "Error: Download was not successful (wget returned $?)"
+        return 1
+      }
+    fi
+  fi
+  echo "${package}"
+}
+
+install_package() {
+  package="${1}"
+  log "Installing package from ${package}"
+  if [ "${INSTALL:-true}" = 'true' ]; then
+    zstd -d <"${package}" | tar x -C / --exclude '.*'
+  fi
+}
+
+print_usage() {
+  name="$(basename "${0}")"
+  pad="$(printf -- ' %.0s' {1..${#name}})"
+  usage=$(cat <<EOF
+${name} - download and install packages from an archlinux repository
+
+Usage: ${name} <package-spec>...
+  <package-spec>: <name>['='<version>['='<arch>['='<repo>]]]
+  When the package-spec contains a version, the archive repository is used.
+
+Supported environment variables:
+  DOWNLOAD=false       - do not download packages
+  INSTALL=false        - do not install packages
+  ARCH_PACKAGE_CACHE   - Use an alternative directory as package cache
+                         (Default: '${ARCH_PACKAGE_CACHE}')
+
+Examples:
+
+${pad} Command                                  Package       Version      Architechture     Repository
+${pad} -------                                  -------       -------      -------------     ----------
+  ${name} util-linux             'util-linux'  latest       current           Core
+  ${name} unrar=1:6.2.6-1        'unrar'       '1:6.2.6-1'  current           Archive
+  ${name} iotop=0.6-9=any        'iotop'       '0.6-9'      'any'             Archive
+  ${name} base==any              'base'        latest       'any'             Core
+  ${name} unrar===extra          'unrar'       latest       current           Extra
+  ${name} iotop==any=community   'iotop'       latest       'any'             Community
+EOF
+)
+  log "${usage}"
+}
+
+main() {
+  if [ "${#}" -eq 0 ]; then
+    print_usage
+    return 0
+  fi
+  for package in "${@}"; do
+    echo "${package}" | while IFS== read -r name version arch repo; do
+      log "Installing archlinux package ${name}${version:+ in version ${version}}${arch:+ for arch ${arch}}${repo:+ from repo ${repo}}"
+      url="$(find_package_url "${name}" "${version}" "${arch}" "${repo}")"
+      local_file="$(provide_package "${url}")"
+      install_package "${local_file}"
+    done
+  done
+}
+
+main "${@}"
