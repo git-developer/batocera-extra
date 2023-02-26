@@ -1,9 +1,17 @@
 #!/bin/sh
 set -eu
 echo "$(date -Iseconds)" "${0}" "${@}" >&2
+export PATH="${PATH}:$(dirname "$(readlink -f "${0}")")"
+
+# HOME is '/' when this script is run from the init process;
+# some of the scripts expect the batocera default '/userdata/system' instead
+if [ "${HOME}" = '/' ]; then
+  export HOME='/userdata/system'
+fi
 
 case "${1-}" in
   start)
+           /userdata/extra/patches/relocate-root-dotfiles-to-home
            /userdata/extra/patches/patch-citra-generator-for-language
            /userdata/extra/patches/patch-citra-generator-for-cemuhook
            /userdata/extra/patches/patch-cemu-generator-for-squashfs

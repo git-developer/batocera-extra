@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+find / -maxdepth 1 -name '.*' | while read -r path; do
+  if [ ! -e "${HOME}${path}" ] && [ ! -h "${HOME}${path}" ]; then
+    ln -v -s "${path}" "${HOME}${path}"
+  elif [ -d "${path}" ]; then
+    find "${path}" -mindepth 1 -exec sh -c 'if [ ! -e "${HOME}{}" ]; then ln -v -s "{}" "${HOME}{}"; fi' \;
+  fi
+done
