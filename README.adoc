@@ -9,8 +9,7 @@ This project is a proof of concept to play games with motion and touch control i
 ## Project status
 
 This project should be considered experimental. It demonstrates how motion and touch control can be added to batocera.
-Currently, some ugly hacks are required to achieve this. Installation requires command line access to batocera through a SSH shell. Main goal of this project is to properly integrate the features into the core of batocera in the
-future.
+Currently, some ugly hacks are required to achieve this. Installation requires command line access to batocera through a SSH shell. Main goal of this project is to properly integrate the features into the core of batocera in the future.
 
 The project is tested against the x86_64 platform. There are no hard dependencies on this architecture, so it may well
 run on other architectures, too, but this is currently untested.
@@ -57,29 +56,17 @@ Patches are located in the `patches/` directory.
 #### `patch-citra-generator-for-cemuhook`
 
 * A patch for the configuration generator of Citra. It adds support for motion and touch configuration in Citra.
-* Related pull request: https://github.com/batocera-linux/batocera.linux/pull/8080[#8080]
 
 #### `patch-cemu-generator-for-cemuhook`
 
-* A patch for the configuration generator of Cemu. It adds generation of the cemuhook configuration file `cemuhook.ini` allowing configuration of motion control.
-* Written for batocera v35 which contains the Windows build of cemu. This patch will probably not work in batocera v36 and above, because v36 introduces the linux version of cemu.
+* A patch for the configuration generator of Cemu. It adds support for motion configuration in Cemu.
 
-#### `patch-citra-generator-for-language`
-
-* A patch for the configuration generator of Citra. It fixes broken language detection.
-* Related pull request: https://github.com/batocera-linux/batocera.linux/pull/8073[#8073]
-* May be applied to batocera v35, will be available in v36.
-
-#### `patch-cemu-generator-for-squashfs`
-
-* A patch for the configuration generator of Cemu. It adds support for arbitrary location of `.rpx` files within Loadiine roms.
-* Related pull requests: https://github.com/batocera-linux/batocera.linux/pull/8052[#8052] & https://github.com/batocera-linux/batocera.linux/pull/8053[#8053]
-* May be applied to batocera v35, will be available in v36.
-
-#### `patch-batocera-info-for-pro-controller`
-* A script that patches `batocera-info` for Switch Pro Controllers.
+#### `patch-batocera-scripts-for-battery-level`
+* A script that patches batocera scripts for controllers that provide their battery capacity as level instead of percentage.
 * For Nintendo controllers, the kernel module https://github.com/emilyst/hid-nx-dkms[hid-nx] is used which provides the battery status as https://github.com/emilyst/hid-nx-dkms/blob/974d6c407296c47390d99f008933846c86f52bb9/hid-nx.c#L1533[level enum] (e.g. `low` and `high`) instead of a percentage.
-* This patch has only an effect on the `batocera-info` script and not on the battery level shown in the Emulation Station UI.
+
+#### `patch-batocera-info-for-hwmon`
+* A script that patches `batocera-info` to read temperatures from `hwmon` devices in addition to `thermal` devices.
 
 ### Scripts
 Scripts are located in the `bin/` directory.
@@ -88,7 +75,7 @@ Scripts are located in the `bin/` directory.
 * An example for `/userdata/system/custom.sh` that enables all features of this project.
 
 #### `read-temperatures`
-* A script to read system temperatures from `hwmon` instead of `thermal_zone`. Useful for hosts where `/sys/devices/virtual/thermal` is not available.
+* A script to read system temperatures.
 
 #### `system-summary`
 * A script to create a system summary (cpu, memory). May be bound to a key or controller button, e.g.:
@@ -105,7 +92,7 @@ KEY_F12 1 /userdata/extra/bin/system-summary | sed 's/°/ /' | HOME=/userdata/sy
 ## Emulator configuration for motion and touch control
 This section explains the emulator configuration that is required to play games with motion and touch control. This configuration has to be performed once only, it will be persisted across boots.
 
-The configuration generators for Citra and Cemu in batocera v35 don't offer support for motion and touch control. Actually, they even prevent it because they override custom changes in the affected configuration files. To avoid this, the <<Patches>> are required.
+The configuration generators for Citra and Cemu in batocera v36 don't offer support for motion and touch control. Actually, they even prevent it because they override custom changes in the affected configuration files. To avoid this, the <<Patches>> are required.
 
 Once the configuration is applied, the emulators will behave as follows:
 
@@ -141,9 +128,8 @@ Notes:
 ### Cemu
 ./userdata/system/batocera.conf
 ----
-wiiu.cemuhook_motion_source=DSU1
-wiiu.cemuhook_motion_source_is_button_source=1
-wiiu.cemuhook_server_ip=127.0.0.1
+wiiu.cemu_controller_api=DSUController
+wiiu.cemuhook_server_ip=localhost
 wiiu.cemuhook_server_port=26761
 ----
 
@@ -152,14 +138,5 @@ Notes:
 * The settings must be set by editing the configuration file using a text editor.
 * Without patching the Cemu configuration generator, these settings have no effect.
 * Implementation details:
-** Without patch, the generator overwrites `/userdata/system/configs/cemu/cemuhook.ini` with `/usr/cemu/cemuhook.ini` on each game start.
-** The patch reads the settings from `batocera.conf` and adds them to `/userdata/system/configs/cemu/cemuhook.ini` resulting in
-+
-./userdata/system/configs/cemu/cemuhook.ini
-----
-[Input]
-motionSource = DSU1
-motionSourceIsBtnSource = true
-serverIP = localhost
-serverPort = 26761
-----
+** Without patch, the generator uses the SDL controller API without (working) motion support.
+** The patch reads the settings from `batocera.conf` and adds them to the controller configuration files in `/userdata/system/configs/cemu/controllerProfiles/controller*.xml`.

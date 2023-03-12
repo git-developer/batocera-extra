@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+
+sed -i.backup -E \
+  's:(/sys/devices/virtual/thermal/thermal_zone\*/temp):\1 /sys/class/hwmon/hwmon*/temp*_input:p' \
+  "$(command -v batocera-info)"
