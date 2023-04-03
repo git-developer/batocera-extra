@@ -1,5 +1,5 @@
 #!/bin/sh
 . "$(dirname $(readlink -f "$0"))/.env"
 
-./stop
-./start
+"${base_dir}/stop"
+"${base_dir}/start"
