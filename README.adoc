@@ -45,6 +45,10 @@ $ ln -s /userdata/extra/bin/custom.sh /userdata/system/custom.sh
 
 * See link:ds4drv-cemuhook/README.adoc[ds4drv-cemuhook].
 
+#### Server for motion control using a Nintendo Wiimote
+
+* See link:linuxmotehook2/README.adoc[linuxmotehook2].
+
 #### Server for motion and touch control using a smartphone
 
 * For touch, see link:remote-touchpad/README.adoc[remote-touchpad].
@@ -107,6 +111,7 @@ Once the configuration is applied, the emulators will behave as follows:
 * Motion input is read from a cemuhook server.
 ** For a Nintendo controller connected to joycond-cemuhook, use `localhost` and `26761`.
 ** For a DS4 controller connected to ds4drv-cemuhook, use `localhost` and `26762`.
+** For a Wiimote connected to linuxmotehook2, use `localhost` and the port from your linuxmotehook2 configuration file.
 ** For a smartphone, use the hostname/ip of the smartphone and the port configured in the _MotionSource_ app.
 
 ### Citra
