@@ -1,0 +1,61 @@
+#!/bin/sh
+set -eu
+
+source_root=/userdata/roms
+target_root=/var/run/squashfs
+
+log() {
+  echo >&2 "${@}"
+}
+
+error() {
+  log "Error: ${@}"
+  return 1
+}
+
+open() {
+  local source="${1}" target="${2}"
+
+  mkdir -p "${target}"
+  mount -t squashfs "${source}" "${target}"
+}
+
+close() {
+  local target="${2}"
+
+  if [ -d "${target}" ]; then
+    umount "${target}"
+    rmdir "${target}"
+  fi
+}
+
+for_each() {
+  local command="${1}" system="${2-}"
+  source="${source_root}${system:+/${system}}"
+  target="${target_root}${system:+/${system}}"
+  if [ ! -d "${source}" ]; then
+    error "Missing '${source}'"
+  fi
+
+  find "${source}" -type f -name '*.squashfs' | while read -r file; do
+    name="$(basename -s .squashfs "${file}")"
+    "${command}" "${file}" "${target}/${name}"
+  done
+}
+
+main() {
+  local command="${1-}" system="${2-}" 
+
+  if [ -z "${command}" ]; then
+    log "Syntax:  ${0} <open|close> [system]"
+    log "Example: ${0} open wiiu"
+    return 1
+  fi
+
+  case "${command}" in
+    open|close) for_each "${command}" "${system}" ;;
+    *) error "Unsupported command: ${command}" ;;
+  esac
+}
+
+main "${@}"
