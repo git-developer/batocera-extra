@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+
+sed -i 's/MODE="0600"/MODE="0660", GROUP="input"/g' /etc/udev/rules.d/89-joycond.rules

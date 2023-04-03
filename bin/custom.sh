@@ -11,6 +11,7 @@ fi
 
 case "${1-}" in
   start)
+           /userdata/extra/patches/patch-joycond-for-flatpak
            /userdata/extra/patches/relocate-root-dotfiles-to-home
            /userdata/extra/patches/patch-citra-generator-for-cemuhook
            /userdata/extra/patches/patch-cemu-generator-for-cemuhook
