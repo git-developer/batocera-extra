@@ -1,0 +1,37 @@
+#
+# For details, see https://github.com/v1993/linuxmotehook2/wiki
+#
+# Global settings
+[Linuxmotehook]
+#
+# Port to run server on. Default is 26760, which is what DSU protocol typically uses.
+#Port=26760
+#
+# Supported orientation values: normal, sideways-left, sideways-right (likely not useful here), inverted
+#Orientation=normal
+#
+# Boolean, telling whether or not to send button presses as well as motion data.
+# Defaults to false to encourage users to configure button presses directly from evdev/SDL
+# (which has somewhat lower latency), but can be enabled if doing so is problematic for one reason or another.
+# This also applies to buttons on extensions!
+#SendButtons=false
+#
+# GyroNormalizationFactor controls how quickly gyro drift is accounted for
+# Default value of 50 should be good in 99%+ of cases, but rarely one may want to tweak it
+#GyroNormalizationFactor=50
+#
+# Per-wiimote settings
+#[0x123456789ABC]
+#
+#Orientation=normal
+#SendButtons=false
+#GyroCalibration=235,1395,223
+#
+# NunchuckStickCalibration is neutral x, y and minimal max offset from neutral x,y
+#NunchuckStickCalibration=0,2,95,83
+#
+# ClassicControllerStickCalibration follows the same notation, first four values are for left stick and last four are for right one
+#ClassicControllerStickCalibration=0,0,25,25,0,0,25,25
+#
+#ProControllerStickCalibration=0,0,1000,1000,0,0,1000,1000
+#

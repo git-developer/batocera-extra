@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+. "$(dirname $(readlink -f "$0"))/.env"
+. "${base_dir}/profile-support.sh"
+
+start_profiles() {
+  for profile in "${@}"; do
+    if pid=$("${base_dir}/is-up" "${profile}"); then
+      log "${app_name}/${profile} is already running with pid ${pid}."
+    elif [ $? -eq 1 ]; then
+      linuxmotehook2 "$(path_of "${profile}")" >"${log_dir}/linuxmotehook2-${profile}.log" 2>&1 &
+    else
+      return 1
+    fi
+  done
+}
+
+main() {
+  if [ "${#}" -eq 0 ]; then
+    set -- $(list_profiles)
+  fi
+  start_profiles "${@}"
+}
+
+main "${@}"

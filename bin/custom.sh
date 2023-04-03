@@ -20,9 +20,11 @@ case "${1-}" in
            /userdata/extra/patches/mark-dbus-python-as-installed
            /userdata/extra/joycond-cemuhook/install-and-start
            /userdata/extra/ds4drv-cemuhook/install-and-start
+           /userdata/extra/linuxmotehook2/install-and-start
            /userdata/extra/remote-touchpad/start
            ;;
   stop)    /userdata/extra/remote-touchpad/stop
+           /userdata/extra/linuxmotehook2/stop
            /userdata/extra/ds4drv-cemuhook/stop
            /userdata/extra/joycond-cemuhook/stop
            ;;

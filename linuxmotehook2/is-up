@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+. "$(dirname $(readlink -f "$0"))/.env"
+. "${base_dir}/profile-support.sh"
+
+if [ "${#}" -eq 0 ]; then
+  pgrep linuxmotehook2
+else
+  for profile in "${@}"; do
+    path=$(path_of "${profile}") || return 2
+    pgrep -f "linuxmotehook2 ${path}"
+  done
+fi
