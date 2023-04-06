@@ -36,7 +36,7 @@ In this example, a server is configured on port 26763 for 2 Wiimotes with the MA
 ====
 
 === Profiles
-linuxmotehook2 manages Wiimote extensions, e.g. a Nunchuck or WiimotePlus sensor, as separate devices. The cemuhook https://v1993.github.io/cemuhook-protocol/[protocol] has a limit of four devices per server. To cope with this limitation, use one profile per Wiimote, each running on a separate server with a dedicated port. The emulators must be configured accordingly. Example:
+linuxmotehook2 manages Wiimote extensions, e.g. Nunchucks and Classic Controllers, as separate devices. The cemuhook https://v1993.github.io/cemuhook-protocol/[protocol] has a limit of four devices per server. To cope with this limitation, use one profile per Wiimote, each running on a separate server with a dedicated port. The emulators must be configured accordingly. Example:
 
 .profiles/white.ini
 [source,ini]
