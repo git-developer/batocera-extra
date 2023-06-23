@@ -1,4 +1,5 @@
 #!/bin/sh
 set -eu
+. "$(dirname $(readlink -f "$0"))/.env"
 
-pgrep -f 'python3 -m ds4drv '
+pgrep -f "python3 -m ${package_name} "
