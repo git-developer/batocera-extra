@@ -2,4 +2,5 @@
 . "$(dirname $(readlink -f "$0"))/.env"
 
 "${base_dir}/stop"
+sleep 1
 "${base_dir}/start"
