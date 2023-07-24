@@ -5,7 +5,7 @@ log() {
 prepare_pip() {
   if ! command -V pip >/dev/null 2>&1; then
     python -m ensurepip --upgrade
-    python -m pip install --upgrade pip
+    python -m pip install --root-user-action=ignore --upgrade pip
   fi
 }
 

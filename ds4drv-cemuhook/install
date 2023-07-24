@@ -5,7 +5,7 @@ set -eu
 main() {
   package_source="$(find_package_source "${package_name}" "${url}")"
   if [ "${package_source}" ]; then
-    pip install --use-pep517 "${package_source}"
+    pip install --root-user-action=ignore --use-pep517 "${package_source}"
   fi
 }
 
