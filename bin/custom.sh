@@ -11,12 +11,10 @@ fi
 
 case "${1-}" in
   start)
+           /userdata/extra/bin/install-from-arch patch
            /userdata/extra/patches/patch-joycond-for-flatpak
            /userdata/extra/patches/relocate-root-dotfiles-to-home
-           /userdata/extra/patches/patch-citra-generator-for-cemuhook
            /userdata/extra/patches/patch-cemu-generator-for-cemuhook
-           /userdata/extra/patches/patch-batocera-scripts-for-battery-level
-           /userdata/extra/patches/patch-batocera-info-for-hwmon
            /userdata/extra/patches/mark-dbus-python-as-installed
            /userdata/extra/joycond-cemuhook/install-and-start
            /userdata/extra/ds4drv-cemuhook/install-and-start
