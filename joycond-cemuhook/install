@@ -8,7 +8,7 @@ main() {
     pip install --root-user-action=ignore "${package_source}"
 
     # install and prepare upower with dependencies
-    install-from-arch upower===extra libimobiledevice===extra libusbmuxd===extra python-evdev===extra
+    install-from-arch upower===extra libimobiledevice===extra libusbmuxd===extra openssl libplist===extra
     if [ ! -e /var/run/dbus ]; then
       ln -s /run/dbus /var/run/dbus
     fi
