@@ -17,7 +17,10 @@ case "${1-}" in
            /userdata/extra/patches/patch-cemu-generator-for-cemuhook
            /userdata/extra/patches/mark-dbus-python-as-installed
            /userdata/extra/joycond-cemuhook/install-and-start
-           /userdata/extra/ds4drv-cemuhook/install-and-start
+           /userdata/extra/ds4drv-cemuhook/install
+           /userdata/extra/dsdrv-cemuhook/install
+           /userdata/extra/patches/patch-dsdrv-for-ps4-controller
+           /userdata/extra/dsdrv-cemuhook/start
            /userdata/extra/linuxmotehook2/install-and-start
            /userdata/extra/remote-touchpad/start
            ;;

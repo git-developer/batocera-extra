@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+. "$(dirname $(readlink -f "$0"))/.env"
+
+main() {
+  package_source="$(find_package_source "${package_name}" "${url}")"
+  if [ "${package_source}" ]; then
+    pip install --use-pep517 "${package_source}"
+  fi
+}
+
+main "${@}"
