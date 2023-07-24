@@ -8,8 +8,11 @@ DBUS_PYTHON_VERSION="${DBUS_PYTHON_VERSION:-$(wget -q -O- "${url}" | sed -nE 's/
 DBUS_PYTHON_VERSION="${DBUS_PYTHON_VERSION:-${version_fallback}}"
 
 site_packages_path="$(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")"
-marker_file="${site_packages_path}/dbus_python-${DBUS_PYTHON_VERSION}.egg-info"
-if [ ! -e "${marker_file}" ]; then
-  touch "${marker_file}"
+metadata="${site_packages_path}/dbus_python-${DBUS_PYTHON_VERSION}.egg-info"
+if [ ! -e "${metadata}" ]; then
+  mkdir -p "${metadata}"
+  info="${metadata}/PKG-INFO"
+  echo 'Name: dbus-python' >>"${info}"
+  echo "Version: ${DBUS_PYTHON_VERSION}" >>"${info}"
   echo >&2 "Marked dbus-python==${DBUS_PYTHON_VERSION} as installed."
 fi
