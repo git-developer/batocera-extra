@@ -41,13 +41,13 @@ $ ln -s /userdata/extra/bin/custom.sh /userdata/system/custom.sh
 
 * See link:joycond-cemuhook/README.adoc[joycond-cemuhook].
 
+#### Server for motion and touch control using a Sony DS4 or DS5 controller (PS4 Dual Shock / PS5 Dual Sense)
+
+* See link:dsdrv-cemuhook/README.adoc[dsdrv-cemuhook].
+
 #### Server for motion and touch control using a Sony DS4 controller (PS4 Dual Shock)
 
 * See link:ds4drv-cemuhook/README.adoc[ds4drv-cemuhook].
-
-#### Server for motion and touch control using a Sony DS5 controller (PS5 Dual Sense)
-
-* See link:dsdrv-cemuhook/README.adoc[dsdrv-cemuhook].
 
 #### Server for motion control using a Nintendo Wiimote
 
@@ -61,20 +61,9 @@ $ ln -s /userdata/extra/bin/custom.sh /userdata/system/custom.sh
 ### Patches
 Patches are located in the `patches/` directory.
 
-#### `patch-citra-generator-for-cemuhook`
-
-* A patch for the configuration generator of Citra. It adds support for motion and touch configuration in Citra.
-
 #### `patch-cemu-generator-for-cemuhook`
 
 * A patch for the configuration generator of Cemu. It adds support for motion configuration in Cemu.
-
-#### `patch-batocera-scripts-for-battery-level`
-* A script that patches batocera scripts for controllers that provide their battery capacity as level instead of percentage.
-* For Nintendo controllers, the kernel module https://github.com/emilyst/hid-nx-dkms[hid-nx] is used which provides the battery status as https://github.com/emilyst/hid-nx-dkms/blob/974d6c407296c47390d99f008933846c86f52bb9/hid-nx.c#L1533[level enum] (e.g. `low` and `high`) instead of a percentage.
-
-#### `patch-batocera-info-for-hwmon`
-* A script that patches `batocera-info` to read temperatures from `hwmon` devices in addition to `thermal` devices.
 
 ### Scripts
 Scripts are located in the `bin/` directory.
@@ -103,7 +92,7 @@ KEY_F12 1 /userdata/extra/bin/system-summary | sed 's/°/ /' | HOME=/userdata/sy
 ## Emulator configuration for motion and touch control
 This section explains the emulator configuration that is required to play games with motion and touch control. This configuration has to be performed once only, it will be persisted across boots.
 
-The configuration generators for Citra and Cemu in batocera v36 don't offer support for motion and touch control. Actually, they even prevent it because they override custom changes in the affected configuration files. To avoid this, the <<Patches>> are required.
+The configuration generator for Cemu in current batocera doesn't offer support for motion and touch control. Actually, it even prevents it because it overrides custom changes in the affected configuration files. To avoid this, the <<Patches>> are required.
 
 Once the configuration is applied, the emulators will behave as follows:
 
@@ -114,8 +103,8 @@ Once the configuration is applied, the emulators will behave as follows:
 
 * Motion input is read from a cemuhook server.
 ** For a Nintendo controller connected to joycond-cemuhook, use `localhost` and `26761`.
+** For a DS4 or DS5 controller connected to dsdrv-cemuhook, use `localhost` and `26766`.
 ** For a DS4 controller connected to ds4drv-cemuhook, use `localhost` and `26762`.
-** For a DS5 controller connected to dsdrv-cemuhook, use `localhost` and `26766`.
 ** For a Wiimote connected to linuxmotehook2, use `localhost` and the port from your linuxmotehook2 configuration file.
 ** For a smartphone, use the hostname/ip of the smartphone and the port configured in the _MotionSource_ app.
 
