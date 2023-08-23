@@ -1,0 +1,15 @@
+#!/bin/sh
+source="$(find /usr/lib/python*.*/site-packages/dsdrv/backends -name hidraw.py)"
+cp -a "${source}" "${source}.backup-ds5"
+patch "${source}" << 'EOF'
++++ ${source}
+--- hidraw.py
+@@ -125,6 +125,7 @@
+     "Sony Interactive Entertainment Wireless Controller": HidrawUSBDSDevice,
+     "Sony Computer Entertainment Wireless Controller": HidrawUSBDSDevice,
+     "Wireless Controller": HidrawBluetoothDSDevice,
++    "DualSense Wireless Controller":  HidrawUSBDSDevice,
+ }
+
+EOF
+echo >&2 "dsdrv-cemuhook was patched for PS5 controllers."
