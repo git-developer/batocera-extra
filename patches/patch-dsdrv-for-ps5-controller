@@ -11,7 +11,7 @@ patch "${source}" << 'EOF'
 +    "Sony Interactive Entertainment DualSense Wireless Controller": HidrawUSBDSDevice,
      "Sony Computer Entertainment Wireless Controller": HidrawUSBDSDevice,
      "Wireless Controller": HidrawBluetoothDSDevice,
-+    "DualSense Wireless Controller": HidrawUSBDSDevice,
++    "DualSense Wireless Controller": HidrawBluetoothDSDevice,
  }
 
 EOF
