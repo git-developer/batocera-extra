@@ -4,8 +4,11 @@ cp -a "${source}" "${source}.backup-ds5"
 patch "${source}" << 'EOF'
 +++ ${source}
 --- hidraw.py
-@@ -125,6 +125,7 @@
+@@ -123,8 +123,10 @@
+
+ HID_DEVICES = {
      "Sony Interactive Entertainment Wireless Controller": HidrawUSBDSDevice,
++    "Sony Interactive Entertainment DualSense Wireless Controller": HidrawUSBDSDevice,
      "Sony Computer Entertainment Wireless Controller": HidrawUSBDSDevice,
      "Wireless Controller": HidrawBluetoothDSDevice,
 +    "DualSense Wireless Controller": HidrawUSBDSDevice,
