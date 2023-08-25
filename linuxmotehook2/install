@@ -3,7 +3,7 @@ set -eu
 . "$(dirname $(readlink -f "$0"))/.env"
 
 main() {
-  install-from-arch libgee===extra
+  install-from-arch libgee=0.20.6-1
   gunzip -d <"${base_dir}/releases/${package}" | tar x -v -C /
 }
 
