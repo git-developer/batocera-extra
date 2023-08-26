@@ -24,6 +24,7 @@ case "${1-}" in
            ;;
   stop)    /userdata/extra/remote-touchpad/stop
            /userdata/extra/linuxmotehook2/stop
+           /userdata/extra/dsdrv-cemuhook/stop
            /userdata/extra/ds4drv-cemuhook/stop
            /userdata/extra/joycond-cemuhook/stop
            ;;
