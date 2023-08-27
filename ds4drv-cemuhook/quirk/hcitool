@@ -1,7 +1,0 @@
-#!/bin/sh
-case "${1}" in
-  clock) ;;
-  *) exec /usr/bin/hcitool "${@}"
-esac
-
-# [ "${1}" = "clock" ] || exec /usr/bin/hcitool "${@}"

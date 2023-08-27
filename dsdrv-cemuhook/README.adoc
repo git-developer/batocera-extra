@@ -13,9 +13,9 @@ This directory contains files to install and manage {url-dsdrv-cemuhook}[dsdrv-c
 .. Start it as background daemon.
 
 == Usage
-Configure your emulators to listen to `localhost` port `26766`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
+Configure your emulators to listen to `localhost` port `26762`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
 
-NOTE: The default port for the cemuhook protocol is `26760`. The custom port `26766` was chosen to avoid conflicts with other cemuhook servers. It is configurable in the `.env` file.
+NOTE: The default port for the cemuhook protocol is `26760`. The custom port `26762` was chosen to avoid conflicts with other cemuhook servers. It is configurable in the `.env` file.
 
 NOTE: Please pay attention to the patches for Citra and Cemu in this project, they are required when you'd like to run the emulators from ES.
 
@@ -24,4 +24,4 @@ NOTE: Please pay attention to the patches for Citra and Cemu in this project, th
 * The other scripts (e.g. `is-up`, `stop`) may help to analyse problems, their names should be self-explaining.
 
 == Implementation details
-Under the hood, https://github.com/chrippa/ds4drv[ds4drv] uses `hcitool` for bluetooth management which is deprecated (see https://github.com/chrippa/ds4drv/issues/123[ds4drv #123] for details). `ds4drv-cemuhook` calls `hcitool clock` to check if bluetooth is up and running. This command returns an `Input/output error` on some machines although bluetooth is working fine. To workaround this, the script `quirk/hcitool` is used to simply ignore this single call and delegate everything else to the `hcitool`.
+Under the hood, https://github.com/lirannl/dsdrv-cemuhook[ds4rv] uses `hcitool` for bluetooth management which is deprecated (see https://github.com/chrippa/ds4drv/issues/123[chrippa/ds4drv #123] for details). `dsdrv-cemuhook` calls `hcitool clock` to check if bluetooth is up and running. This command returns an `Input/output error` on some machines although bluetooth is working fine. To workaround this, the script `quirk/hcitool` is used to simply ignore this single call and delegate everything else to the `hcitool`.
