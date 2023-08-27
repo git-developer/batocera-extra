@@ -53,6 +53,7 @@ $ ln -s /userdata/extra/bin/custom.sh /userdata/system/custom.sh
 
 * For touch, see link:remote-touchpad/README.adoc[remote-touchpad].
 * For motion, see _Android MotionSource server_ in the https://cemuhook.sshnuke.net/padudpserver.html[cemuhook documentation]
+* For game controller emulation, see https://github.com/breeze2/dsu-controller-guides[DSUController Guides]
 
 ### Patches
 Patches are located in the `patches/` directory.
@@ -101,7 +102,7 @@ Once the configuration is applied, the emulators will behave as follows:
 ** For a Nintendo controller connected to joycond-cemuhook, use `localhost` and `26761`.
 ** For a DS4 or DS5 controller connected to dsdrv-cemuhook, use `localhost` and `26762`.
 ** For a Wiimote connected to linuxmotehook2, use `localhost` and the port from your linuxmotehook2 configuration file.
-** For a smartphone, use the hostname/ip of the smartphone and the port configured in the _MotionSource_ app.
+** For a smartphone, use the hostname/ip of the smartphone and the port configured in the app of your choice (e.g. _MotionSource_ or _DSUController_).
 
 ### Citra
 ./userdata/system/configs/citra-emu/qt-config.ini
