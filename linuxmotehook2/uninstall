@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+. "$(dirname $(readlink -f "$0"))/.env"
+
+main() {
+  content="$(gunzip -d <"${base_dir}/releases/${package}" | tar t | tac - | sed s:^:/:g)"
+  echo "${content}" | while read -r file; do
+    if [ -f "${file}" ]; then rm "${file}"; fi
+  done
+  echo "${content}" | while read -r file; do
+    if [ -d "${file}" ]; then rmdir "${file}" 2>/dev/null || true; fi
+  done
+}
+
+main "${@}"

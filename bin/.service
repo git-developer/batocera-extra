@@ -1,0 +1,23 @@
+#!/bin/sh
+set -u
+echo "$(date -Iseconds)" "${0}" "${@}" >&2
+
+service_name="$(basename "${0}")"
+export PATH="${PATH}:/userdata/extra/bin"
+# HOME is '/' when this script is run from the init process;
+# some services expect the batocera default '/userdata/system' instead
+if [ "${HOME}" = '/' ]; then
+  export HOME='/userdata/system'
+fi
+
+case "${1-}" in
+  enable)  "/userdata/extra/${service_name}/install"
+           ;;
+  disable) "/userdata/extra/${service_name}/uninstall"
+           ;;
+  start)   "/userdata/extra/${service_name}/start"
+           ;;
+  stop)    "/userdata/extra/${service_name}/stop"
+           ;;
+  *)
+esac
