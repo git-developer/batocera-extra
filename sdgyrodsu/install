@@ -3,9 +3,16 @@ set -eu
 . "$(dirname $(readlink -f "$0"))/.env"
 
 main() {
-  target="${XDG_CACHE_HOME:-/userdata/system/.cache}/${app_name}"
+  timestamp="$(
+    wget -q --spider -S "${url}" 2>&1 \
+    | sed -nE 's/\s*Last-Modified: ([^\s].+)/\1/p' \
+    | date -u '+%Y-%m-%d.%H-%m' -f -)"
+  directory="${app_name}/${timestamp}"
+
+  target="${XDG_CACHE_HOME:-/userdata/system/.cache}/${directory}"
   package="$(provide_package "${url}" "${target}")"
-  unzip -j "${package}" "SteamDeckGyroDSUSetup/${app_name}" -d /usr/bin/
+
+  unzip -j -o "${package}" "SteamDeckGyroDSUSetup/${app_name}" -d /usr/bin/
 }
 
 main "${@}"
