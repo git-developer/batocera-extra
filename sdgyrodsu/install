@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+. "$(dirname $(readlink -f "$0"))/.env"
+
+main() {
+  target="${XDG_CACHE_HOME:-/userdata/system/.cache}/${app_name}"
+  package="$(provide_package "${url}" "${target}")"
+  unzip -j "${package}" "SteamDeckGyroDSUSetup/${app_name}" -d /usr/bin/
+}
+
+main "${@}"
