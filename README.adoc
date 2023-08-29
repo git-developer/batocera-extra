@@ -49,6 +49,10 @@ $ ln -s /userdata/extra/bin/custom.sh /userdata/system/custom.sh
 
 * See link:linuxmotehook2/README.adoc[linuxmotehook2].
 
+#### Server for motion control using a Steam Deck
+
+* See link:sdgyrodsu/README.adoc[sdgyrodsu].
+
 #### Server for motion and touch control using a smartphone
 
 * For touch, see link:remote-touchpad/README.adoc[remote-touchpad].
@@ -66,7 +70,7 @@ Patches are located in the `patches/` directory.
 Scripts are located in the `bin/` directory.
 
 #### `custom.sh`
-* An example for `/userdata/system/custom.sh` that enables all features of this project.
+* An example for `/userdata/system/custom.sh` that enables most features of this project.
 
 #### `on-game-condition`
 * A template for files in the `/userdata/system/scripts` directory.
@@ -102,6 +106,7 @@ Once the configuration is applied, the emulators will behave as follows:
 ** For a Nintendo controller connected to joycond-cemuhook, use `localhost` and `26761`.
 ** For a DS4 or DS5 controller connected to dsdrv-cemuhook, use `localhost` and `26762`.
 ** For a Wiimote connected to linuxmotehook2, use `localhost` and the port from your linuxmotehook2 configuration file.
+** For a Steam Deck connected to sdgyrodsu, use `localhost` and `26760`.
 ** For a smartphone, use the hostname/ip of the smartphone and the port configured in the app of your choice (e.g. _MotionSource_ or _DSUController_).
 
 ### Citra
