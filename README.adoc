@@ -126,7 +126,6 @@ profiles\1\udp_input_port\default=false
 Notes:
 
 * The settings may be set by either editing the configuration file using a text editor or using the UI: File Manager -> Applications -> citra-emu-config -> Menu _Emulation_ -> Entry _Configure_ -> List Entry _Controls_ -> Tab _Input_ -> Button _Motion / Touch Control..._
-* Without patch, the Citra configuration generator will overwrite these settings on game start.
 
 ### Cemu
 ./userdata/system/batocera.conf

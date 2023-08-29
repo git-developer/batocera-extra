@@ -14,7 +14,7 @@ This directory contains files to install and manage {url-sdgyrodsu}[SteamDeckGyr
 == Usage
 Configure your emulators to listen to `localhost` port `26760`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
 
-NOTE: Please pay attention to the patches for Citra and Cemu in this project, they are required when you'd like to run the emulators from ES.
+NOTE: Please pay attention to the patch for Cemu in this project, it is required when you'd like to run the emulator from ES.
 
 == Troubleshooting
 * The log file is located at `/userdata/system/logs/sdgyrodsu.log` (location is configurable in the `.env` file).

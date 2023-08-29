@@ -19,7 +19,7 @@ Configure your emulators to listen to `localhost` port `26761`. The https://gith
 
 NOTE: The default port for the cemuhook protocol is `26760`. The custom port `26761` was chosen to avoid conflicts with other cemuhook servers. It is configurable in the `.env` file.
 
-NOTE: Please pay attention to the patches for Citra and Cemu in this project, they are required when you'd like to run the emulators from ES.
+NOTE: Please pay attention to the patch for Cemu in this project, it is required when you'd like to run the emulator from ES.
 
 == Troubleshooting
 * The log file is located at `/userdata/system/logs/joycond-cemuhook.log` (location is configurable in the `.env` file).
