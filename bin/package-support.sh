@@ -2,13 +2,6 @@ log() {
   echo >&2 "${@}"
 }
 
-prepare_pip() {
-  if ! command -V pip >/dev/null 2>&1; then
-    python -m ensurepip --upgrade
-    python -m pip install --root-user-action=ignore --upgrade pip
-  fi
-}
-
 provide_package() {
   source="${1}" target="${2}"
 
@@ -27,6 +20,13 @@ provide_package() {
     fi
   fi
   echo "${package}"
+}
+
+prepare_pip() {
+  if ! command -V pip >/dev/null 2>&1; then
+    python -m ensurepip --upgrade
+    python -m pip install --root-user-action=ignore --upgrade pip
+  fi
 }
 
 find_package_source() {
