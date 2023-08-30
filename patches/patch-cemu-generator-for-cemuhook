@@ -1,6 +1,10 @@
 #!/bin/sh
 set -eu
 
+if ! command -V patch >/dev/null 2>&1; then
+  /userdata/extra/bin/install-from-arch patch=2.7.6-10
+fi
+
 generator="$(find /usr/lib/python*.*/site-packages/configgen/generators/cemu -name cemuControllers.py)"
 cp -a "${generator}" "${generator}.backup-cemuhook"
 patch "${generator}" << 'EOF'
