@@ -16,3 +16,7 @@ if [ ! -e "${metadata}" ]; then
   echo "Version: ${DBUS_PYTHON_VERSION}" >>"${info}"
   echo >&2 "Marked dbus-python==${DBUS_PYTHON_VERSION} as installed."
 fi
+
+if [ ! -e /var/run/dbus ]; then
+  ln -s /run/dbus /var/run/dbus
+fi
