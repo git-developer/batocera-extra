@@ -13,6 +13,8 @@ main() {
   package="$(provide_package "${url}" "${target}")"
 
   unzip -j -o "${package}" "SteamDeckGyroDSUSetup/${app_name}" -d /usr/bin/
+
+  install-from-arch ncurses=6.4_20230520-1
 }
 
 main "${@}"
