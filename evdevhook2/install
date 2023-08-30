@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+. "$(dirname $(readlink -f "$0"))/.env"
+
+main() {
+  install-from-arch libgee=0.20.6-1
+  gunzip -d <"${base_dir}/releases/${package}" | tar x -v -C /
+  if [ "${port}" ]; then
+    printf '[Evdevhook]\nPort=%s\n' "${port}" >"${config_file}"
+  fi
+}
+
+main "${@}"

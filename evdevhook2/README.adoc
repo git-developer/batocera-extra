@@ -1,0 +1,31 @@
+= evdevhook2
+:url-evdevhook2: https://github.com/v1993/evdevhook2
+Motion and touch control for devices with modern Linux drivers
+
+This directory contains files to install and manage {url-evdevhook2}[evdevhook2] which enables motion and touch control for devices with modern Linux drivers:
+. Nintendo Switch Joy-Cons
+. Nintendo Switch Pro Controller
+. DualShock 3 controller (currently untested, feedback welcome)
+. DualShock 4 controller
+. DualSense controller
+
+Controllers may be connected via USB or Bluetooth.
+
+== Installation
+. Add `install-and-start` to your `/userdata/system/custom.sh`. This will perform the following steps when the host boots:
+
+.. Install `linuxmotehook2` from the `releases` directory.
+.. Download and install required dependencies.
+.. Start `evdevhook2` as background daemon.
+
+== Usage
+Configure your emulators to listen to `localhost` port `26766`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
+
+NOTE: The default port for the cemuhook protocol is `26760`. The custom port `26766` was chosen to avoid conflicts with other cemuhook servers. It is configurable in the `.env` file.
+
+NOTE: Please pay attention to the patch for Cemu in this project, it is required when you'd like to run the emulator from ES.
+
+== Troubleshooting
+* The log file is located at `/userdata/system/logs/evdevhook2.log` (location is configurable in the `.env` file).
+* The other scripts (e.g. `is-up`, `stop`) may help to analyse problems, their names should be self-explaining.
+
