@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+. "$(dirname $(readlink -f "$0"))/.env"
+
+if pid=$("${base_dir}/is-up"); then
+  log "${app_name} is already running with pid ${pid}."
+else
+  "${app_name}" >"${log_file}" 2>&1 &
+fi

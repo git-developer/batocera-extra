@@ -5,13 +5,12 @@ set -eu
 main() {
   package_source="$(find_package_source "${app_name}" "${url}")"
   if [ "${package_source}" ]; then
+    /userdata/extra/patches/mark-dbus-python-as-installed
+
     pip install --root-user-action=ignore "${package_source}"
 
     # install and prepare upower with dependencies
     install-from-arch upower=1.90.2-1 libimobiledevice=1.3.0-9 libusbmuxd=2.0.2-3 openssl=3.1.2-1 libplist=2.3.0-2
-    if [ ! -e /var/run/dbus ]; then
-      ln -s /run/dbus /var/run/dbus
-    fi
   fi
 }
 

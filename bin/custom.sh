@@ -11,14 +11,13 @@ fi
 
 case "${1-}" in
   start)
-           /userdata/extra/bin/install-from-arch patch=2.7.6-10
-           /userdata/extra/patches/patch-joycond-for-flatpak
            /userdata/extra/patches/relocate-root-dotfiles-to-home
+           /userdata/extra/patches/patch-joycond-for-flatpak
            /userdata/extra/patches/patch-cemu-generator-for-cemuhook
-           /userdata/extra/patches/mark-dbus-python-as-installed
            /userdata/extra/joycond-cemuhook/install-and-start
            /userdata/extra/dsdrv-cemuhook/install-and-start
            /userdata/extra/linuxmotehook2/install-and-start
+           /userdata/extra/sdgyrodsu/install
            /userdata/extra/remote-touchpad/start
            ;;
   stop)    /userdata/extra/remote-touchpad/stop

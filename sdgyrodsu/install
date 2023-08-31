@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+. "$(dirname $(readlink -f "$0"))/.env"
+
+main() {
+  timestamp="$(
+    wget -q --spider -S "${url}" 2>&1 \
+    | sed -nE 's/\s*Last-Modified: ([^\s].+)/\1/p' \
+    | date -u '+%Y-%m-%d.%H-%m' -f -)"
+  directory="${app_name}/${timestamp}"
+
+  target="${XDG_CACHE_HOME:-/userdata/system/.cache}/${directory}"
+  package="$(provide_package "${url}" "${target}")"
+
+  unzip -j -o "${package}" "SteamDeckGyroDSUSetup/${app_name}" -d /usr/bin/
+
+  install-from-arch ncurses=6.4_20230520-1
+}
+
+main "${@}"

@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+. "$(dirname $(readlink -f "$0"))/.env"
+
+main() {
+  file="/usr/bin/${app_name}"
+  if [ -f "${file}" ]; then
+    rm "${file}"
+  fi
+}
+
+main "${@}"

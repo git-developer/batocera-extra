@@ -1,0 +1,21 @@
+= sdgyrodsu
+:url-sdgyrodsu: https://github.com/kmicki/SteamDeckGyroDSU
+Motion control for Steam Deck
+
+This directory contains files to install and manage {url-sdgyrodsu}[SteamDeckGyroDSU] which enables motion control for the Steam Deck controller.
+
+== Installation
+. Add `install-and-start` to your `/userdata/system/custom.sh`. This will perform the following steps when the host boots:
+
+.. Download the latest version of `SteamDeckGyroDSU`, if required.
+.. Install it.
+.. Start it as background daemon.
+
+== Usage
+Configure your emulators to listen to `localhost` port `26760`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
+
+NOTE: Please pay attention to the patch for Cemu in this project, it is required when you'd like to run the emulator from ES.
+
+== Troubleshooting
+* The log file is located at `/userdata/system/logs/sdgyrodsu.log` (location is configurable in the `.env` file).
+* The other scripts (e.g. `is-up`, `stop`) may help to analyse problems, their names should be self-explaining.
