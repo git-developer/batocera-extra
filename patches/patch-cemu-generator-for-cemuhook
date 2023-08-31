@@ -10,7 +10,7 @@ cp -a "${generator}" "${generator}.backup-cemuhook"
 patch "${generator}" << 'EOF'
 --- "${generator}"
 +++ cemuControllers.py
-@@ -2,136 +2,262 @@
+@@ -2,136 +2,264 @@
  
  import batoceraFiles
  import os
@@ -148,7 +148,7 @@ patch "${generator}" << 'EOF'
 +
 +    apiButtonMappings = {
 +        API_SDL: {
-+            GAMEPAD: { # excludes blow mic & show screen
++            GAMEPAD: { # excludes show screen
 +                    "1":  "1",
 +                    "2":  "0",
 +                    "3":  "3",
@@ -172,7 +172,8 @@ patch "${generator}" << 'EOF'
 +                    "21": "47",
 +                    "22": "41",
 +                    "23": "46",
-+                    "24": "40"
++                    "24": "40",
++                    "25": "7"
 +            },
 +            PRO: {
 +                    "1":  "1",
@@ -246,7 +247,7 @@ patch "${generator}" << 'EOF'
 +            }
 +        },
 +        API_DSU: {
-+            GAMEPAD: { # excludes blow mic & show screen
++            GAMEPAD: { # excludes show screen
 +                    "1":  "13",
 +                    "2":  "14",
 +                    "3":  "12",
@@ -270,7 +271,8 @@ patch "${generator}" << 'EOF'
 +                    "21": "41",
 +                    "22": "47",
 +                    "23": "46",
-+                    "24": "40"
++                    "24": "40",
++                    "25": "7"
 +            },
 +            PRO: {
 +                    "1":  "13",
@@ -384,7 +386,7 @@ patch "${generator}" << 'EOF'
  
      # cemu assign pads by uuid then by index with the same uuid
      # so, if 2 pads have the same uuid, the index is not 0 but 1 for the 2nd one
-@@ -148,97 +274,61 @@
+@@ -148,97 +276,61 @@
          guid_n[pad.index] = guid_count[pad.guid]
      ###
  
