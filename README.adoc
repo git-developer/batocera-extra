@@ -130,7 +130,6 @@ Notes:
 ### Cemu
 ./userdata/system/batocera.conf
 ----
-wiiu.cemu_controller_api=DSUController
 wiiu.cemuhook_server_ip=localhost
 wiiu.cemuhook_server_port=26761
 ----
