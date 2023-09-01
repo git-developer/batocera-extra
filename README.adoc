@@ -37,6 +37,10 @@ $ ln -s /userdata/extra/bin/custom.sh /userdata/system/custom.sh
 
 ## Content
 ### Features
+#### Server for motion control using a controller with modern Linux drivers (e.g. Nintendo Switch, Sony DS4 & DS5)
+
+* See link:evdevhook2/README.adoc[evdevhook2].
+
 #### Server for motion control using a Nintendo Switch controller
 
 * See link:joycond-cemuhook/README.adoc[joycond-cemuhook].
@@ -103,6 +107,7 @@ Once the configuration is applied, the emulators will behave as follows:
 ** A mouse connected to the batocera host
 
 * Motion input is read from a cemuhook server.
+** For a controller connected to evdevhook2, use `localhost` and `26766`.
 ** For a Nintendo controller connected to joycond-cemuhook, use `localhost` and `26761`.
 ** For a DS4 or DS5 controller connected to dsdrv-cemuhook, use `localhost` and `26762`.
 ** For a Wiimote connected to linuxmotehook2, use `localhost` and the port from your linuxmotehook2 configuration file.
@@ -119,7 +124,7 @@ profiles\1\motion_device=engine:cemuhookudp
 profiles\1\motion_device\default=false
 profiles\1\udp_input_address=localhost
 profiles\1\udp_input_address\default=false
-profiles\1\udp_input_port=26761
+profiles\1\udp_input_port=26766
 profiles\1\udp_input_port\default=false
 ----
 
@@ -131,7 +136,7 @@ Notes:
 ./userdata/system/batocera.conf
 ----
 wiiu.cemuhook_server_ip=localhost
-wiiu.cemuhook_server_port=26761
+wiiu.cemuhook_server_port=26766
 ----
 
 Notes:

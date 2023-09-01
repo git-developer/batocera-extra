@@ -7,7 +7,7 @@ This directory contains files to install and manage {url-evdevhook2}[evdevhook2]
 == Installation
 . Add `install-and-start` to your `/userdata/system/custom.sh`. This will perform the following steps when the host boots:
 
-.. Install `linuxmotehook2` from the `releases` directory.
+.. Install `evdevhook2` from the `releases` directory.
 .. Download and install required dependencies.
 .. Start `evdevhook2` as background daemon.
 
