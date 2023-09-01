@@ -14,16 +14,16 @@ case "${1-}" in
            /userdata/extra/patches/relocate-root-dotfiles-to-home
            /userdata/extra/patches/patch-joycond-for-flatpak
            /userdata/extra/patches/patch-cemu-generator-for-cemuhook
-           /userdata/extra/joycond-cemuhook/install-and-start
-           /userdata/extra/dsdrv-cemuhook/install-and-start
+           /userdata/extra/evdevhook2/install-and-start
+           /userdata/extra/joycond-cemuhook/install
+           /userdata/extra/dsdrv-cemuhook/install
            /userdata/extra/linuxmotehook2/install-and-start
            /userdata/extra/sdgyrodsu/install
            /userdata/extra/remote-touchpad/start
            ;;
   stop)    /userdata/extra/remote-touchpad/stop
            /userdata/extra/linuxmotehook2/stop
-           /userdata/extra/dsdrv-cemuhook/stop
-           /userdata/extra/joycond-cemuhook/stop
+           /userdata/extra/evdevhook2/stop
            ;;
   restart) ;;
   reload)  ;;
