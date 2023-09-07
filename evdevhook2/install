@@ -3,8 +3,12 @@ set -eu
 . "$(dirname $(readlink -f "$0"))/.env"
 
 main() {
-  install-from-arch libgee=0.20.6-1
-  gunzip -d <"${base_dir}/releases/${package}" | tar x -v -C /
+  target="${XDG_CACHE_HOME:-/userdata/system/.cache}/${app_name}"
+  package="$(provide_package "${url}" "${target}")"
+  chmod +x "${package}"
+  ln -sf "${package}" "/usr/bin/${app_name}"
+  install-from-arch upower=1.90.2-1
+
   if [ "${port}" ]; then
     printf '[Evdevhook]\nPort=%s\n' "${port}" >"${config_file}"
   fi

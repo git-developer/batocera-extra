@@ -2,4 +2,4 @@
 set -eu
 . "$(dirname $(readlink -f "$0"))/.env"
 
-pgrep "${app_name}"
+pgrep -f "/tmp/.*/usr/bin/${app_name}"

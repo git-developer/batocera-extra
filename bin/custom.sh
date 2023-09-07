@@ -15,9 +15,9 @@ case "${1-}" in
            /userdata/extra/patches/patch-joycond-for-flatpak
            /userdata/extra/patches/patch-cemu-generator-for-cemuhook
            /userdata/extra/evdevhook2/install-and-start
+           /userdata/extra/linuxmotehook2/install-and-start
            /userdata/extra/joycond-cemuhook/install
            /userdata/extra/dsdrv-cemuhook/install
-           /userdata/extra/linuxmotehook2/install-and-start
            /userdata/extra/sdgyrodsu/install
            /userdata/extra/remote-touchpad/start
            ;;

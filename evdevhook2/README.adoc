@@ -7,9 +7,8 @@ This directory contains files to install and manage {url-evdevhook2}[evdevhook2]
 == Installation
 . Add `install-and-start` to your `/userdata/system/custom.sh`. This will perform the following steps when the host boots:
 
-.. Install `evdevhook2` from the `releases` directory.
-.. Download and install required dependencies.
-.. Start `evdevhook2` as background daemon.
+.. Download the latest version of `evdevhook2` to a cache directory, if required.
+.. Start it as background daemon.
 
 == Usage
 Configure your emulators to listen to `localhost` port `26766`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
@@ -21,4 +20,3 @@ NOTE: Please pay attention to the patch for Cemu in this project, it is required
 == Troubleshooting
 * The log file is located at `/userdata/system/logs/evdevhook2.log` (location is configurable in the `.env` file).
 * The other scripts (e.g. `is-up`, `stop`) may help to analyse problems, their names should be self-explaining.
-

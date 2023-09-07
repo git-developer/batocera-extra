@@ -8,7 +8,7 @@ start_profiles() {
     if pid=$("${base_dir}/is-up" "${profile}"); then
       log "${app_name}/${profile} is already running with pid ${pid}."
     elif [ $? -eq 1 ]; then
-      linuxmotehook2 "$(path_of "${profile}")" >"${log_dir}/linuxmotehook2-${profile}.log" 2>&1 &
+      "${app_name}" "$(path_of "${profile}")" >"${log_dir}/${app_name}-${profile}.log" 2>&1 &
     else
       return 1
     fi

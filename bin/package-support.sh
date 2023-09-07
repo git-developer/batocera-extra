@@ -22,6 +22,16 @@ provide_package() {
   echo "${package}"
 }
 
+find_latest_github_release() {
+  repo="${1}"
+  prefix="${2-}"
+  suffix="${3-}"
+
+  wget -q -O - "https://api.github.com/repos/${repo}/releases/latest" \
+  | jq -r --arg prefix "${prefix}" --arg suffix "${suffix}" \
+    '.assets[] | select((.name|startswith($prefix)) and (.name|endswith($suffix))).browser_download_url'
+}
+
 prepare_pip() {
   if ! command -V pip >/dev/null 2>&1; then
     python -m ensurepip --upgrade
