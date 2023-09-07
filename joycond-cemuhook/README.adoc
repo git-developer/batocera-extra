@@ -24,8 +24,3 @@ NOTE: Please pay attention to the patch for Cemu in this project, it is required
 == Troubleshooting
 * The log file is located at `/userdata/system/logs/joycond-cemuhook.log` (location is configurable in the `.env` file).
 * The other scripts (e.g. `is-up`, `stop`) may help to analyse problems, their names should be self-explaining.
-
-== Implementation details
-- https://github.com/DanielOgorchock/joycond[joycond] support was https://batocera.org/changelog[added] to batocera v35.
-- batocera does not contain tools to build the dependencies for joycond-cemuhook. Thus, these dependencies are downloaded as binary packages from the Arch Linux package repository. The https://upower.freedesktop.org/docs/UPower.html[UPower] package is taken from the Arch Linux archive, because the latest version requires glibc 2.34 but buildroot provides 2.33.
-- The https://github.com/gvalkov/python-evdev[python-evdev] version in batocera v35 (0.7.0 from 2017-06-16) seems to be too old for joycond-cemuhook, so the package is updated to the latest version.

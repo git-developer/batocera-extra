@@ -7,7 +7,6 @@ main() {
   package="$(provide_package "${url}" "${target}")"
   chmod +x "${package}"
   ln -sf "${package}" "/usr/bin/${app_name}"
-  install-from-arch upower=1.90.2-1
 
   if [ "${port}" ]; then
     printf '[Evdevhook]\nPort=%s\n' "${port}" >"${config_file}"
