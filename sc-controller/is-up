@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+[ -r "${pid_file}" ] && LANG=C ps --no-headers -o pid= -p "$(cat ${pid_file})" | tr -d ' '

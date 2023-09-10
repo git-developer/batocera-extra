@@ -1,0 +1,30 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+prepare_profile() {
+  path=usr/share/scc/default_profiles
+  profile_source="${path}/XBox Controller.sccprofile"
+
+  work_dir="$(mktemp -d)"
+  cd "${work_dir}"
+  mkdir -p "squashfs-root/${path}"
+  "${app_name}" --appimage-extract "${profile_source}"
+  mv "squashfs-root/${profile_source}" "${profile}"
+  rm -r "${work_dir}"
+}
+
+main() {
+  target="${XDG_CACHE_HOME:-/userdata/system/.cache}/${app_name}"
+  package="$(provide_package "${url}" "${target}")"
+  chmod +x "${package}"
+  ln -sf "${package}" "/usr/bin/${app_name}"
+
+  if [ ! -e "${profile}" ]; then
+    prepare_profile
+  fi
+
+  install-from-arch libffi=3.3-4 bluez-libs=5.68-1 binutils=2.40-2 libelf=0.188-2
+}
+
+main "${@}"

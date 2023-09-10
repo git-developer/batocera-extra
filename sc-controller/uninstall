@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+main() {
+  rm -f "/usr/bin/${app_name}"
+}
+
+main "${@}"

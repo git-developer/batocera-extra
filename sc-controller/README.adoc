@@ -1,0 +1,21 @@
+= sc-controller
+:url-sc-controller: https://github.com/kozec/sc-controller
+Motion control for the Steam Controllers
+
+This directory contains files to install and manage {url-sc-controller}[sc-controller] which enables motion control for the Steam Controller.
+
+== Installation
+. Add `install-and-start` to your `/userdata/system/custom.sh`. This will perform the following steps when the host boots:
+
+.. Download `sc-controller`, if required.
+.. Download and install required dependencies.
+.. Start `sc-controller` as background daemon.
+
+== Usage
+Configure your emulators to listen to `localhost` port `26760`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
+
+NOTE: Please pay attention to the patch for Cemu in this project, it is required when you'd like to run the emulator from ES.
+
+== Troubleshooting
+* The log file is located at `/userdata/system/logs/sc-controller.log` (location is configurable in the `.env` file).
+* The other scripts (e.g. `is-up`, `stop`) may help to analyse problems, their names should be self-explaining.
