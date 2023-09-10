@@ -1,4 +1,1 @@
-#!/bin/sh
-set -eu
-
-pgrep -f 'joycond-cemuhook[^/]'
+../bin/.is-up

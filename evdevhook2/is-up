@@ -1,5 +1,1 @@
-#!/bin/sh
-set -eu
-. "$(dirname $(readlink -f "$0"))/.env"
-
-pgrep -f "/tmp/.*/usr/bin/${app_name}"
+../bin/.is-up

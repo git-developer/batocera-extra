@@ -2,4 +2,4 @@
 set -eu
 . "$(readlink -f "$(dirname "$0")")/.env"
 
-rm -f "/usr/bin/${app_name}"
+pgrep -f "${app_name}" | grep -v "^$$"

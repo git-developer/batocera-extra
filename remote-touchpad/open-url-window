@@ -1,5 +1,5 @@
 #!/bin/sh
-. "$(dirname $(readlink -f "$0"))/.env"
+. "$(readlink -f "$(dirname "$0")")/.env"
 
 if ! "${base_dir}/is-up"; then
   "${base_dir}/start"

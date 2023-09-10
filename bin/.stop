@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+"${base_dir}/is-up" "${@}" | cut -d ' ' -f 1 | sort -r | xargs -r kill

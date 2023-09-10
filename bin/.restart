@@ -2,4 +2,6 @@
 set -eu
 . "$(readlink -f "$(dirname "$0")")/.env"
 
-rm -f "/usr/bin/${app_name}"
+"${base_dir}/stop" "${@}"
+sleep 1
+"${base_dir}/start" "${@}"

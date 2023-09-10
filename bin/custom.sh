@@ -1,7 +1,7 @@
 #!/bin/sh
 set -u
 echo "$(date -Iseconds)" "${0}" "${@}" >&2
-export PATH="${PATH}:$(dirname "$(readlink -f "${0}")")"
+export PATH="${PATH}:$(readlink -f "$(dirname "$0")")"
 
 # HOME is '/' when this script is run from the init process;
 # some of the scripts expect the batocera default '/userdata/system' instead

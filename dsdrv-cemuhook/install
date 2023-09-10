@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-. "$(dirname $(readlink -f "$0"))/.env"
+. "$(readlink -f "$(dirname "$0")")/.env"
 
 main() {
   package_source="$(find_package_source "${package_name}" "${url}")"
@@ -8,6 +8,7 @@ main() {
     /userdata/extra/patches/mark-dbus-python-as-installed
 
     pip install --root-user-action=ignore --use-pep517 "${package_source}"
+    ln -s "${package_name}" "/usr/bin/${app_name}"
   fi
 }
 
