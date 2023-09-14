@@ -3,4 +3,4 @@ set -eu
 . "$(readlink -f "$(dirname "$0")")/.env"
 
 "${base_dir}/install" "${@}"
-"${base_dir}/start" "${@}"
+exec "${base_dir}/start" "${@}"

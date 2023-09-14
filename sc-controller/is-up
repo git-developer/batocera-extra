@@ -2,4 +2,17 @@
 set -eu
 . "$(readlink -f "$(dirname "$0")")/.env"
 
-[ -r "${pid_file}" ] && LANG=C ps --no-headers -o pid= -p "$(cat ${pid_file})" | tr -d ' '
+main() {
+  if [ -r "${pid_file}" ]; then
+    pids="$(LANG=C ps --no-headers -o pid= -p "$(cat "${pid_file}")" | tr -d ' ')"
+    if [ "${pids}" ]; then
+      echo "${pids}"
+      return 0
+    fi
+    echo >&2 "Removing stale pid file ${pid_file}"
+    rm "${pid_file}"
+  fi
+  return 1
+}
+
+main "${@}"

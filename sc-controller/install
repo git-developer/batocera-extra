@@ -11,6 +11,7 @@ prepare_profile() {
   mkdir -p "squashfs-root/${path}"
   "${app_name}" --appimage-extract "${profile_source}"
   mv "squashfs-root/${profile_source}" "${profile}"
+  cd -
   rm -r "${work_dir}"
 }
 
