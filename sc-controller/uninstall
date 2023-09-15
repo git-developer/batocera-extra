@@ -4,6 +4,8 @@ set -eu
 
 main() {
   rm -f "/usr/bin/${app_name}"
+  rm -f "/usr/share/applications/${app_name}-config.desktop"
+  rm -f "/usr/share/icons/hicolor/512x512/apps/${app_name}.png"
 }
 
 main "${@}"
