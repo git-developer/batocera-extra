@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+pgrep -f "${app_name}" | grep -v -P "^($$|${PPID})"

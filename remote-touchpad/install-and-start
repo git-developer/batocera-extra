@@ -1,6 +1,1 @@
-#!/bin/sh
-set -eu
-
-base="$(dirname "${0}")"
-"${base}/install" "${@}"
-"${base}/start" "${@}"
+../bin/.install-and-start

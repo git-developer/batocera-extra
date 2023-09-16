@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+"${base_dir}/install" "${@}"
+exec "${base_dir}/start" "${@}"

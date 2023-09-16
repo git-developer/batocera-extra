@@ -1,5 +1,1 @@
-#!/bin/sh
-set -eu
-. "$(dirname $(readlink -f "$0"))/.env"
-
-"${base_dir}/is-up" | xargs -r kill
+../bin/.stop

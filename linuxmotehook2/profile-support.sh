@@ -1,5 +1,5 @@
 set -eu
-. "$(dirname $(readlink -f "$0"))/.env"
+. "$(readlink -f "$(dirname "$0")")/.env"
 
 log() {
   echo >&2 "${@}"

@@ -1,7 +1,7 @@
 #!/bin/sh
 set -u
 echo "$(date -Iseconds)" "${0}" "${@}" >&2
-export PATH="${PATH}:$(dirname "$(readlink -f "${0}")")"
+export PATH="${PATH}:$(readlink -f "$(dirname "$0")")"
 
 # HOME is '/' when this script is run from the init process;
 # some of the scripts expect the batocera default '/userdata/system' instead
@@ -15,10 +15,11 @@ case "${1-}" in
            /userdata/extra/patches/patch-joycond-for-flatpak
            /userdata/extra/patches/patch-cemu-generator-for-cemuhook
            /userdata/extra/evdevhook2/install-and-start
+           /userdata/extra/linuxmotehook2/install-and-start
            /userdata/extra/joycond-cemuhook/install
            /userdata/extra/dsdrv-cemuhook/install
-           /userdata/extra/linuxmotehook2/install-and-start
            /userdata/extra/sdgyrodsu/install
+           /userdata/extra/sc-controller/install
            /userdata/extra/remote-touchpad/start
            ;;
   stop)    /userdata/extra/remote-touchpad/stop

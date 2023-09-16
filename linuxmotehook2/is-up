@@ -1,13 +1,13 @@
 #!/bin/sh
 set -eu
-. "$(dirname $(readlink -f "$0"))/.env"
+. "$(readlink -f "$(dirname "$0")")/.env"
 . "${base_dir}/profile-support.sh"
 
 if [ "${#}" -eq 0 ]; then
-  pgrep linuxmotehook2
+  pgrep -a "${app_name}" | sed -nE 's:^([0-9]+).*/([^/]+)\.ini$:\1 \2:p'
 else
   for profile in "${@}"; do
     path=$(path_of "${profile}") || return 2
-    pgrep -f "linuxmotehook2 ${path}"
+    pgrep -f "/tmp/.*/usr/bin/${app_name} ${path}"
   done
 fi

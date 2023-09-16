@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+# example args: '-Wl,-t' '-o' '/tmp/tmpW9yHlS' '-lbluetooth'
+if [ "${1-}" = '-Wl,-t' ]; then
+  arg_outfile="${3}"
+  query="${4#-l*}"
+
+  find /lib /usr/lib -name "lib${query}.so.?" | tee "${arg_outfile}"
+fi

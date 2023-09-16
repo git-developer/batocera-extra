@@ -7,9 +7,8 @@ This directory contains files to install and manage {url-linuxmotehook2}[linuxmo
 == Installation
 . Add `install-and-start` to your `/userdata/system/custom.sh`. This will perform the following steps when the host boots:
 
-.. Install `linuxmotehook2` from the `releases` directory.
-.. Download and install required dependencies.
-.. Start `linuxmotehook2` as background daemon.
+.. Download the latest version of `linuxmotehook2` to a cache directory, if required.
+.. Start it as background daemon.
 
 == Usage
 . Create a configuration file with the suffix `.ini` in the `profiles` directory. Example:
@@ -61,34 +60,3 @@ In this example, we have configured one server for a white Wiimote served on por
 == Troubleshooting
 * The log files are located at `/userdata/system/logs/` using the filename pattern `linuxmotehook2-${PROFILE_NAME}.log` (location is configurable in the `.env` file).
 * The other scripts (e.g. `is-up`, `stop`) may help to analyse problems, their names should be self-explaining.
-
-== Implementation details
-batocera does not contain any tools to build linuxmotehook2 and its dependencies. Thus, the binaries are provided in subdirectory `releases`, and the dependencies are downloaded as binary packages from the Arch Linux package repository.
-
-=== Build
-linuxmotehook2 currently does not provide any binary releases. If you're not happy with the pre-built binaries distributed within this project, you can use the `build` script to simplify the build. The script is self-contained, its only requirement is a host with Docker installed.
-
-==== Specify the release
-When run without any arguments, the build script uses the latest commit of the default branch of the linuxmotehook2 Github repository. To use a specific tag or branch, you can handle its name as argument, e.g.
-
-[source,console]
-----
-$ ./build v0.1.4
-----
-
-==== Integration in batocera
-To use a custom release within batocera, put the release archive into the `releases` subdirectory and change the `package` variable in the `.env` file. Example:
-
-..env
-[source,env]
-----
-package="linuxmotehook2-v0.1.4-$(uname -m).tar.gz"
-----
-
-==== Build details
-The build script will perform the following steps:
-
-. Prepare a Docker container that is compatible with the current version of batocera (glibc version) and the architecture of the host system.
-. Download all required dependencies.
-. Run the build.
-. Package all files to a tar archive in the `releases` subdirectory of the current working directory.

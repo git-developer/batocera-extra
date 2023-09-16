@@ -1,9 +1,10 @@
 #!/bin/sh
 set -eu
-. "$(dirname $(readlink -f "$0"))/.env"
+. "$(readlink -f "$(dirname "$0")")/.env"
 
 if pid=$("${base_dir}/is-up"); then
   log "${app_name} is already running with pid ${pid}."
 else
+  /userdata/extra/bin/upowerd-start
   "${app_name}" ${config_file:+"${config_file}"} >"${log_file}" 2>&1 &
 fi

@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-. "$(dirname $(readlink -f "$0"))/.env"
+. "$(readlink -f "$(dirname "$0")")/.env"
 
 if pid=$("${base_dir}/is-up"); then
   log "${app_name} is already running with pid ${pid}."
@@ -8,8 +8,6 @@ else
   if ! lsmod | grep -q hid_nx; then
     modprobe hid_nx
   fi
-  if ! pgrep upowerd >/dev/null; then
-    /usr/lib/upowerd 2>&1 | logger &
-  fi
+  /userdata/extra/bin/upowerd-start
   PYTHONUNBUFFERED=true joycond-cemuhook ${ip:+--ip "${ip}"} ${port:+--port "${port}"} >"${log_file}" 2>&1 &
 fi

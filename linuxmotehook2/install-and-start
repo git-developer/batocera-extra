@@ -1,6 +1,1 @@
-#!/bin/sh
-set -eu
-. "$(dirname $(readlink -f "$0"))/.env"
-
-"${base_dir}/install" "${@}"
-"${base_dir}/start" "${@}"
+../bin/.install-and-start

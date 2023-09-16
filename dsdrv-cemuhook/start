@@ -1,9 +1,9 @@
 #!/bin/sh
 set -eu
-. "$(dirname $(readlink -f "$0"))/.env"
+. "$(readlink -f "$(dirname "$0")")/.env"
 
 if pid=$("${base_dir}/is-up"); then
   log "${app_name} is already running with pid ${pid}."
 else
-  PATH="${base_dir}/quirk:$PATH" python3 -m "${package_name}" --udp ${host:+--udp-host "${host}"} ${port:+--udp-port "${port}"} >"${log_file}" 2>&1 &
+  PATH="${base_dir}/quirk:$PATH" "${app_name}" --udp ${host:+--udp-host "${host}"} ${port:+--udp-port "${port}"} >"${log_file}" 2>&1 &
 fi

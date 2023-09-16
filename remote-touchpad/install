@@ -1,5 +1,5 @@
 #!/bin/sh
-. "$(dirname $(readlink -f "$0"))/.env"
+. "$(readlink -f "$(dirname "$0")")/.env"
 
 flatpak remote-add --if-not-exists flathub "${repo_url}"
 flatpak install --noninteractive --or-update flathub "${app_id}"

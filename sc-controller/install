@@ -1,0 +1,60 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+prepare_profiles() {
+  if [ "${1-}" = '--with-default-profiles' ]; then
+    path=usr/share/scc/default_profiles
+    work_dir="$(mktemp -d)"
+    cd "${work_dir}"
+    mkdir -p "squashfs-root/${path}"
+    "${app_name}" --appimage-extract "${path}/*.sccprofile"
+    find "squashfs-root/${path}" -name '*.sccprofile' -exec mv -n '{}' "${base_dir}/profiles/" \;
+    cd - >/dev/null
+    rm -r "${work_dir}"
+  fi
+
+  profile_path="${XDG_CONFIG_HOME:-/userdata/system/.config}/scc/profiles"
+  if [ ! -L "${profile_path}" ] && [ -d "${profile_path}" ]; then
+    mv "${profile_path}" "$(mktemp -d -p "${profile_path}/.." profiles-backup.XXXXXX)"
+  fi
+  ln -sf "${base_dir}/profiles" "${XDG_CONFIG_HOME:-/userdata/system/.config}/scc/"
+}
+
+add_desktop_integration() {
+  icon_path=/usr/share/icons/hicolor/512x512/apps
+  icon_file="${app_name}.png"
+
+  work_dir="$(mktemp -d)"
+  cd "${work_dir}"
+  "${app_name}" --appimage-extract "${icon_file}"
+  mv "squashfs-root/${icon_file}" "${icon_path}"
+  cd - >/dev/null
+  rm -r "${work_dir}"
+
+  cat >"/usr/share/applications/${app_name}-config.desktop" << EOF
+[Desktop Entry]
+Version=1.0
+Icon=${icon_path}/${icon_file}
+Exec=/usr/bin/${app_name} gui
+Terminal=false
+Type=Application
+Categories=Game;batocera.linux;
+Name=${app_name}-config
+EOF
+
+}
+
+main() {
+  target="${XDG_CACHE_HOME:-/userdata/system/.cache}/${app_name}"
+  package="$(provide_package "${url}" "${target}")"
+  chmod +x "${package}"
+  ln -sf "${package}" "/usr/bin/${app_name}"
+
+  prepare_profiles "${@}"
+  add_desktop_integration
+
+  install-from-arch libffi=3.3-4 bluez-libs=5.68-1 binutils=2.40-2 libelf=0.188-2
+}
+
+main "${@}"
