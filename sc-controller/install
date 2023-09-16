@@ -50,7 +50,7 @@ EOF
 
 main() {
   target="${XDG_CACHE_HOME:-/userdata/system/.cache}/${app_name}"
-  package="$(provide_package "${url}" "${target}")"
+  package="$(provide_package "$(find_url)" "${target}")"
   chmod +x "${package}"
   ln -sf "${package}" "/usr/bin/${app_name}"
 
