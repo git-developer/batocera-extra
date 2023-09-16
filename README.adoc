@@ -57,7 +57,7 @@ $ ln -s /userdata/extra/bin/custom.sh /userdata/system/custom.sh
 
 * See link:sdgyrodsu/README.adoc[sdgyrodsu].
 
-#### Server for motion control using a Steam Controller
+#### Server for motion and touch control using a Steam Controller
 
 * See link:sc-controller/README.adoc[sc-controller].
 
