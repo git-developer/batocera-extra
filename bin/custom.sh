@@ -19,10 +19,12 @@ case "${1-}" in
            /userdata/extra/joycond-cemuhook/install
            /userdata/extra/dsdrv-cemuhook/install
            /userdata/extra/sdgyrodsu/install
-           /userdata/extra/sc-controller/install
+           /userdata/extra/sc-controller/install-and-start
            /userdata/extra/remote-touchpad/start
            ;;
-  stop)    /userdata/extra/remote-touchpad/stop
+  stop)
+           /userdata/extra/remote-touchpad/stop
+           /userdata/extra/sc-controller/stop
            /userdata/extra/linuxmotehook2/stop
            /userdata/extra/evdevhook2/stop
            ;;
