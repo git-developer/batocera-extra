@@ -53,9 +53,7 @@ provide_package() {
 install_package() {
   package="${1}"
   log "Installing package from ${package}"
-  if [ "${INSTALL:-true}" = 'true' ]; then
-    zstd -d <"${package}" | tar x -C / --exclude '.*'
-  fi
+  zstd -d <"${package}" | tar x -C / --exclude '.*'
 }
 
 print_usage() {
@@ -100,7 +98,11 @@ main() {
       log "Installing archlinux package ${name}${version:+ in version ${version}}${arch:+ for arch ${arch}}${repo:+ from repo ${repo}}${date:+ from ${date}}"
       url="$(find_package_url "${name}" "${version}" "${arch}" "${repo}" "${date}")"
       local_file="$(provide_package "${url}")"
-      install_package "${local_file}"
+      if [ "${INSTALL:-true}" = 'true' ]; then
+        install_package "${local_file}"
+      else
+        echo "${local_file}"
+      fi
     done
   done
 }
