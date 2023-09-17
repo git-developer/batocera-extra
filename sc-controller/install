@@ -2,6 +2,25 @@
 set -eu
 . "$(readlink -f "$(dirname "$0")")/.env"
 
+install_dependencies() {
+  install-from-arch bluez-libs=5.68-1 binutils=2.40-2 libelf=0.188-2 cairo=1.17.6-2
+
+  package_spec="linux-headers=$(uname -r).arch1-1"
+  filename='input*.h'
+  target=/usr/include/linux
+
+  work_dir="$(mktemp -d)"
+  cd "${work_dir}"
+  package="$(INSTALL=false install-from-arch "${package_spec}")"
+  <"${package}" zstd -d | tar x --wildcards "*/${filename}"
+  find . -name "${filename}" | while read -r file; do
+    mkdir -p "${target}"
+    mv "${file}" "${target}"
+  done
+  cd - >/dev/null
+  rm -r "${work_dir}"
+}
+
 prepare_profiles() {
   if [ "${1-}" = '--with-default-profiles' ]; then
     path=usr/share/scc/default_profiles
@@ -57,7 +76,7 @@ main() {
   prepare_profiles "${@}"
   add_desktop_integration
 
-  install-from-arch libffi=3.3-4 bluez-libs=5.68-1 binutils=2.40-2 libelf=0.188-2
+  install_dependencies
 }
 
 main "${@}"
