@@ -8,12 +8,18 @@ log() {
 }
 
 find_package_url() {
-  local name="${1}" version="${2}" arch="${3:-$(uname -m)}" repo="${4:-core}"
+  local name="${1}" version="${2}" arch="${3:-$(uname -m)}" repo="${4:-core}" date="${5-}"
 
   if [ "${version}" ]; then
     first_letter="${name%"${name#?}"}"
     filename="${name}-${version}-${arch}.pkg.tar.zst"
-    url="https://archive.archlinux.org/packages/${first_letter}/${name}/${filename}"
+    if [ "${date}" ]; then
+      date="$(echo "${date}" | tr -c '[:digit:]' '/')"
+      path="repos/${date}/${repo}/os/${arch}"
+    else
+      path="packages/${first_letter}/${name}"
+    fi
+    url="https://archive.archlinux.org/${path}/${filename}"
   else
     url="$(wget --quiet --spider --server-response "https://archlinux.org/packages/${repo}/${arch}/${name}/download/" 2>&1 | sed -nE 's/\s*Location:\s*(.+)/\1/p')"
   fi
@@ -59,7 +65,7 @@ print_usage() {
 ${name} - download and install packages from an archlinux repository
 
 Usage: ${name} <package-spec>...
-  <package-spec>: <name>['='<version>['='<arch>['='<repo>]]]
+  <package-spec>: <name>['='<version>['='<arch>['='<repo>['='<date>]]]]
   When the package-spec contains a version, the archive repository is used.
 
 Supported environment variables:
@@ -70,14 +76,15 @@ Supported environment variables:
 
 Examples:
 
-${pad} Command                                  Package       Version      Architechture     Repository
-${pad} -------                                  -------       -------      -------------     ----------
-  ${name} util-linux             'util-linux'  latest       current           Core
-  ${name} unrar=1:6.2.6-1        'unrar'       '1:6.2.6-1'  current           Archive
-  ${name} iotop=0.6-9=any        'iotop'       '0.6-9'      'any'             Archive
-  ${name} base==any              'base'        latest       'any'             Core
-  ${name} unrar===extra          'unrar'       latest       current           Extra
-  ${name} iotop==any=community   'iotop'       latest       'any'             Community
+${pad} Command                                      Package       Version      Architechture  Repository  Date
+${pad} -------                                      -------       -------      -------------  ----------  ----
+  ${name} util-linux                 'util-linux'  latest       current        Core
+  ${name} unrar=1:6.2.6-1            'unrar'       '1:6.2.6-1'  current        Archive
+  ${name} iotop=0.6-9=any            'iotop'       '0.6-9'      'any'          Archive
+  ${name} base==any                  'base'        latest       'any'          Core
+  ${name} unrar===extra              'unrar'       latest       current        Extra
+  ${name} iotop==any=community       'iotop'       latest       'any'          Community
+  ${name} gzip=1.12-1====2023-02-05  'gzip'        '1.12-1'     current        Core        2023/02/05
 EOF
 )
   log "${usage}"
@@ -89,9 +96,9 @@ main() {
     return 0
   fi
   for package in "${@}"; do
-    echo "${package}" | while IFS== read -r name version arch repo; do
-      log "Installing archlinux package ${name}${version:+ in version ${version}}${arch:+ for arch ${arch}}${repo:+ from repo ${repo}}"
-      url="$(find_package_url "${name}" "${version}" "${arch}" "${repo}")"
+    echo "${package}" | while IFS== read -r name version arch repo date; do
+      log "Installing archlinux package ${name}${version:+ in version ${version}}${arch:+ for arch ${arch}}${repo:+ from repo ${repo}}${date:+ from ${date}}"
+      url="$(find_package_url "${name}" "${version}" "${arch}" "${repo}" "${date}")"
       local_file="$(provide_package "${url}")"
       install_package "${local_file}"
     done
