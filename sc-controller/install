@@ -35,6 +35,10 @@ add_desktop_integration() {
   # only required for batocera <38
   sed -i 's/inline_limit="20"/inline_limit="25"/g' /etc/xdg/menus/batocera-applications.menu
 
+  # enable title bar with settings menu
+  sed -i 's:</applications>:\t<application groupname="sc-controller">\n\t\t<fullscreen>no</fullscreen>\n\t</application>\n</applications>:g' /etc/openbox/rc.xml
+  DISPLAY=:0 openbox --reconfigure
+
   cat >"/usr/share/applications/${app_name}-config.desktop" << EOF
 [Desktop Entry]
 Version=1.0
