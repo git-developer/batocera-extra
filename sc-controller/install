@@ -18,6 +18,9 @@ prepare_profiles() {
   if [ ! -L "${profile_path}" ] && [ -d "${profile_path}" ]; then
     mv "${profile_path}" "$(mktemp -d -p "${profile_path}/.." profiles-backup.XXXXXX)"
   fi
+  if [ -z "${XDG_CONFIG_HOME-}" ]; then
+    mkdir -p /userdata/system/.config/scc
+  fi
   ln -sf "${base_dir}/profiles" "${XDG_CONFIG_HOME:-/userdata/system/.config}/scc/"
 }
 
