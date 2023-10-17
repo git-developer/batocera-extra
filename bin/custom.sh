@@ -11,20 +11,14 @@ fi
 
 case "${1-}" in
   start)
-           /userdata/extra/patches/relocate-root-dotfiles-to-home
-           /userdata/extra/patches/patch-joycond-for-flatpak
-           /userdata/extra/patches/patch-cemu-generator-for-cemuhook
-           /userdata/extra/evdevhook2/install-and-start
-           /userdata/extra/linuxmotehook2/install-and-start
-           /userdata/extra/joycond-cemuhook/install
-           /userdata/extra/dsdrv-cemuhook/install
-           /userdata/extra/sdgyrodsu/install
-           /userdata/extra/sc-controller/install
-           /userdata/extra/remote-touchpad/start
+           batocera-services list user | sed -nE 's/^([^;]+);\*$/\1/p' | while read service; do
+             batocera-services start "${service}"
+           done
            ;;
-  stop)    /userdata/extra/remote-touchpad/stop
-           /userdata/extra/linuxmotehook2/stop
-           /userdata/extra/evdevhook2/stop
+  stop)
+           batocera-services list user | sed -nE 's/^([^;]+);\*$/\1/p' | while read service; do
+             batocera-services stop "${service}"
+           done
            ;;
   restart) ;;
   reload)  ;;
