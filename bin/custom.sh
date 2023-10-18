@@ -11,6 +11,7 @@ fi
 
 case "${1-}" in
   start)
+           /userdata/extra/bin/register-services
            batocera-services list user | sed -nE 's/^([^;]+);\*$/\1/p' | while read service; do
              batocera-services start "${service}"
            done

@@ -1,0 +1,7 @@
+#!/bin/sh
+set -u
+base_dir="$(readlink -f "$(dirname "$0")")"
+
+"${base_dir}/relocate-root-dotfiles-to-home"
+"${base_dir}/patch-joycond-for-flatpak"
+"${base_dir}/patch-cemu-generator-for-cemuhook"
