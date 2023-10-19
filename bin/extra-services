@@ -1,0 +1,74 @@
+#!/bin/sh
+set -eu
+
+bin_dir="$(readlink -f "$(dirname "$0")")"
+root_dir="$(readlink -f "$(dirname "${bin_dir}")")"
+target=/userdata/system/services
+
+print_usage() {
+  cat >&2 <<EOF
+Lifecycle management for batocera-extra services
+
+Usage: $(basename "${0}") <ACTION> [OPTION]...
+
+where <ACTION> is one of
+
+  install     Install all non-hidden services
+  uninstall   Uninstall all non-hidden services
+  status      Show started services (-h for help)
+
+Services whose directory name starts with a dot ('.') are hidden.
+EOF
+}
+
+services_find() {
+  find "${root_dir}" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -exec test -x '{}/start' \; -print
+}
+
+services_status() {
+  "${bin_dir}/.status" "${@}"
+}
+
+services_install() {
+  if [ ! -d "${target}" ]; then
+    mkdir -p "${target}"
+  fi
+
+  services_find | while read -r path; do
+    if [ -x "${path}/install" ]; then
+      "${path}/install"
+    fi
+    service="$(basename "${path}" | tr - _)"
+    ln -sf "${bin_dir}/.service" "${target}/${service}"
+  done
+}
+
+services_uninstall() {
+  services_find | while read -r path; do
+    service="$(basename "${path}" | tr - _)"
+    batocera-services stop "${service}"
+    rm -f "${target}/${service}"
+    if [ -x "${path}/uninstall" ]; then
+      "${path}/uninstall"
+    fi
+  done
+
+  rmdir --ignore-fail-on-non-empty "${target}"
+}
+
+main() {
+  if [ "${#}" -eq 0 ]; then
+    print_usage
+    return 1
+  fi
+  action="${1}"
+  shift
+  case "${action}" in
+    install)   services_install   ;;
+    uninstall) services_uninstall ;;
+    status)    services_status "${@}" ;;
+    *)
+  esac
+}
+
+main "${@}"

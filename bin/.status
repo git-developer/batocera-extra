@@ -10,7 +10,7 @@ print_usage() {
 Status monitor for batocera-extra services
 Lists running services with their ports.
 
-Usage: $(basename "${0}") [OPTION]...
+Options:
 
   -a,  --all          Print all processes, not only port owners
   -h,  --help         Display this help and exit
