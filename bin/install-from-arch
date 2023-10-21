@@ -2,30 +2,43 @@
 set -eu
 
 ARCH_PACKAGE_CACHE="${ARCH_PACKAGE_CACHE:-${XDG_CACHE_HOME:-/userdata/system/.cache}/arch-packages}"
+ARCH_PACKAGE_CACHE="${ARCH_PACKAGE_CACHE%/}"
 
 log() {
   echo >&2 "${@}"
 }
 
 find_package_url() {
-  local name="${1}" version="${2}" arch="${3:-$(uname -m)}" repo="${4:-core}" date="${5-}"
+  local name="${1}" revision="${2}" repo="${3:-core}" arch="${4:-$(uname -m)}"
 
-  if [ "${version}" ]; then
-    first_letter="${name%"${name#?}"}"
-    filename="${name}-${version}-${arch}.pkg.tar.zst"
-    if [ "${date}" ]; then
-      date="$(echo "${date}" | tr -c '[:digit:]' '/')"
+  if [ "${revision}" ]; then
+    if echo "${revision}" | grep -qP '^\d{4}.\d{2}.\d{2}$'; then
+      date="$(printf %s "${revision}" | tr -c '[:digit:]' '/')"
       path="repos/${date}/${repo}/os/${arch}"
+
+      mkdir -p "${ARCH_PACKAGE_CACHE}"
+      packages="${ARCH_PACKAGE_CACHE}/${revision}.${repo}.packages"
+      if [ ! -s "${packages}" ]; then
+        curl -fsSL "https://archive.archlinux.org/${path}" \
+        | sed -nE 's/.*href="([^"]+\.pkg\.tar\.zst)".*/\1/p' \
+        | grep . >"${packages}"
+      fi
+      filename="$(grep -P "^${name}-(.+)-${arch}\.pkg\.tar\.zst$" "${packages}" | sort -V | tail -1)"
     else
+      first_letter="${name%"${name#?}"}"
       path="packages/${first_letter}/${name}"
+      filename="${name}-${revision}-${arch}.pkg.tar.zst"
     fi
-    url="https://archive.archlinux.org/${path}/${filename}"
+    if [ "${filename}" ]; then
+      url="https://archive.archlinux.org/${path}/${filename}"
+    fi
   else
-    url="$(wget --quiet --spider --server-response "https://archlinux.org/packages/${repo}/${arch}/${name}/download/" 2>&1 | sed -nE 's/\s*Location:\s*(.+)/\1/p')"
+    url="$(wget --quiet --spider --server-response "https://archlinux.org/packages/${repo}/${arch}/${name}/download/" 2>&1 \
+           | sed -nE 's/\s*Location:\s*(.+)/\1/p')"
   fi
 
-  if [ -z "${url}" ]; then
-    log "Error: No URL found in repo '${repo}' for package '${name}'${version:+ in version '${version}'} and arch '${arch}'"
+  if [ -z "${url-}" ]; then
+    log "Error: No URL found in repo '${repo}' for package '${name}'${revision:+ in revision '${revision}'} and arch '${arch}'"
     return 1
   fi
   printf '%s\n' "${url}"
@@ -63,26 +76,33 @@ print_usage() {
 ${name} - download and install packages from an archlinux repository
 
 Usage: ${name} <package-spec>...
-  <package-spec>: <name>['='<version>['='<arch>['='<repo>['='<date>]]]]
-  When the package-spec contains a version, the archive repository is used.
+  <package-spec>: <name>['='<revision>['='<repo>['='<arch>]]]
+  When revision
+  - is missing, the latest package is used.
+  - is '?', the actual revision is
+    - read from env variable ARCH_REVISION if set, else
+    - read from file '.arch_revision' in the directory of this script if existing, else
+    - set to latest.
+  - has date format 'YYYY-MM-DD', the package is read from archive by date.
+  - has no date format, the package is read from archive by version.
 
 Supported environment variables:
   DOWNLOAD=false       - do not download packages
   INSTALL=false        - do not install packages
-  ARCH_PACKAGE_CACHE   - Use an alternative directory as package cache
-                         (Default: '${ARCH_PACKAGE_CACHE}')
+  ARCH_PACKAGE_CACHE   - Use an alternative directory as package cache (Default: '${ARCH_PACKAGE_CACHE}')
+  ARCH_REVISION        - Arch revision to use when revision is '?'
 
 Examples:
 
-${pad} Command                                      Package       Version      Architechture  Repository  Date
-${pad} -------                                      -------       -------      -------------  ----------  ----
-  ${name} util-linux                 'util-linux'  latest       current        Core
-  ${name} unrar=1:6.2.6-1            'unrar'       '1:6.2.6-1'  current        Archive
-  ${name} iotop=0.6-9=any            'iotop'       '0.6-9'      'any'          Archive
-  ${name} base==any                  'base'        latest       'any'          Core
-  ${name} unrar===extra              'unrar'       latest       current        Extra
-  ${name} iotop==any=community       'iotop'       latest       'any'          Community
-  ${name} gzip=1.12-1====2023-02-05  'gzip'        '1.12-1'     current        Core        2023/02/05
+${pad} Command                                      Package       Revision         Repository  Architechture
+${pad} -------                                      -------       -------          ----------  -------------
+  ${name} util-linux                 'util-linux'  latest           Core        current
+  ${name} unrar=1:6.2.6-1            'unrar'       '1:6.2.6-1'      Archive     current
+  ${name} unrar=2023-02-05           'unrar'       from 2023/02/05  Archive     current
+  ${name} iotop=0.6-9==any           'iotop'       '0.6-9'          Archive     'any'
+  ${name} base===any                 'base'        latest           Core        'any'
+  ${name} unrar==extra               'unrar'       latest           Extra       current
+  ${name} iotop==community=any       'iotop'       latest           Community   'any'
 EOF
 )
   log "${usage}"
@@ -94,9 +114,12 @@ main() {
     return 0
   fi
   for package in "${@}"; do
-    echo "${package}" | while IFS== read -r name version arch repo date; do
-      log "Installing archlinux package ${name}${version:+ in version ${version}}${arch:+ for arch ${arch}}${repo:+ from repo ${repo}}${date:+ from ${date}}"
-      url="$(find_package_url "${name}" "${version}" "${arch}" "${repo}" "${date}")"
+    echo "${package}" | while IFS== read -r name revision repo arch; do
+      if [ "${revision}" = '?' ]; then
+        revision="${ARCH_REVISION:-$(cat "$(dirname "$0")/.arch_revision" 2>/dev/null || true)}"
+      fi
+      log "Installing archlinux package ${name}${revision:+ in revision ${revision}}${repo:+ from repo ${repo}}${arch:+ for arch ${arch}}"
+      url="$(find_package_url "${name}" "${revision}" "${repo}" "${arch}")"
       local_file="$(provide_package "${url}")"
       if [ "${INSTALL:-true}" = 'true' ]; then
         install_package "${local_file}"

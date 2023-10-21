@@ -9,14 +9,14 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 #
-# | batocera | glibc | archlinux  |       docker
-# +----------+-------+------------+-------------------
-# |    37    | 2.36  | 2023-02-05 | 20230205.0.124056
-# |    38    | 2.37  | 2023-08-03 |         ?
+# |     batocera    | buildroot | glibc | archlinux  |      docker
+# +-----------------+-----------+-------+------------+------------------
+# | 37 (2023/06/18) | 2023.02.1 | 2.36  | 2023-02-05 | 20230205.0.124056
+# | 38 (2023/10/14) | 2023.05.1 | 2.37  | 2023-08-03 | 20230725.0.167364
 #
 cat <<'EOF' | docker build -t "${image_tag}" -
-FROM archlinux/archlinux:base-devel-20230205.0.124056
-RUN  echo 'Server=https://archive.archlinux.org/repos/2023/02/05/$repo/os/$arch' >/etc/pacman.d/mirrorlist && \
+FROM archlinux/archlinux:base-devel-20230725.0.167364
+RUN  echo 'Server=https://archive.archlinux.org/repos/2023/08/03/$repo/os/$arch' >/etc/pacman.d/mirrorlist && \
      pacman -Sy --noconfirm git make gcc glibc linux-api-headers ncurses
 WORKDIR /tmp
 ENV REPO_URL https://github.com/kmicki/SteamDeckGyroDSU.git

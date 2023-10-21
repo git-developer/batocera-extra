@@ -5,7 +5,7 @@ set -eu
 main() {
   package_source="$(find_package_source "${app_name}" "${url}")"
   if [ "${package_source}" ]; then
-    /userdata/extra/patches/mark-dbus-python-as-installed
+    "${base_dir}/../patches/mark-dbus-python-as-installed"
 
     pip install --root-user-action=ignore "${package_source}"
   fi

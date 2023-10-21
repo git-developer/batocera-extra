@@ -3,7 +3,8 @@ set -u
 echo "$(date -Iseconds)" "${0}" "${@}" >&2
 
 service_name="$(basename "${0}" | tr _ -)"
-export PATH="${PATH}:/userdata/extra/bin"
+extra_root="$(dirname -- "$(dirname -- "$(readlink -f "$0")")")"
+export PATH="${PATH}:${extra_root}/bin"
 # HOME is '/' when this script is run from the init process;
 # some services expect the batocera default '/userdata/system' instead
 if [ "${HOME}" = '/' ]; then
@@ -11,9 +12,9 @@ if [ "${HOME}" = '/' ]; then
 fi
 
 case "${1-}" in
-  start)   "/userdata/extra/${service_name}/install-and-start"
+  start)   "${extra_root}/${service_name}/install-and-start"
            ;;
-  stop)    "/userdata/extra/${service_name}/stop"
+  stop)    "${extra_root}/${service_name}/stop"
            ;;
   *)
 esac
