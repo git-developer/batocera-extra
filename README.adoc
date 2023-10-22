@@ -114,22 +114,21 @@ Once the configuration is applied, the emulators will behave as follows:
 ** For a smartphone, use the hostname/ip of the smartphone and the port configured in the app of your choice (e.g. _MotionSource_ or _DSUController_).
 
 ### Citra
-./userdata/system/configs/citra-emu/qt-config.ini
+./userdata/system/batocera.conf
 ----
-[Controls]
-profiles\1\touch_device=engine:emu_window
-profiles\1\touch_device\default=true
-profiles\1\motion_device=engine:cemuhookudp
-profiles\1\motion_device\default=false
-profiles\1\udp_input_address=localhost
-profiles\1\udp_input_address\default=false
-profiles\1\udp_input_port=26766
-profiles\1\udp_input_port\default=false
+3ds.citra_motion_device=engine:cemuhookudp
+3ds.citra_touch_device=engine:emu_window
+3ds.citra_udp_input_address=localhost
+3ds.citra_udp_input_port=26766
 ----
 
 Notes:
 
-* The settings may be set by either editing the configuration file using a text editor or using the UI: File Manager -> Applications -> citra-emu-config -> Menu _Emulation_ -> Entry _Configure_ -> List Entry _Controls_ -> Tab _Input_ -> Button _Motion / Touch Control..._
+* The settings may be set by editing the configuration file using a text editor.
+* Without patching the Citra configuration generator, these settings have no effect.
+* Implementation details:
+** Without patch, the generator uses the SDL controller API without (working) motion support.
+** The patch reads the settings from `batocera.conf` and adds them to the controller configuration files in `/userdata/system/configs/citra-emu/qt-config.ini`.
 
 ### Cemu
 ./userdata/system/batocera.conf
