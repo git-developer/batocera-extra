@@ -5,7 +5,7 @@ Motion and touch control for Sony DualShock 4 and DualSense 5 controllers
 This directory contains files to install and manage {url-dsdrv-cemuhook}[dsdrv-cemuhook] which enables motion and touch control for Sony DualShock 4 and DualSense 5 controllers. Controllers may be connected via USB or Bluetooth.
 
 == Installation
-. Enable this feature as batocera service (Main Menu / System Settings / Services). This will perform the following steps:
+. Enable batocera service _MOTION_SONY_ (Main Menu / System Settings / Services). This will perform the following steps:
 
 .. Prepare `pip`.
 .. Download the latest version of `dsdrv-cemuhook` to a cache directory, if required, and install it.
@@ -15,8 +15,6 @@ This directory contains files to install and manage {url-dsdrv-cemuhook}[dsdrv-c
 Configure your emulators to listen to `localhost` port `26762`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
 
 NOTE: The default port for the cemuhook protocol is `26760`. The custom port `26762` was chosen to avoid conflicts with other cemuhook servers. It is configurable in the `.env` file.
-
-NOTE: Please pay attention to the patches for Cemu and Citra in this project, they are required when you'd like to run the emulators from ES.
 
 == Troubleshooting
 * The log file is located at `/userdata/system/logs/dsdrv-cemuhook.log` (location is configurable in the `.env` file).

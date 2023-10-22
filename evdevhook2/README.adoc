@@ -5,7 +5,7 @@ Motion and touch control for devices with modern Linux drivers
 This directory contains files to install and manage {url-evdevhook2}[evdevhook2] which enables motion and touch control for devices with modern Linux drivers. Controllers may be connected via USB or Bluetooth.
 
 == Installation
-. Enable this feature as batocera service (Main Menu / System Settings / Services). This will perform the following steps:
+. Enable batocera service _MOTION_EVDEV_ (Main Menu / System Settings / Services). This will perform the following steps:
 
 .. Download the latest version of `evdevhook2` to a cache directory, if required.
 .. Start it as background daemon.
@@ -14,8 +14,6 @@ This directory contains files to install and manage {url-evdevhook2}[evdevhook2]
 Configure your emulators to listen to `localhost` port `26766`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
 
 NOTE: The default port for the cemuhook protocol is `26760`. The custom port `26766` was chosen to avoid conflicts with other cemuhook servers. It is configurable in the `.env` file.
-
-NOTE: Please pay attention to the patches for Cemu and Citra in this project, they are required when you'd like to run the emulators from ES.
 
 == Troubleshooting
 * The log file is located at `/userdata/system/logs/evdevhook2.log` (location is configurable in the `.env` file).

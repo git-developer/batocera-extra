@@ -93,7 +93,7 @@ KEY_F12 1 /userdata/extra/bin/system-summary | sed 's/°/ /' | HOME=/userdata/sy
 ----
 
 ## Emulator configuration for motion and touch control
-This section explains the emulator configuration that is required to play games with motion and touch control. This configuration has to be performed once only, it will be persisted across boots.
+This section explains the emulator configuration that is required to play games with motion and touch control. This configuration has to be performed once only, it will be persisted across boots and batocera updates.
 
 The configuration generators for Cemu and Citra in current batocera don't offer support for motion and touch control. Thus, the included patches are required.
 

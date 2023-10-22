@@ -5,7 +5,7 @@ Motion control for Nintendo Wiimote controllers
 This directory contains files to install and manage {url-linuxmotehook2}[linuxmotehook2] which enables motion control for Nintendo Wiimotes.
 
 == Installation
-. Enable this feature as batocera service (Main Menu / System Settings / Services). This will perform the following steps:
+. Enable batocera service _MOTION_WIIMOTE_ (Main Menu / System Settings / Services). This will perform the following steps:
 
 .. Download the latest version of `linuxmotehook2` to a cache directory, if required.
 .. Start it as background daemon.

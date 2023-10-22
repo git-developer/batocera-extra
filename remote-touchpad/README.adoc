@@ -5,7 +5,7 @@ Control mouse and keyboard from a remote browser
 This directory contains files to install and manage {url-remote-touchpad}[remote-touchpad] which allows to use a remote device with a touchpad, e.g. a smartphone, to control mouse and keyboard.
 
 == Installation
-. Enable this feature as batocera service (Main Menu / System Settings / Services). This will perform the following steps:
+. Enable batocera service _REMOTE_TOUCHPAD_ (Main Menu / System Settings / Services). This will perform the following steps:
 .. Install the flatpak app on the host.
 . Bind the command `open-url-window` to a controller key combination in `multimedia_keys.conf` on the host:
 +
