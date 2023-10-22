@@ -23,7 +23,7 @@ find_package_url() {
         | sed -nE 's/.*href="([^"]+\.pkg\.tar\.zst)".*/\1/p' \
         | grep . >"${packages}"
       fi
-      filename="$(grep -P "^${name}-(.+)-${arch}\.pkg\.tar\.zst$" "${packages}" | sort -V | tail -1)"
+      filename="$(grep -P "^${name}-(\d.+)-${arch}\.pkg\.tar\.zst$" "${packages}" | sort -V | tail -1)"
     else
       first_letter="${name%"${name#?}"}"
       path="packages/${first_letter}/${name}"
