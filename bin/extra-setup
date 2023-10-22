@@ -33,7 +33,7 @@ main() {
   case "${1-}" in
     start)
       apply_patches
-      "${base_dir}/extra-services" install
+      "${base_dir}/extra-services" register
       enabled_services start
       ;;
     stop)

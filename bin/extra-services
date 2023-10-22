@@ -14,7 +14,9 @@ Usage: $(basename "${0}") <ACTION> [OPTION]...
 where <ACTION> is one of
 
   install     Install all non-hidden services
-  uninstall   Uninstall all non-hidden services
+  register    Install and register all non-hidden services
+  unregister  Stop and unregister all non-hidden services
+  uninstall   Stop, unregister and permanently uninstall all non-hidden services
   status      Show started services (-h for help)
 
 Services whose directory name starts with a dot ('.') are hidden.
@@ -38,16 +40,27 @@ services_install() {
     if [ -x "${path}/install" ]; then
       "${path}/install"
     fi
-    service="$(basename "${path}" | tr - _)"
-    ln -sf "${bin_dir}/.service" "${target}/${service}"
+  done
+}
+
+services_register() {
+  services_install
+  services_find | while read -r path; do
+    "${path}/service" register
+  done
+}
+
+services_unregister() {
+  services_find | while read -r path; do
+    service="$("${path}/service" name)"
+    batocera-services stop "${service}"
+    "${path}/service" unregister
   done
 }
 
 services_uninstall() {
+  services_unregister
   services_find | while read -r path; do
-    service="$(basename "${path}" | tr - _)"
-    batocera-services stop "${service}"
-    rm -f "${target}/${service}"
     if [ -x "${path}/uninstall" ]; then
       "${path}/uninstall"
     fi
@@ -64,9 +77,11 @@ main() {
   action="${1}"
   shift
   case "${action}" in
-    install)   services_install   ;;
-    uninstall) services_uninstall ;;
-    status)    services_status "${@}" ;;
+    install)    services_install       ;;
+    uninstall)  services_uninstall     ;;
+    register)   services_register      ;;
+    unregister) services_unregister    ;;
+    status)     services_status "${@}" ;;
     *)
   esac
 }

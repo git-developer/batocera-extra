@@ -1,0 +1,31 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+register() {
+  command="$(readlink -f "${base_dir}/../bin/.service-adapter")"
+  target="/userdata/system/services/$(name)"
+  echo >"${target}" exec "'${command}'" "'${base_dir}'" '"${@}"'
+  chmod +x "${target}"
+}
+
+unregister() {
+  rm -f "/userdata/system/services/$(name)"
+}
+
+name() {
+ echo "${display_name:-$(printf %s "${app_name}" | tr -c '[:alnum:]' _)}"
+}
+
+main() {
+  case "${1-}" in
+    reg*)   register ;;
+    unreg*) unregister ;;
+    name)   name ;;
+    -h|--help) echo 'Supported arguments: [register, unregister, name].' ;;
+    *)
+      echo >&2 "Ignoring unsupported argument '${1-}'."
+  esac
+}
+
+main "${@}"
