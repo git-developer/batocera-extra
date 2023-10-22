@@ -12,9 +12,11 @@ This directory contains files to install and manage {url-sc-controller}[sc-contr
 .. Start `sc-controller` as background daemon.
 
 == Usage
-Configure your emulators to listen to `localhost` port `26760`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
+Configure your emulators to listen to `localhost` port `26768`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
 
-NOTE: Please pay attention to the patch for Cemu in this project, it is required when you'd like to run the emulator from ES.
+NOTE: The default port for the cemuhook protocol is `26760`. The custom port `26768` was chosen to avoid conflicts with other cemuhook servers. It is configurable in the `.env` file.
+
+NOTE: Please pay attention to the patches for Cemu and Citra in this project, they are required when you'd like to run the emulators from ES.
 
 == Button Mapping
 batocera-extra comes with two mapping profiles _Mouse First_ and _Stick First_.
