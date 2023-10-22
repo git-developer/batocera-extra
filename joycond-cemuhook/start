@@ -8,6 +8,6 @@ else
   if ! lsmod | grep -q hid_nx; then
     modprobe hid_nx
   fi
-  /userdata/extra/bin/upowerd-start
+  "${base_dir}/../bin/upowerd-start"
   PYTHONUNBUFFERED=true joycond-cemuhook ${ip:+--ip "${ip}"} ${port:+--port "${port}"} >"${log_file}" 2>&1 &
 fi

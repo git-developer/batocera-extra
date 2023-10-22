@@ -18,6 +18,9 @@ prepare_profiles() {
   if [ ! -L "${profile_path}" ] && [ -d "${profile_path}" ]; then
     mv "${profile_path}" "$(mktemp -d -p "${profile_path}/.." profiles-backup.XXXXXX)"
   fi
+  if [ -z "${XDG_CONFIG_HOME-}" ]; then
+    mkdir -p /userdata/system/.config/scc
+  fi
   ln -sf "${base_dir}/profiles" "${XDG_CONFIG_HOME:-/userdata/system/.config}/scc/"
 }
 
@@ -31,9 +34,6 @@ add_desktop_integration() {
   mv "squashfs-root/${icon_file}" "${icon_path}"
   cd - >/dev/null
   rm -r "${work_dir}"
-
-  # only required for batocera <38
-  sed -i 's/inline_limit="20"/inline_limit="25"/g' /etc/xdg/menus/batocera-applications.menu
 
   # enable title bar with settings menu
   sed -i 's:</applications>:\t<application groupname="sc-controller">\n\t\t<fullscreen>no</fullscreen>\n\t</application>\n</applications>:g' /etc/openbox/rc.xml

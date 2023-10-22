@@ -14,7 +14,7 @@ main() {
 
   unzip -j -o "${package}" "SteamDeckGyroDSUSetup/${app_name}" -d /usr/bin/
 
-  install-from-arch ncurses=6.4_20230520-1
+  "${base_dir}/../bin/install-from-arch" ncurses=?
 }
 
 main "${@}"

@@ -2,4 +2,4 @@
 set -eu
 . "$(readlink -f "$(dirname "$0")")/.env"
 
-pgrep -f "${app_name}" | grep -v -P "^($$|${PPID})"
+pgrep -a -f "${app_name}" | grep -v '\(/usr/bin/batocera-services\|/userdata/\(system/services\|extra\)/\)' | cut -d ' ' -f 1 | grep .

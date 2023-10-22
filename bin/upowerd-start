@@ -1,11 +1,13 @@
 #!/bin/sh
 set -eu
 
+extra_root="$(readlink -f "$(dirname -- "$0")/..")"
+
 # install and prepare upower with dependencies
-install-from-arch upower=1.90.2-1 libimobiledevice=1.3.0-9 libplist=2.3.0-2 openssl=3.1.2-1 libusbmuxd=2.0.2-3
+"${extra_root}/bin/install-from-arch" upower=?=extra libimobiledevice=?=extra libplist=?=extra openssl=? libusbmuxd=?=extra
 
 # without this dbus patch, upowerd fails with error messages
-/userdata/extra/patches/mark-dbus-python-as-installed
+"${extra_root}/patches/mark-dbus-python-as-installed"
 
 if ! pgrep -f /usr/lib/upowerd >/dev/null; then
   /usr/lib/upowerd 2>&1 | logger &
