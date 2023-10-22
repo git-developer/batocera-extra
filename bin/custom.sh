@@ -10,6 +10,7 @@ apply_patches() {
   "${patches_dir}/relocate-root-dotfiles-to-home"
   "${patches_dir}/patch-joycond-for-flatpak"
   "${patches_dir}/patch-cemu-generator-for-cemuhook"
+  "${patches_dir}/patch-citra-generator-for-cemuhook"
 }
 
 enabled_services() {
