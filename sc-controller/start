@@ -5,5 +5,5 @@ set -eu
 if pid=$("${base_dir}/is-up"); then
   log "${app_name} is already running with pid ${pid}."
 else
-  PATH="${PATH}:${base_dir}/quirk" SCC_SERVER_PORT="${port}" sc-controller daemon --alone "${profile}" debug >"${log_file}" 2>&1 &
+  PATH="${PATH}:${base_dir}/quirk" sc-controller daemon --alone "${profile}" debug >"${log_file}" 2>&1 &
 fi
