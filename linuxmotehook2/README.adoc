@@ -5,7 +5,7 @@ Motion control for Nintendo Wiimote controllers
 This directory contains files to install and manage {url-linuxmotehook2}[linuxmotehook2] which enables motion control for Nintendo Wiimotes.
 
 == Installation
-. Add `install-and-start` to your `/userdata/system/custom.sh`. This will perform the following steps when the host boots:
+. Enable this feature as batocera service (Main Menu / System Settings / Services). This will perform the following steps:
 
 .. Download the latest version of `linuxmotehook2` to a cache directory, if required.
 .. Start it as background daemon.
@@ -31,7 +31,7 @@ In this example, a server is configured on port 26763 for 2 Wiimotes with the MA
 [NOTE]
 ====
 - The server will only manage a Wiimote if its MAC address is listed in the configuration file.
-- Please pay attention to the patch for Cemu in this project, it is required when you'd like to run the emulator from ES.
+- Please pay attention to the patches for Cemu and Citra in this project, they are required when you'd like to run the emulators from ES.
 ====
 
 === Profiles

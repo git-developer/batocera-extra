@@ -5,11 +5,10 @@ Motion control for the Steam Controllers
 This directory contains files to install and manage {url-sc-controller}[sc-controller] which enables motion and touch control for the Steam Controller.
 
 == Installation
-. Add `install-and-start` to your `/userdata/system/custom.sh`. This will perform the following steps when the host boots:
+. Enable this feature as batocera service (Main Menu / System Settings / Services). This will perform the following steps:
 
-.. Download `sc-controller`, if required.
-.. Download and install required dependencies.
-.. Start `sc-controller` as background daemon.
+.. Download the latest version of `sc-controller` and its dependencies to a cache directory, if required.
+.. Start is as background daemon.
 
 == Usage
 Configure your emulators to listen to `localhost` port `26760`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
@@ -43,7 +42,7 @@ available in the File Manager (Batocera Main Menu / F1 / Applications / sc-contr
 
 ==== Default Profiles
 To add the default profiles of sc-controller to the `profiles` directory,
-add the argument `--with-default-profiles` on installation (existing profiles will not be overwritten). Example:
+run the install script with the argument `--with-default-profiles` (existing profiles will not be overwritten). Example:
 ```
 ./install --with-default-profiles
 ```

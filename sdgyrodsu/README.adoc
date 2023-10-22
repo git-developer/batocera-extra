@@ -5,10 +5,9 @@ Motion control for Steam Deck
 This directory contains files to install and manage {url-sdgyrodsu}[SteamDeckGyroDSU] which enables motion control for the Steam Deck controller.
 
 == Installation
-. Add `install-and-start` to your `/userdata/system/custom.sh`. This will perform the following steps when the host boots:
+. Enable this feature as batocera service (Main Menu / System Settings / Services). This will perform the following steps:
 
-.. Download the latest version of `SteamDeckGyroDSU`, if required.
-.. Install it.
+.. Download the latest version of `SteamDeckGyroDSU` to a cache directory, if required, and install it.
 .. Start it as background daemon.
 
 == Usage
