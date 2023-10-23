@@ -1,8 +1,10 @@
 #!/bin/sh
 set -u
-
 base_dir="$(readlink -f "$(dirname "$0")")"
-echo "$(date -Iseconds)" "${0}" "${@}" >&2
+
+log() {
+  echo >&2 "${@}"
+}
 
 apply_patches() {
   patches_dir="$(readlink -f "$(dirname "${base_dir}")/patches")"
@@ -23,26 +25,25 @@ enabled_services() {
 }
 
 main() {
+  log "$(date -Iseconds)" "${0}" "${@}"
 
   # HOME is '/' when this script is run from the init process;
   # some of the scripts expect the batocera default '/userdata/system' instead
   if [ "${HOME}" = '/' ]; then
-    export HOME='/userdata/system'
+    export HOME=/userdata/system
   fi
 
   case "${1-}" in
     start)
       apply_patches
-      "${base_dir}/extra-services" register
+      "${base_dir}/extra-services" install-and-register
       enabled_services start
       ;;
     stop)
       enabled_services stop
       ;;
-    restart) ;;
-    reload)  ;;
-    *)
-      echo >&2 "Ignoring unsupported argument '${1-}'."
+    restart|reload|*)
+      log 'Supported arguments: [start, stop]'
   esac
 }
 

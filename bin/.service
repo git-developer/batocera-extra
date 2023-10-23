@@ -1,0 +1,43 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+name="${display_name:-$(printf %s "${app_name}" | tr -c '[:alnum:]' _)}"
+
+register() {
+ printf 'exec "%s/${1}"\n' "${base_dir}" | install /dev/stdin "/userdata/system/services/${name}"
+}
+
+unregister() {
+  rm -f "/userdata/system/services/${name}"
+}
+
+start() {
+  "${base_dir}/start"
+}
+
+stop() {
+  "${base_dir}/stop"
+}
+
+is_up() {
+  "${base_dir}/is-up"
+}
+
+print_name() {
+ echo "${name}"
+}
+
+main() {
+  case "${1-}" in
+    register)   register   ;;
+    unregister) unregister ;;
+    start)      start      ;;
+    stop)       stop       ;;
+    name)       print_name ;;
+    is-up)      is_up      ;;
+    *)
+      echo >&2 'Supported arguments: [name, is-up, register, unregister, start, stop]' ;;
+  esac
+}
+
+main "${@}"

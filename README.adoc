@@ -29,7 +29,7 @@ $ mkdir -p /userdata/extra && wget -O - https://github.com/git-developer/batocer
 +
 [source]
 ----
-/userdata/extra/bin/extra-setup "${@}"
+/userdata/extra/bin/extra-setup "${@}" 2>&1 | tee /userdata/system/logs/extra-setup.log
 ----
 . Follow the installation instructions of the features you're interested in. Each feature has its own subdirectory containing a README file.
 

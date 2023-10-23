@@ -13,11 +13,12 @@ Usage: $(basename "${0}") <ACTION> [OPTION]...
 
 where <ACTION> is one of
 
-  install     Install all non-hidden services
-  register    Install and register all non-hidden services
-  unregister  Stop and unregister all non-hidden services
-  uninstall   Stop, unregister and permanently uninstall all non-hidden services
-  status      Show started services (-h for help)
+  install               Install all non-hidden services
+  register              Register all non-hidden services as batocera services
+  install-and-register  Install all non-hidden services and register as batocera services
+  unregister            Stop and unregister all non-hidden services
+  uninstall             Permanently uninstall all non-hidden services
+  list                  List running services (-h for help)
 
 Services whose directory name starts with a dot ('.') are hidden.
 EOF
@@ -27,15 +28,11 @@ services_find() {
   find "${root_dir}" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -exec test -x '{}/start' \; -print
 }
 
-services_status() {
+services_list() {
   "${bin_dir}/.status" "${@}"
 }
 
 services_install() {
-  if [ ! -d "${target}" ]; then
-    mkdir -p "${target}"
-  fi
-
   services_find | while read -r path; do
     if [ -x "${path}/install" ]; then
       "${path}/install"
@@ -44,29 +41,35 @@ services_install() {
 }
 
 services_register() {
-  services_install
+  if [ ! -d "${target}" ]; then
+    mkdir -p "${target}"
+  fi
+
   services_find | while read -r path; do
-    "${path}/service" register
+    if [ -x "${path}/service" ]; then
+      "${path}/service" register
+    fi
   done
 }
 
 services_unregister() {
   services_find | while read -r path; do
-    service="$("${path}/service" name)"
-    batocera-services stop "${service}"
-    "${path}/service" unregister
+    if [ -x "${path}/service" ]; then
+      service="$("${path}/service" name)"
+      batocera-services stop "${service}"
+      "${path}/service" unregister
+    fi
   done
+
+  rmdir --ignore-fail-on-non-empty "${target}"
 }
 
 services_uninstall() {
-  services_unregister
   services_find | while read -r path; do
     if [ -x "${path}/uninstall" ]; then
       "${path}/uninstall"
     fi
   done
-
-  rmdir --ignore-fail-on-non-empty "${target}"
 }
 
 main() {
@@ -77,12 +80,14 @@ main() {
   action="${1}"
   shift
   case "${action}" in
-    install)    services_install       ;;
-    uninstall)  services_uninstall     ;;
-    register)   services_register      ;;
-    unregister) services_unregister    ;;
-    status)     services_status "${@}" ;;
+    list)       services_list "${@}" ;;
+    install-and-register) services_install && services_register ;;
+    install)    services_install     ;;
+    uninstall)  services_uninstall   ;;
+    register)   services_register    ;;
+    unregister) services_unregister  ;;
     *)
+      log 'Supported arguments: [list, install-and-register, install, uninstall, register, unregister]'
   esac
 }
 
