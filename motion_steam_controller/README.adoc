@@ -1,0 +1,53 @@
+= sc-controller
+:url-sc-controller: https://github.com/kozec/sc-controller
+Motion control for the Steam Controllers
+
+This directory contains files to install and manage {url-sc-controller}[sc-controller] which enables motion and touch control for the Steam Controller.
+
+== Installation
+. Enable batocera service _MOTION_STEAM_CONTROLLER_ (Main Menu / System Settings / Services). This will perform the following steps:
+
+.. Download the latest version of `sc-controller` and its dependencies to a cache directory, if required.
+.. Start is as background daemon.
+
+== Usage
+Configure your emulators to listen to `localhost` port `26760`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
+
+== Button Mapping
+batocera-extra comes with two mapping profiles _Mouse First_ and _Stick First_.
+
+The active button mapping is stored in `profiles/active.sccprofile`. It is set to _Mouse First_ per default.
+
+Mappings can be customized via the sc-controller GUI,
+available in the File Manager (Batocera Main Menu / F1 / Applications / sc-controller-config).
+
+=== Mapping Profiles
+==== Mouse First
+* Analog Stick, Buttons, D-Pad Buttons: XBox 360 Controller
+* Left Touchpad: _unused_
+* Right Touchpad:
+** Mouse incl. Left Click
+** With Left Grip pressed: Right Analog Stick incl. Button (without haptic feedback)
+* Right Grip: Switch to profile _Stick First_
+
+==== Stick First
+* Analog Stick, Buttons, D-Pad Buttons: XBox 360 Controller
+* Left Touchpad: _unused_
+* Right Touchpad:
+** Right Analog Stick incl. Button (without haptic feedback)
+** With Left Grip pressed: Mouse incl. Left Click
+* Right Grip: Switch to profile _Mouse First_
+
+==== Default Profiles
+To add the default profiles of sc-controller to the `profiles` directory,
+run the install script with the argument `--with-default-profiles` (existing profiles will not be overwritten). Example:
+```
+./install --with-default-profiles
+```
+
+==== Examples
+Additional profiles can be found in {url-sc-controller}/tree/master/profile_examples[profile_examples].
+
+
+== Troubleshooting
+* The log file is located at `/userdata/system/logs/motion_steam_controller.log` (location is configurable in the `.env` file).

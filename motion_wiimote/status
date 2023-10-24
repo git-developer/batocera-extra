@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+. "${base_dir}/profile-support.sh"
+
+if [ "${#}" -eq 0 ]; then
+  pgrep -a "${app_name}" | sed -nE 's:^([0-9]+).*/([^/]+)\.ini$:\1 \2:p'
+else
+  for profile in "${@}"; do
+    path=$(path_of "${profile}") || return 1
+    pgrep -f "/tmp/.*/usr/bin/${app_name} ${path}" || true
+  done
+fi

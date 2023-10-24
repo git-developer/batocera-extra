@@ -1,7 +1,0 @@
-#!/bin/sh
-set -eu
-. "$(readlink -f "$(dirname "$0")")/.env"
-
-if ${base_dir}/is-up >/dev/null; then
-  "${app_name}" daemon stop
-fi

@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+if "${base_dir}/service" status | grep -q .; then
+  "${app_name}" daemon stop
+fi

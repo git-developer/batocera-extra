@@ -1,42 +1,115 @@
 #!/bin/sh
 set -eu
 . "$(readlink -f "$(dirname "$0")")/.env"
-name="${display_name:-$(printf %s "${app_name}" | tr -c '[:alnum:]' _)}"
+service_name="$(basename "${base_dir}")"
+service_path="/userdata/system/services/${service_name}"
 
-register() {
- printf 'exec "%s/${1}"\n' "${base_dir}" | install /dev/stdin "/userdata/system/services/${name}"
+service_usage() {
+  cat >&2 <<EOF
+Lifecycle management for a batocera-extra service
+
+Usage: $(basename "${0}") <ACTION> [OPTION]...
+
+where <ACTION> is one of
+
+  install       Install this service and all dependencies to the system
+  uninstall     Permanently remove this service from the system
+  hide          Mark this service as hidden
+  unhide        Unmark this service from being hidden
+  register      Add this service to batocera-services
+  unregister    Remove this service from batocera-services
+  start         Start this service
+  stop          Stop this service
+  restart       Restart this service
+  status        Show running processes of this service
+
+When a service is hidden, its actions will not be run automatically;
+they can still be run manually at any time.
+EOF
 }
 
-unregister() {
-  rm -f "/userdata/system/services/${name}"
+service_install() {
+  if [ -x "${base_dir}/install" ]; then
+    "${base_dir}/install"
+  fi
 }
 
-start() {
+service_uninstall() {
+  if [ -x "${base_dir}/uninstall" ]; then
+    "${base_dir}/uninstall"
+  else
+    rm -f "/usr/bin/${app_name}"
+  fi
+}
+
+service_register() {
+ printf 'exec "%s/${1}"\n' "${base_dir}" | install /dev/stdin "${service_path}"
+}
+
+service_unregister() {
+  rm -f "${service_path}"
+}
+
+service_start() {
   "${base_dir}/start"
 }
 
-stop() {
-  "${base_dir}/stop"
+service_stop() {
+  if [ -x "${base_dir}/stop" ]; then
+    "${base_dir}/stop"
+  else
+    is-up "${@}" | cut -d ' ' -f 1 | sort -r | xargs -r kill
+  fi
 }
 
-is_up() {
-  "${base_dir}/is-up"
+service_restart() {
+  if [ -x "${base_dir}/restart" ]; then
+    "${base_dir}/restart"
+  else
+    stop "${@}"
+    sleep 1
+    start "${@}"
+  fi
 }
 
-print_name() {
- echo "${name}"
+service_status() {
+  if [ -x "${base_dir}/status" ]; then
+    "${base_dir}/status"
+  else
+    pgrep -a -f "${app_name}" | cut -d ' ' -f 1
+  fi | {
+    while read -r pid comment; do
+      open_port="$(lsof -p "${pid}" -a -iUDP -Fn | sed -nE 's/^n.*:([0-9]+)$/\1/p')"
+      printf '%-16s\t%-16s\t%s\t%s\t%s\n' "${service_name}" "${app_name}" "${pid}" "${open_port}" "${comment-}"
+    done
+  }
 }
+
+service_hide() {
+  touch "${base_dir}/.hidden"
+}
+
+service_unhide() {
+  rm -f "${base_dir}/.hidden"
+}
+
 
 main() {
-  case "${1-}" in
-    register)   register   ;;
-    unregister) unregister ;;
-    start)      start      ;;
-    stop)       stop       ;;
-    name)       print_name ;;
-    is-up)      is_up      ;;
-    *)
-      echo >&2 'Supported arguments: [name, is-up, register, unregister, start, stop]' ;;
+  action="${1-}"
+  if [ "$#" -gt 0 ]; then shift; fi
+  case "${action}" in
+    status)     service_status "${@}"     ;;
+    start)      service_start "${@}"      ;;
+    stop)       service_stop "${@}"       ;;
+    restart)    service_restart "${@}"    ;;
+    register)   service_register "${@}"   ;;
+    unregister) service_unregister "${@}" ;;
+    install)    service_install "${@}"    ;;
+    uninstall)  service_uninstall "${@}"  ;;
+    hide)       service_hide "${@}"       ;;
+    unhide)     service_unhide "${@}"     ;;
+    *)          service_usage             ;;
+#      echo >&2 'Supported arguments: [status, start, stop, restart, register, unregister, install, uninstall, hide, unhide]' ;;
   esac
 }
 

@@ -1,0 +1,23 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+. "${base_dir}/profile-support.sh"
+
+start_profiles() {
+  for profile in "${@}"; do
+    if "${base_dir}/service" status "${profile}" | grep .; then
+      log "${app_name}/${profile} is already running."
+    else
+      "${app_name}" "$(path_of "${profile}")" >"${log_dir}/${service_name}-${profile}.log" 2>&1 &
+    fi
+  done
+}
+
+main() {
+  if [ "${#}" -eq 0 ]; then
+    set -- $(list_profiles)
+  fi
+  start_profiles "${@}"
+}
+
+main "${@}"

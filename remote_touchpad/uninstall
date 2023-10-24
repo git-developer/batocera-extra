@@ -1,0 +1,4 @@
+#!/bin/sh
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+flatpak uninstall --noninteractive "${app_id}"

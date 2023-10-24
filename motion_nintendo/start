@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+if "${base_dir}/service" status | grep .; then
+  log "${app_name} is already running."
+else
+  if ! lsmod | grep -q hid_nx; then
+    modprobe hid_nx
+  fi
+  "${base_dir}/../bin/upowerd-start"
+  PYTHONUNBUFFERED=true joycond-cemuhook ${ip:+--ip "${ip}"} ${port:+--port "${port}"} >"${log_file}" 2>&1 &
+fi

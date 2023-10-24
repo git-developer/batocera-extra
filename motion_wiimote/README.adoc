@@ -1,0 +1,61 @@
+= linuxmotehook2
+:url-linuxmotehook2: https://github.com/v1993/linuxmotehook2
+Motion control for Nintendo Wiimote controllers
+
+This directory contains files to install and manage {url-linuxmotehook2}[linuxmotehook2] which enables motion control for Nintendo Wiimotes.
+
+== Installation
+. Enable batocera service _MOTION_WIIMOTE_ (Main Menu / System Settings / Services). This will perform the following steps:
+
+.. Download the latest version of `linuxmotehook2` to a cache directory, if required.
+.. Start it as background daemon.
+
+== Usage
+. Create a configuration file with the suffix `.ini` in the `profiles` directory. Example:
++
+.profiles/example.ini
+[source,ini]
+----
+[Linuxmotehook]
+Port=26763
+SendButtons=true
+
+[0x0123456789AB]
+[0xFEDCBA987654]
+----
++
+In this example, a server is configured on port 26763 for 2 Wiimotes with the MAC addresses `01:23:45:67:89:AB` and `FE:DC:BA:98:76:54`. The https://github.com/v1993/linuxmotehook2/wiki[linuxmotehook2 wiki] has detailed explanations on the configuration file options.
+
+. Configure your emulators to listen to `localhost` and the port configured in one of your configuration files.
+
+[NOTE]
+====
+- The server will only manage a Wiimote if its MAC address is listed in the configuration file.
+- Please pay attention to the patches for Cemu and Citra in this project, they are required when you'd like to run the emulators from ES.
+====
+
+=== Profiles
+linuxmotehook2 manages Wiimote extensions, e.g. Nunchucks and Classic Controllers, as separate devices. The cemuhook https://v1993.github.io/cemuhook-protocol/[protocol] has a limit of four devices per server. To cope with this limitation, use one profile per Wiimote, each running on a separate server with a dedicated port. The emulators must be configured accordingly. Example:
+
+.profiles/white.ini
+[source,ini]
+----
+[Linuxmotehook]
+Port=26763
+SendButtons=true
+[0x0123456789AB]
+----
+
+.profiles/gold.ini
+[source,ini]
+----
+[Linuxmotehook]
+Port=26764
+SendButtons=true
+[0xFEDCBA987654]
+----
+
+In this example, we have configured one server for a white Wiimote served on port 26763 and another one for a golden Wiimote served on port 26764.
+
+== Troubleshooting
+* The log files are located at `/userdata/system/logs/` using the filename pattern `motion_wiimote-${PROFILE_NAME}.log` (location is configurable in the `.env` file).

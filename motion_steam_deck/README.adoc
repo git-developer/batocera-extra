@@ -1,0 +1,19 @@
+= sdgyrodsu
+:url-sdgyrodsu: https://github.com/kmicki/SteamDeckGyroDSU
+Motion control for Steam Deck
+
+This directory contains files to install and manage {url-sdgyrodsu}[SteamDeckGyroDSU] which enables motion control for the Steam Deck controller.
+
+== Installation
+. Enable batocera service _MOTION_STEAM_DECK_ (Main Menu / System Settings / Services). This will perform the following steps:
+
+.. Download the latest version of `SteamDeckGyroDSU` to a cache directory, if required, and install it.
+.. Start it as background daemon.
+
+== Usage
+Configure your emulators to listen to `localhost` port `26767`. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
+
+NOTE: The default port for the cemuhook protocol is `26760`. The custom port `26767` was chosen to avoid conflicts with other cemuhook servers. It is configurable in the `.env` file.
+
+== Troubleshooting
+* The log file is located at `/userdata/system/logs/motion_steam_deck.log` (location is configurable in the `.env` file).

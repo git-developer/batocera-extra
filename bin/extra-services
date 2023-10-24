@@ -3,7 +3,7 @@ set -eu
 
 bin_dir="$(readlink -f "$(dirname "$0")")"
 root_dir="$(readlink -f "$(dirname "${bin_dir}")")"
-target=/userdata/system/services
+services_dir=/userdata/system/services
 
 print_usage() {
   cat >&2 <<EOF
@@ -13,63 +13,79 @@ Usage: $(basename "${0}") <ACTION> [OPTION]...
 
 where <ACTION> is one of
 
-  install               Install all non-hidden services
-  register              Register all non-hidden services as batocera services
-  install-and-register  Install all non-hidden services and register as batocera services
-  unregister            Stop and unregister all non-hidden services
-  uninstall             Permanently uninstall all non-hidden services
-  list                  List running services (-h for help)
+  status [-n]           Show running services ('-n' to omit header)
+  list                  List all services, including hidden
+  install-and-register  Install all services and register as batocera services
+  install               Install all services
+  uninstall             Permanently uninstall all services
+  register              Register all services as batocera services
+  unregister            Stop and unregister all services
 
-Services whose directory name starts with a dot ('.') are hidden.
+Hidden services are ignored for all actions except 'list'.
 EOF
 }
 
+services_find_all() {
+  find "${root_dir}" -mindepth 1 -maxdepth 1 -type d -exec test -x '{}/service' \; -print | sort
+}
+
 services_find() {
-  find "${root_dir}" -mindepth 1 -maxdepth 1 -type d -not -name '.*' -exec test -x '{}/start' \; -print
+#  find "${root_dir}" -mindepth 1 -maxdepth 1 -type d -exec test -x '{}/start' \; -exec test ! -r '{}/.hidden' \; -print
+  services_find_all | while read -r service; do
+    if [ ! -r "${service}/.hidden" ]; then echo "${service}"; fi
+  done
+}
+
+for_each_service() {
+  services_find | while read -r path; do
+    if [ -x "${path}/service" ]; then
+      "${path}/service" "${@}"
+    fi
+  done
 }
 
 services_list() {
-  "${bin_dir}/.status" "${@}"
+  services_find_all | while read -r path; do
+    if [ -r "${path}/.hidden" ]; then
+      status=hidden
+    elif "${path}/service" status | grep -q .; then
+      status=started
+    else
+      status=stopped
+    fi
+    printf '%-16s\t%s\n' "$(basename "${path}")" "${status}"
+  done
+}
+
+services_status() {
+  header=true
+  case "${1-}" in
+    -n | --no-header) header=false ;;
+  esac
+
+  if [ "${header}" = 'true' ]; then
+    printf '%-16s\t%-16s\t%s\t%s\t%s\n' Service Process PID Port Comment
+  fi
+  for_each_service status
 }
 
 services_install() {
-  services_find | while read -r path; do
-    if [ -x "${path}/install" ]; then
-      "${path}/install"
-    fi
-  done
+  for_each_service install
 }
 
 services_register() {
-  if [ ! -d "${target}" ]; then
-    mkdir -p "${target}"
-  fi
-
-  services_find | while read -r path; do
-    if [ -x "${path}/service" ]; then
-      "${path}/service" register
-    fi
-  done
+  mkdir -p "${services_dir}"
+  for_each_service register
 }
 
 services_unregister() {
-  services_find | while read -r path; do
-    if [ -x "${path}/service" ]; then
-      service="$("${path}/service" name)"
-      batocera-services stop "${service}"
-      "${path}/service" unregister
-    fi
-  done
-
-  rmdir --ignore-fail-on-non-empty "${target}"
+  for_each_service stop
+  for_each_service unregister
+  rmdir --ignore-fail-on-non-empty "${services_dir}"
 }
 
 services_uninstall() {
-  services_find | while read -r path; do
-    if [ -x "${path}/uninstall" ]; then
-      "${path}/uninstall"
-    fi
-  done
+  for_each_service uninstall
 }
 
 main() {
@@ -80,14 +96,15 @@ main() {
   action="${1}"
   shift
   case "${action}" in
-    list)       services_list "${@}" ;;
+    status)     services_status "${@}" ;;
+    list)       services_list          ;;
     install-and-register) services_install && services_register ;;
-    install)    services_install     ;;
-    uninstall)  services_uninstall   ;;
-    register)   services_register    ;;
-    unregister) services_unregister  ;;
+    install)    services_install       ;;
+    uninstall)  services_uninstall     ;;
+    register)   services_register      ;;
+    unregister) services_unregister    ;;
     *)
-      log 'Supported arguments: [list, install-and-register, install, uninstall, register, unregister]'
+      log 'Supported arguments: [status, list, install-and-register, install, uninstall, register, unregister]'
   esac
 }
 

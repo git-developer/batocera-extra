@@ -1,7 +1,0 @@
-#!/bin/sh
-set -eu
-. "$(readlink -f "$(dirname "$0")")/.env"
-
-"${base_dir}/stop" "${@}"
-sleep 1
-"${base_dir}/start" "${@}"

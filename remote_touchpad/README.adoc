@@ -1,0 +1,33 @@
+= remote-touchpad
+:url-remote-touchpad: https://github.com/Unrud/remote-touchpad/
+Control mouse and keyboard from a remote browser
+
+This directory contains files to install and manage {url-remote-touchpad}[remote-touchpad] which allows to use a remote device with a touchpad, e.g. a smartphone, to control mouse and keyboard.
+
+== Installation
+. Enable batocera service _REMOTE_TOUCHPAD_ (Main Menu / System Settings / Services). This will perform the following steps:
+.. Install the flatpak app on the host.
+. Bind the command `open-url-window` to a controller key combination in `multimedia_keys.conf` on the host:
++
+./userdata/system/configs/multimedia_keys.conf
+[source,conf]
+----
+BTN_1+BTN_TR2 1 /userdata/extra/remote-touchpad/open-url-window
+----
+
+. Install a QR-code reader app to your smartphone.
+
+. Optional, if you'd like to use `https` instead of plain `http`:
+.. Generate a TLS certificate & key.
+.. Move the files to `tls/batocera.key` and `tls/batocera.cert` (name and location of files may be adjusted in the `.env` file).
+
+== Usage
+1. Open the QR-code reader app on your smartphone.
+2. Press the key combination on your controller.
+3. A QR-code is shown on the host screen for a few seconds. Scan it with the QR-code app and visit the link.
+4. Use the browser on your smartphone to control the mouse.
+
+When the code disappears before scanning, simply try again. The timeout may be adjusted in the `.env` file.
+
+== Troubleshooting
+* The log file is located at `/userdata/system/logs/remote_touchpad.log` (location is configurable in the `.env` file).

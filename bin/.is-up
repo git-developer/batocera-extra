@@ -1,5 +1,0 @@
-#!/bin/sh
-set -eu
-. "$(readlink -f "$(dirname "$0")")/.env"
-
-pgrep -a -f "${app_name}" | grep -v '\(/usr/bin/batocera-services\|/userdata/\(system/services\|extra\)/\)' | cut -d ' ' -f 1 | grep .

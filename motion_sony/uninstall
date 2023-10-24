@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+main() {
+  rm -f "/usr/bin/${app_name}"
+  if [ "${package_name}" ]; then
+    pip uninstall --yes --root-user-action=ignore "${package_name}"
+  fi
+}
+
+main "${@}"

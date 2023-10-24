@@ -31,33 +31,36 @@ $ mkdir -p /userdata/extra && wget -O - https://github.com/git-developer/batocer
 ----
 /userdata/extra/bin/extra-setup "${@}" 2>&1 | tee /userdata/system/logs/extra-setup.log
 ----
-. Follow the installation instructions of the features you're interested in. Each feature has its own subdirectory containing a README file.
+. Follow the installation instructions of the features you're interested in.
+.. Each feature has its own subdirectory containing a README file.
+.. By default, all features are installed to disk and registered as batocera-service, but not enabled.
+   To exclude a feature, run `/userdata/extra/<feature>/service hide`.
 
 ## Content
 ### Features
 #### Server for motion control using a controller with modern Linux drivers (e.g. Nintendo Switch, Sony DS4 & DS5)
 
-* See link:evdevhook2/README.adoc[evdevhook2].
+* See link:motion_evdev/README.adoc[motion_evdev].
 
 #### Server for motion control using a Nintendo Switch controller
 
-* See link:joycond-cemuhook/README.adoc[joycond-cemuhook].
+* See link:motion_nintendo/README.adoc[motion_nintendo].
 
 #### Server for motion and touch control using a Sony DS4 or DS5 controller (PS4 Dual Shock / PS5 Dual Sense)
 
-* See link:dsdrv-cemuhook/README.adoc[dsdrv-cemuhook].
+* See link:motion_sony/README.adoc[motion_sony].
 
 #### Server for motion control using a Nintendo Wiimote
 
-* See link:linuxmotehook2/README.adoc[linuxmotehook2].
+* See link:motion_wiimote/README.adoc[motion_wiimote].
 
 #### Server for motion control using a Steam Deck
 
-* See link:sdgyrodsu/README.adoc[sdgyrodsu].
+* See link:motion_steam_deck/README.adoc[motion_steam_deck].
 
 #### Server for motion and touch control using a Steam Controller
 
-* See link:sc-controller/README.adoc[sc-controller].
+* See link:motion_steam_controller/README.adoc[motion_steam_controller].
 
 #### Server for motion and touch control using a smartphone
 
@@ -105,12 +108,12 @@ Once the configuration is applied, the emulators will behave as follows:
 ** A mouse connected to the batocera host
 
 * Motion input is read from a cemuhook server.
-** For a controller connected to evdevhook2, use `localhost` and `26766`.
-** For a Nintendo controller connected to joycond-cemuhook, use `localhost` and `26761`.
-** For a DS4 or DS5 controller connected to dsdrv-cemuhook, use `localhost` and `26762`.
-** For a Wiimote connected to linuxmotehook2, use `localhost` and the port from your linuxmotehook2 configuration file.
-** For a Steam Deck connected to sdgyrodsu, use `localhost` and `26767`.
-** For a Steam Controller connected to sc-controller, use `localhost` and `26760`.
+** For a controller connected to motion_evdev, use `localhost` and `26766`.
+** For a Nintendo controller connected to motion_nintendo, use `localhost` and `26761`.
+** For a DS4 or DS5 controller connected to motion_sony, use `localhost` and `26762`.
+** For a Wiimote connected to motion_wiimote, use `localhost` and the port from your linuxmotehook2 configuration file.
+** For a Steam Deck connected to motion_steam_deck, use `localhost` and `26767`.
+** For a Steam Controller connected to motion_steam_controller, use `localhost` and `26760`.
 ** For a smartphone, use the hostname/ip of the smartphone and the port configured in the app of your choice (e.g. _MotionSource_ or _DSUController_).
 
 ### Citra
