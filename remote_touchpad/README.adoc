@@ -12,7 +12,7 @@ This directory contains files to install and manage {url-remote-touchpad}[remote
 ./userdata/system/configs/multimedia_keys.conf
 [source,conf]
 ----
-BTN_1+BTN_TR2 1 /userdata/extra/remote-touchpad/open-url-window
+BTN_1+BTN_TR2 1 /userdata/extra/remote_touchpad/open-url-window
 ----
 
 . Install a QR-code reader app to your smartphone.
