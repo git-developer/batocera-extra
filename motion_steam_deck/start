@@ -5,5 +5,5 @@ set -eu
 if "${base_dir}/service" status | grep .; then
   log "${app_name} is already running."
 else
-  SDGYRO_SERVER_PORT="${port}" "${app_name}" >"${log_file}" 2>&1 &
+  SDGYRO_SERVER_PORT="${port}" "${app_name}" >>"${log_file}" 2>&1 &
 fi

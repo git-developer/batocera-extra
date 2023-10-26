@@ -1,5 +1,5 @@
 #!/bin/sh
 . "$(readlink -f "$(dirname "$0")")/.env"
 
-. "${base_dir}/../bin/.stop"
+flatpak kill "${app_id}"
 rm -f "${log_file}"

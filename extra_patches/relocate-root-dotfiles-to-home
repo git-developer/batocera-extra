@@ -1,6 +1,10 @@
 #!/bin/sh
 set -eu
 
+if [ "${HOME}" = '/' ]; then
+  export HOME=/userdata/system/
+fi
+
 find / -maxdepth 1 -name '.*' | while read -r path; do
   if [ ! -e "${HOME}${path}" ] && [ ! -h "${HOME}${path}" ]; then
     ln -v -s "${path}" "${HOME}${path}"

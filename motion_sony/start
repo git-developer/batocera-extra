@@ -5,5 +5,5 @@ set -eu
 if "${base_dir}/service" status | grep .; then
   log "${app_name} is already running."
 else
-  PATH="${base_dir}/quirk:$PATH" "${app_name}" --udp ${host:+--udp-host "${host}"} ${port:+--udp-port "${port}"} >"${log_file}" 2>&1 &
+  PATH="${base_dir}/quirk:$PATH" "${app_name}" --udp ${host:+--udp-host "${host}"} ${port:+--udp-port "${port}"} >>"${log_file}" 2>&1 &
 fi

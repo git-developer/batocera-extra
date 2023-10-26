@@ -1,0 +1,32 @@
+#!/bin/sh
+set -eu
+CEMUHOOK_DEFAULT_PORT=26760
+
+sync_motion_configuration() {
+  service_path="${1}"
+  . "${service_path}/.env"
+  port="${port:-${CEMUHOOK_DEFAULT_PORT}}"
+
+  batocera-settings-set \
+    3ds.citra_touch_device engine:emu_window \
+    3ds.citra_motion_device engine:cemuhookudp \
+    3ds.citra_udp_input_address localhost \
+    3ds.citra_udp_input_port "${port}" \
+    wiiu.cemu_touchpad 1 \
+    wiiu.cemuhook_server_ip localhost \
+    wiiu.cemuhook_server_port "${port}"
+}
+
+main() {
+  action="${1}"
+  service_path="${2}"
+
+  if [ "${action}" = 'start' ]; then
+    service_name="$(basename "${service_path}")"
+    case "${service_name}" in
+      motion_*) sync_motion_configuration "${service_path}" ;;
+    esac
+  fi
+}
+
+main "${@}"

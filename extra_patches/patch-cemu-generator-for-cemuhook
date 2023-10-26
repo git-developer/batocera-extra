@@ -7,8 +7,7 @@ if ! command -V patch >/dev/null 2>&1; then
 fi
 
 generator="$(find /usr/lib/python*.*/site-packages/configgen/generators/cemu -name cemuControllers.py)"
-cp -a "${generator}" "${generator}.backup-cemuhook"
-patch "${generator}" << 'EOF'
+patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 --- "${generator}"
 +++ cemuControllers.py
 @@ -2,25 +2,33 @@

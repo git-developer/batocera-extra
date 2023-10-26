@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+main() {
+  # patch-cemu-generator-for-cemuhook
+  find /usr/lib/python*.*/site-packages/configgen/generators/cemu -name cemuControllers.py.backup-cemuhook | while read backup; do
+    mv "${backup}" "${backup%.backup-cemuhook}"
+  done
+
+  # patch-citra-generator-for-cemuhook
+  find /usr/lib/python*.*/site-packages/configgen/generators/citra -name citraGenerator.py.backup-cemuhook | while read backup; do
+    mv "${backup}" "${backup%.backup-cemuhook}"
+  done
+
+  # patch-joycond-for-flatpak
+  sed -i 's/MODE="0660", GROUP="input"/MODE="0600"/g' /etc/udev/rules.d/89-joycond.rules
+
+  # patch-sony-controllers-for-flatpak
+  rm /etc/udev/rules.d/99-sony-controllers.rules
+
+  # no uninstall for 'relocate-root-dotfiles-to-home'
+}
+
+main "${@}"

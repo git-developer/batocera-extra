@@ -7,8 +7,7 @@ if ! command -V patch >/dev/null 2>&1; then
 fi
 
 generator="$(find /usr/lib/python*.*/site-packages/configgen/generators/citra -name citraGenerator.py)"
-cp -a "${generator}" "${generator}.backup-cemuhook"
-patch "${generator}" << 'EOF'
+patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 --- "${generator}"
 +++ citraGenerator.py
 @@ -208,6 +208,18 @@

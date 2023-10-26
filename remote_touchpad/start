@@ -7,4 +7,4 @@
   else
     printf '%s\0' "${app_id}"
   fi
-} | xargs -0 sh -c "DISPLAY=:0 flatpak run \"\${@}\" >\"${log_file}\" 2>&1 &" -
+} | xargs -0 sh -c "DISPLAY=:0 flatpak run \"\${@}\" >>\"${log_file}\" 2>&1 &" -

@@ -7,7 +7,7 @@ extra_root="$(readlink -f "$(dirname -- "$0")/..")"
 "${extra_root}/bin/install-from-arch" upower=?=extra libimobiledevice=?=extra libplist=?=extra openssl=? libusbmuxd=?=extra
 
 # without this dbus patch, upowerd fails with error messages
-"${extra_root}/patches/mark-dbus-python-as-installed"
+"${extra_root}/extra_patches/mark-dbus-python-as-installed"
 
 if ! pgrep -f /usr/lib/upowerd >/dev/null; then
   /usr/lib/upowerd 2>&1 | logger &

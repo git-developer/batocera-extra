@@ -9,5 +9,5 @@ else
     modprobe hid_nx
   fi
   "${base_dir}/../bin/upowerd-start"
-  PYTHONUNBUFFERED=true joycond-cemuhook ${ip:+--ip "${ip}"} ${port:+--port "${port}"} >"${log_file}" 2>&1 &
+  PYTHONUNBUFFERED=true joycond-cemuhook ${ip:+--ip "${ip}"} ${port:+--port "${port}"} >>"${log_file}" 2>&1 &
 fi
