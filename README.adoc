@@ -139,6 +139,7 @@ wiiu.cemuhook_server_port=<service port>
 ----
 
 The port is read from the activated service:
+
 * For a controller connected to motion_evdev: `26766`
 * For a Nintendo controller connected to motion_nintendo: `26761`
 * For a DS4 or DS5 controller connected to motion_sony: `26762`
