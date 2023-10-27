@@ -126,9 +126,8 @@ service_unhide() {
 
 service_notify() {
   action="${1}"
-  setup="${2}"
   handler="${base_dir}/../bin/.handle-event"
-  if [ "${setup}" = 'done' ] && [ -x "${handler}" ]; then
+  if [ -x "${handler}" ]; then
     "${handler}" "${action}" "${base_dir}" &
   fi
 }
@@ -136,7 +135,6 @@ service_notify() {
 main() {
   action="${1-}"
   if [ "$#" -gt 0 ]; then shift; fi
-  if [ -e "${install_marker}" ]; then setup=done; fi
 
   case "${action}" in
     status)     service_status "${@}"     ;;
@@ -151,7 +149,7 @@ main() {
     unhide)     service_unhide "${@}"     ;;
     *)          service_usage             ;;
   esac
-  service_notify "${action}" "${setup-}" "${@}"
+  service_notify "${action}" "${@}"
 }
 
 main "${@}"
