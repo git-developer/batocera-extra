@@ -103,7 +103,7 @@ service_restart() {
 
 service_status() {
   if [ -x "${base_dir}/status" ]; then
-    "${base_dir}/status"
+    "${base_dir}/status" "${@}"
   else
     if [ "${app_name-}" ]; then
       pgrep -a -f "${app_name}" | cut -d ' ' -f 1
