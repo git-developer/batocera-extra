@@ -73,7 +73,7 @@ _service_start() {
 }
 
 service_start() {
-  if [ "${1-}" = '--unattended' ]; then
+  if [ "${unattended-}" = 'true' ]; then
     {
       service_install_unattended
       _service_start
@@ -128,13 +128,18 @@ service_notify() {
   action="${1}"
   handler="${base_dir}/../bin/.handle-event"
   if [ -x "${handler}" ]; then
-    "${handler}" "${action}" "${base_dir}" &
+    # do not send to background to avoid race conditions
+    "${handler}" "${action}" "${base_dir}"
   fi
 }
 
 main() {
   action="${1-}"
   if [ "$#" -gt 0 ]; then shift; fi
+  if [ "${1-}" = '--unattended' ]; then
+    unattended=true
+    shift
+  fi
 
   case "${action}" in
     status)     service_status "${@}"     ;;

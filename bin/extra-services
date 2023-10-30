@@ -100,7 +100,7 @@ main() {
     register)   services_register      ;;
     unregister) services_unregister    ;;
     *)
-      log 'Supported arguments: [status, list, install, uninstall, register, unregister]'
+      echo >&2 'Supported arguments: [status, list, install, uninstall, register, unregister]'
   esac
 }
 
