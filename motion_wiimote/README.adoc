@@ -18,7 +18,6 @@ This directory contains files to install and manage {url-linuxmotehook2}[linuxmo
 ----
 [Linuxmotehook]
 Port=26763
-SendButtons=true
 
 [0x0123456789AB]
 [0xFEDCBA987654]
@@ -27,6 +26,13 @@ SendButtons=true
 In this example, a server is configured on port 26763 for 2 Wiimotes with the MAC addresses `01:23:45:67:89:AB` and `FE:DC:BA:98:76:54`. The https://github.com/v1993/linuxmotehook2/wiki[linuxmotehook2 wiki] has detailed explanations on the configuration file options.
 
 . Configure your emulators to listen to `localhost` and the port configured in one of your configuration files.
+  To do this automatically, set the desired port in the `.env` file, for example:
++
+.env
+[source]
+----
+port=26763
+----
 
 [NOTE]
 ====
@@ -42,7 +48,6 @@ linuxmotehook2 manages Wiimote extensions, e.g. Nunchucks and Classic Controller
 ----
 [Linuxmotehook]
 Port=26763
-SendButtons=true
 [0x0123456789AB]
 ----
 
@@ -51,7 +56,6 @@ SendButtons=true
 ----
 [Linuxmotehook]
 Port=26764
-SendButtons=true
 [0xFEDCBA987654]
 ----
 
