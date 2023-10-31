@@ -26,50 +26,81 @@ so it may well run on other architectures, too, but this is currently untested.
 ----
 $ mkdir -p /userdata/extra && wget -O - https://github.com/git-developer/batocera-extra/tarball/main | gunzip | tar x --strip-components 1 -C /userdata/extra
 ----
-. Register the features as batocera service.
-.. By default, all features are registered. To exclude a feature, run `/userdata/extra/<feature>/service hide`.
-.. Run
+. Register the desired features as batocera service.
+.. (Optional)
++
+By default, all features are registered. If you'd like to shorten the list of available services, you can exclude a feature by running:
 +
 [source,console]
 ----
-/userdata/extra/bin/extra-services register
-batocera-services enable extra_patches
-batocera-services start extra_patches
+$ /userdata/extra/<feature>/service hide
 ----
-. Follow the installation instructions of the features you're interested in.
-.. For the basics, see section <<Emulator configuration for motion and touch control>>
+.. Register features and activate patches (required for Cemu and Citra):
++
+[source,console]
+----
+$ /userdata/extra/bin/extra-services register
+$ batocera-services enable extra_patches
+$ batocera-services start extra_patches
+----
+. Follow the instructions for the features you're interested in.
+.. This is usually done by enabling a service from the batocera menu. See section <<Configuration>> for details.
 .. Each feature has its own subdirectory containing a README file.
 
+## Configuration
+This section explains the emulator configuration that is required to play games with motion and touch control.
+The configuration has to be performed once only, it will be persisted across boots and batocera updates.
+
+The configuration is applied by activating a motion service from the Main Menu / System Settings / Services:
+
+image::services.png[]
+
+Each time a motion service is started or stopped, the batocera configuration is updated so that Cemu and Citra will behave as follows:
+
+* Motion input is read from the first enabled motion provider.
+* Touch input is read from the emulator window. This enables the following sources for touch input:
+** The touchpad of a DS4 or DS5 controller
+** A smartphone connected via remote touchpad
+** A mouse connected to the batocera host
+
+[NOTE]
+====
+Make sure that _extra_patches_ is enabled as batocera service.
+The configuration generators for Cemu and Citra in current batocera don't offer support for motion and touch control.
+Thus, the included patches are required to be started as batocera service.
+====
+
+
 ## Content
-### Features
-#### Server for motion control using a controller with modern Linux drivers (e.g. Nintendo Switch, Sony DS4 & DS5)
+### Providers
+#### Provider for motion control using a controller with modern Linux drivers (e.g. Nintendo Switch, Sony DS4 & DS5)
 
 * See link:motion_evdev/README.adoc[motion_evdev].
 
-#### Server for motion control using a Nintendo Switch controller
+#### Provider for motion control using a Nintendo Switch controller
 
 * See link:motion_nintendo/README.adoc[motion_nintendo].
 
-#### Server for motion and touch control using a Sony DS4 or DS5 controller (PS4 Dual Shock / PS5 Dual Sense)
+#### Provider for motion and touch control using a Sony DS4 or DS5 controller (PS4 Dual Shock / PS5 Dual Sense)
 
 * See link:motion_sony/README.adoc[motion_sony].
 
-#### Server for motion control using a Nintendo Wiimote
+#### Provider for motion control using a Nintendo Wiimote
 
 * See link:motion_wiimote/README.adoc[motion_wiimote].
 
-#### Server for motion control using a Steam Deck
+#### Provider for motion control using a Steam Deck
 
 * See link:motion_steam_deck/README.adoc[motion_steam_deck].
 
-#### Server for motion and touch control using a Steam Controller
+#### Provider for motion and touch control using a Steam Controller
 
 * See link:motion_steam_controller/README.adoc[motion_steam_controller].
 
-#### Server for motion and touch control using a smartphone
+#### Providers for motion and touch control using a smartphone
 
+* For motion, see link:motion_remote/README.adoc[motion_remote].
 * For touch, see link:remote-touchpad/README.adoc[remote-touchpad].
-* For motion, see _Android MotionSource server_ in the https://cemuhook.sshnuke.net/padudpserver.html[cemuhook documentation]
 * For game controller emulation, see https://github.com/breeze2/dsu-controller-guides[DSUController Guides]
 
 ### Scripts
@@ -98,47 +129,23 @@ Scripts are located in the `bin/` directory.
 KEY_F12 1 /userdata/extra/bin/system-summary | sed 's/°/ /' | HOME=/userdata/system XAUTHORITY=/var/lib/.Xauthority DISPLAY=:0.0 osd_cat -f -*-*-bold-*-*-*-38-120-*-*-*-*-*-* -cred -s 3 -d 4
 ----
 
-## Emulator configuration for motion and touch control
-This section explains the emulator configuration that is required to play games with motion and touch control.
-The configuration has to be performed once only, it will be persisted across boots and batocera updates.
-
-The configuration is applied by activating a motion service (Main Menu / System Settings / Services).
-Each time a service is activated, the batocera configuration is updated so that Cemu and Citra will behave as follows:
-
-* Motion input is read from the cemuhook server of the activated service.
-* Touch input is read from the emulator window. This enables the following sources for touch input:
-** The touchpad of a DS4 or DS5 controller
-** A smartphone connected via remote touchpad
-** A mouse connected to the batocera host
-
-To use a smartphone as motion provider, you have to set the hostname/ip of the smartphone and the port
-configured in the app of your choice (e.g. _MotionSource_ or _DSUController_).
-This must be done manually by editing the batocera configuration file `/userdata/system/batocera.conf`.
-
-[NOTE]
-====
-Make sure that _extra_patches_ is enabled as batocera service.
-The configuration generators for Cemu and Citra in current batocera don't offer support for motion and touch control.
-Thus, the included patches are required to be started as batocera service.
-====
-
 ## Implementation details
 
-Whenever one of the motion services is started, the following settings are written to the batocera configuration file:
+Whenever a motion provider is started or stopped, the following settings are written to the batocera configuration file:
 
 ./userdata/system/batocera.conf
 ----
 3ds.citra_motion_device=engine:cemuhookudp
 3ds.citra_touch_device=engine:emu_window
-3ds.citra_udp_input_address=localhost
-3ds.citra_udp_input_port=<service port>
+3ds.citra_udp_input_address=<provider-host>
+3ds.citra_udp_input_port=<provider-port>
 
 wiiu.cemu_touchpad=1
-wiiu.cemuhook_server_ip=localhost
-wiiu.cemuhook_server_port=<service port>
+wiiu.cemuhook_server_ip=<provider-host>
+wiiu.cemuhook_server_port=<provider-port>
 ----
 
-The port is read from the activated service:
+The host is `localhost` unless you run a remote provider (on a smartphone). The port is read from the first enabled service:
 
 * For a controller connected to motion_evdev: `26766`
 * For a Nintendo controller connected to motion_nintendo: `26761`
@@ -146,3 +153,4 @@ The port is read from the activated service:
 * For a Wiimote connected to motion_wiimote: the port from your linuxmotehook2 configuration file.
 * For a Steam Deck connected to motion_steam_deck: `26767`.
 * For a Steam Controller connected to motion_steam_controller: `26760`.
+* For a smartphone connected to motion_remote: the port from your configuration file.
