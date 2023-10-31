@@ -2,8 +2,20 @@
 set -eu
 . "$(readlink -f "$(dirname "$0")")/.env"
 
+# Simple protocol version info request in hex format (20 bytes)
+# For details, see https://v1993.github.io/cemuhook-protocol/
+request='4453 5543 e903 0400 033a 885b 6745 8b6b 0000 1000'
+
 if [ "${host-}" ] && [ "${port-}" ]; then
+  # this is a remote provider, so local pid must be empty
   pid=''
-  comment=''
+  if [ 'DSUS' = "$(printf %s "${request}" \
+                   | xxd -p -r \
+                   | timeout "${timeout:-1}" netcat -u "${host}" "${port}" 2>/dev/null \
+                   | cut -b 1-4)" ]; then
+    comment='online'
+  else
+    comment='offline'
+  fi
   printf '%s,%s\n' "${pid}" "${comment}"
 fi
