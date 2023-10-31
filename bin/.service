@@ -87,7 +87,7 @@ service_stop() {
   if [ -x "${base_dir}/stop" ]; then
     "${base_dir}/stop"
   else
-    service_status "${@}" | awk '{print $3}' | sort -r | xargs -r kill
+    service_status "${@}" | awk '{print $2}' | sort -r | xargs -r kill
   fi
 }
 
@@ -109,9 +109,12 @@ service_status() {
       pgrep -a -f "${app_name}" | cut -d ' ' -f 1
     fi
   fi | {
-    while read -r pid comment; do
-      open_port="$(lsof -p "${pid}" -a -iUDP -Fn | sed -nE 's/^n.*:([0-9]+)$/\1/p')"
-      printf '%-16s\t%-16s\t%s\t%s\t%s\n' "${service_name}" "${app_name}" "${pid}" "${open_port}" "${comment-}"
+    while IFS=, read -r pid comment; do
+      if [ "${pid-}" ]; then
+        open_port="$(lsof -p "${pid}" -a -iUDP -Fn | sed -nE 's/^n.*:([0-9]+)$/\1/p')"
+      fi
+      printf '%-16s\t%-7s\t%-16s\t%-5s\t%s\n' \
+        "${service_name}" "${pid}" "${app_name:-${host-}}" "${open_port:-${port-}}" "${comment-}"
     done
   }
 }

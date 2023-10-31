@@ -1,0 +1,17 @@
+= motion_remote
+:url-cemuhook: https://cemuhook.sshnuke.net/padudpserver.html
+Motion control for smartphones
+
+This directory contains files to manage a remote motion provider which enables motion control for smartphones.
+
+== Installation
+. Setup a motion server app (e.g. _MotionSource_ or _DSUController_) on your smartphone
+  as described in section _Android MotionSource server_ of the {url-cemuhook}[cemuhook documentation].
+. Set hostname/ip and port of the smartphone in the `.env` file, for example:
++
+./userdata/system/motion_remote/.env
+----
+host=192.168.178.99
+port=26769
+----
+. Enable batocera service _MOTION_REMOTE_ (Main Menu / System Settings / Services).

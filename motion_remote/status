@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+if [ "${host-}" ] && [ "${port-}" ]; then
+  pid=''
+  comment=''
+  printf '%s,%s\n' "${pid}" "${comment}"
+fi

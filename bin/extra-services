@@ -62,7 +62,7 @@ services_status() {
   esac
 
   if [ "${header}" = 'true' ]; then
-    printf '%-16s\t%-16s\t%s\t%s\t%s\n' Service Process PID Port Comment
+    printf '%-16s\t%-7s\t%-16s\t%-5s\t%s\n' Service PID Name Port Comment
   fi
   for_each_service status
 }

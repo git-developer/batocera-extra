@@ -23,15 +23,16 @@ sync_motion_configuration() {
   motion_provider="$("${base_dir}/extra-services" status -n | awk '{print $1}' | head -1)"
   if [ "${motion_provider}" ]; then
     . "${base_dir}/../${motion_provider}/.env"
+    host="${host:-localhost}"
     port="${port:-${CEMUHOOK_DEFAULT_PORT}}"
 
     batocera-settings-set \
       3ds.citra_touch_device engine:emu_window \
       3ds.citra_motion_device engine:cemuhookudp \
-      3ds.citra_udp_input_address localhost \
+      3ds.citra_udp_input_address "${host}" \
       3ds.citra_udp_input_port "${port}" \
       wiiu.cemu_touchpad 1 \
-      wiiu.cemuhook_server_ip localhost \
+      wiiu.cemuhook_server_ip "${host}" \
       wiiu.cemuhook_server_port "${port}"
   fi
 }
