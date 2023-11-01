@@ -2,15 +2,14 @@
 Motion control for remote devices
 
 == Configuration
-. Setup a motion server app (e.g. _MotionSource_ or _DSUController_) on your smartphone
+. Setup a motion server app (e.g. _MotionSource_ or _DSUController_) on your remote device
   as described in section _Android MotionSource server_ of the https://cemuhook.sshnuke.net/padudpserver.html[cemuhook documentation].
   For full game controller emulation, see https://github.com/breeze2/dsu-controller-guides[DSUController Guides].
-. Set hostname/ip and port of the smartphone in the `.env` file, for example:
+. Set hostname/ip and port of the remote device in the `.env` file, for example:
 +
 ./userdata/system/motion_remote/.env
 ----
 host=192.168.178.99
 port=26769
 ----
-. Enable batocera service _MOTION_REMOTE_
-
+. Enable batocera service _MOTION_REMOTE_.

@@ -35,7 +35,7 @@ By default, all features are registered. If you'd like to shorten the list of av
 ----
 $ /userdata/extra/<feature>/service hide
 ----
-.. Register features and activate patches (required for Cemu and Citra):
+.. Create services and activate patches (required for Cemu and Citra):
 +
 [source,console]
 ----
@@ -48,15 +48,15 @@ $ batocera-services start extra_patches
 ## Configuration
 The configuration is applied by activating a motion service from the Main Menu / System Settings / Services:
 
-image::services.png[]
+image::services.png[Batocera Services,800]
 
 [NOTE]
 ====
 - The configuration has to be performed once only, it will be persisted across boots and batocera updates.
 
-- Make sure that _extra_patches_ is enabled as batocera service.
+- Make sure that _EXTRA_PATCHES_ is enabled as batocera service.
 The configuration generators for Cemu and Citra in current batocera don't offer support for motion and touch control.
-Thus, the included patches are required to be started as batocera service.
+Thus, the included patches are required as batocera service.
 ====
 
 Each time a service is started (manually or on boot), it will check for updates of the provider and download it to a cache directory if required, then install it and start it as background daemon.
@@ -71,63 +71,63 @@ Each time a motion service is started or stopped, the batocera configuration is 
 
 .Supported motion providers
 |===
-|Controller |Batocera Service |Connection|Motion Provider|UDP Port|Log file (in `/userdata/system/logs`)|Comment
+|Controller|Batocera Service|Comment|Connection|Motion Provider|UDP Port|Log file (in `/userdata/system/logs`)
 
 |Devices with modern Linux drivers
 |MOTION_EVDEV
+|Recommended. Supports many devices incl. Nintendo and Sony controllers.
 |USB, Bluetooth
 |https://github.com/v1993/evdevhook2[evdevhook2]
 | 26766
 | `motion_evdev.log`
-|Recommended. Supports many devices incl. Nintendo and Sony controllers.
 
 |Nintendo Switch Controllers
 |MOTION_NINTENDO
+| Supports Switch Pro Controllers and Joycons.
 |USB, Bluetooth
 |https://github.com/joaorb64/joycond-cemuhook[joycond-cemuhook]
 | 26761
 | `motion_nintendo.log`
-| Supports Switch Pro Controllers and Joycons.
 
 |Sony Controllers
 |MOTION_SONY
+|Supports Sony DualShock 4 and DualSense 5.
 |USB, Bluetooth
 |https://github.com/lirannl/dsdrv-cemuhook[dsdrv-cemuhook]
 | 26762
 | `motion_sony.log`
-| Supports Sony DualShock 4 and DualSense 5.
 
 |Steam Controller
 |MOTION_STEAM_CONTROLLER
-|Dongle
+|Supports touch via link:motion_steam_controller/README.adoc[button mapping profiles]
+|USB Dongle
 |https://github.com/kozec/sc-controller[sc-controller]
 | 26760
 | `motion_steam_controller.log`
-|Supports touch via link:motion_steam_controller/README.adoc[button mapping profiles]
 
 |Steam Deck
 |MOTION_STEAM_DECK
+|
 |native
 |https://github.com/kmicki/SteamDeckGyroDSU[SteamDeckGyroDSU]
 | 26767
 | `motion_steam_deck.log`
-|
 
 |Nintendo Wiimote
 |MOTION_WIIMOTE
+|Requires link:motion_wiimote/README.adoc[configuration]
 |Bluetooth
 |https://github.com/v1993/linuxmotehook2[linuxmotehook2]
 | from configuration
 | `motion_wiimote-PROFILE.log`
-|Requires link:motion_wiimote/README.adoc[configuration]
 
 |Remote devices (e.g. smartphones)
 |MOTION_REMOTE
+|Requires link:motion_remote/README.adoc[configuration].
 |HTTP
 |any
 | from configuration
 | _none_
-|Requires link:motion_remote/README.adoc[configuration].
 
 |===
 
@@ -149,32 +149,36 @@ wiiu.cemuhook_server_ip=<provider-host>
 wiiu.cemuhook_server_port=<provider-port>
 ----
 
-The host is `localhost` unless you run a remote provider (on a smartphone). The port is read from the first enabled service.
+The host is `localhost` unless you run a remote provider (e.g. on a smartphone). The port is read from the first enabled service.
 
 ### Touch Providers
 .Supported touch providers
 |===
-|Controller |Batocera Service |Touch Provider|Details
+|Controller|Batocera Service|Comment|Touch Provider|Log file (in `/userdata/system/logs`)
 
 |Local devices (e.g. mouse)
 |_none_
-|_none_
 |No configuration required.
+|_none_
+|_none_
 
 |Sony controllers (DS4, DS5)
 |_none_
-|_none_
 |No configuration required.
+|_none_
+|_none_
 
 |Steam Controller
 |MOTION_STEAM_CONTROLLER
+|link:motion_steam_controller/README.adoc[Configuration] is optional.
 |https://github.com/kozec/sc-controller[sc-controller]
-| link:motion_steam_controller/README.adoc[Configuration] is optional.
+| `motion_steam_controller.log`
 
 |Remote devices (e.g. smartphones)
 |REMOTE_TOUCHPAD
-|https://github.com/Unrud/remote-touchpad/[remote-touchpad]
 |Requires link:remote_touchpad/README.adoc[configuration] to support browsers via URL or QR code.
+|https://github.com/Unrud/remote-touchpad/[remote-touchpad]
+| `remote_touchpad.log`
 
 |===
 

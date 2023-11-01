@@ -2,10 +2,10 @@
 Motion control for Nintendo Wiimote controllers
 
 == Configuration
-. Create a configuration file with the suffix `.ini` in the `profiles` directory. 
-.. The https://github.com/v1993/linuxmotehook2/wiki[linuxmotehook2 wiki]
+. Create a configuration file with the suffix `.ini` in the `profiles` directory.
+** The https://github.com/v1993/linuxmotehook2/wiki[linuxmotehook2 wiki]
 has detailed explanations on the configuration file options.
-..Example 1:
+** In the following example, a server is configured on port 26763 that will accept connections from any Wiimote:
 +
 .profiles/all-wimotes.ini
 [source,ini]
@@ -14,9 +14,8 @@ has detailed explanations on the configuration file options.
 Port=26763
 AllowlistMode=false
 ----
-+
-In this example, a server is configured on port 26763 that will accept connections from any Wiimote.
-.. Example 2:
+** In the following example, a server is configured on port 26763 for 2 Wiimotes
+with the MAC addresses `01:23:45:67:89:AB` and `FE:DC:BA:98:76:54`:
 +
 .profiles/example.ini
 [source,ini]
@@ -27,9 +26,6 @@ Port=26763
 [0x0123456789AB]
 [0xFEDCBA987654]
 ----
-+
-In this example, a server is configured on port 26763 for 2 Wiimotes
-with the MAC addresses `01:23:45:67:89:AB` and `FE:DC:BA:98:76:54`.
 
 . To automatically configure Cemu and Citra for a Wiimote motion provider,
   set the port in the `.env` file. Example:
@@ -53,6 +49,7 @@ The emulators must be configured accordingly. Example:
 ----
 [Linuxmotehook]
 Port=26763
+
 [0x0123456789AB]
 ----
 
@@ -61,6 +58,7 @@ Port=26763
 ----
 [Linuxmotehook]
 Port=26764
+
 [0xFEDCBA987654]
 ----
 
