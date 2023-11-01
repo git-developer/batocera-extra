@@ -10,7 +10,7 @@ generator="$(find /usr/lib/python*.*/site-packages/configgen/generators/cemu -na
 patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 --- "${generator}"
 +++ cemuControllers.py
-@@ -2,25 +2,33 @@
+@@ -2,25 +2,30 @@
  
  import batoceraFiles
  import os
@@ -37,23 +37,20 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 +    PRO     = "Wii U Pro Controller"
 +    CLASSIC = "Wii U Classic Controller"
 +    WIIMOTE = "Wiimote"
-+
-+    API_SDL = "SDLController"
-+    API_DSU = "DSUController"
-+
-+    DEFAULT_IP             = 'localhost'
-+    DEFAULT_PORT           = '26760'
-+    DEFAULT_DEADZONE       = '0.25'
-+    DEFAULT_RANGE          = '1'
  
 -    # Wii U GamePad Controller (excludes show screen)
 -    wiiUGamePadButtons = {
++    API_SDL = "SDLController"
++
++    DEFAULT_DEADZONE       = '0.25'
++    DEFAULT_RANGE          = '1'
++
 +    buttonMappings = {
 +        GAMEPAD: { # excludes show screen
              "1":  "1",
              "2":  "0",
              "3":  "3",
-@@ -46,9 +54,8 @@
+@@ -46,9 +51,8 @@ def generateControllerConfig(system, playersControllers):
              "23": "46",
              "24": "40",
              "25": "7"
@@ -65,7 +62,7 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
              "1":  "1",
              "2":  "0",
              "3":  "3",
-@@ -59,6 +66,7 @@
+@@ -59,6 +63,7 @@ def generateControllerConfig(system, playersControllers):
              "8":  "43",
              "9":  "6",
              "10": "4",
@@ -73,7 +70,7 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
              "12": "11",
              "13": "12",
              "14": "13",
-@@ -73,9 +81,8 @@
+@@ -73,9 +78,8 @@ def generateControllerConfig(system, playersControllers):
              "23": "41",
              "24": "46",
              "25": "40"
@@ -85,7 +82,7 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
              "1":  "13",
              "2":  "12",
              "3":  "15",
-@@ -86,6 +93,7 @@
+@@ -86,6 +90,7 @@ def generateControllerConfig(system, playersControllers):
              "8":  "43",
              "9":  "4",
              "10": "5",
@@ -93,7 +90,7 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
              "12": "0",
              "13": "1",
              "14": "2",
-@@ -98,9 +106,8 @@
+@@ -98,9 +103,8 @@ def generateControllerConfig(system, playersControllers):
              "21": "47",
              "22": "46",
              "23": "40"
@@ -105,7 +102,7 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
              "1":  "0",
              "2":  "43",
              "3":  "2",
-@@ -113,25 +120,44 @@
+@@ -113,25 +117,44 @@ def generateControllerConfig(system, playersControllers):
              "10": "12",
              "11": "13",
              "12": "14",
@@ -156,7 +153,7 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
  
      # cemu assign pads by uuid then by index with the same uuid
      # so, if 2 pads have the same uuid, the index is not 0 but 1 for the 2nd one
-@@ -149,96 +175,60 @@
+@@ -149,96 +172,51 @@ def generateControllerConfig(system, playersControllers):
      ###
  
      for playercontroller, pad in sorted(playersControllers.items()):
@@ -281,6 +278,34 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 +            addTextElement(entryNode, "mapping", key)
 +            addTextElement(entryNode, "button", value)
 +
++        # Save to file
++        with open(getConfigFileName(nplayer), 'wb') as handle:
++            tree = ET.ElementTree(root)
++            ET.indent(tree, space="  ", level=0)
++            tree.write(handle, encoding='UTF-8', xml_declaration=True)
++            handle.close()
++
+         nplayer+=1
+EOF
+
+patch -b -z .backup-cemuhook2 "${generator}" << 'EOF'
+--- "${generator}"
++++ cemuControllers.py
+@@ -20,7 +20,10 @@ def generateControllerConfig(system, playersControllers):
+     WIIMOTE = "Wiimote"
+ 
+     API_SDL = "SDLController"
++    API_DSU = "DSUController"
+ 
++    DEFAULT_IP             = 'localhost'
++    DEFAULT_PORT           = '26760'
+     DEFAULT_DEADZONE       = '0.25'
+     DEFAULT_RANGE          = '1'
+ 
+@@ -212,6 +215,15 @@ def generateControllerConfig(system, playersControllers):
+             addTextElement(entryNode, "mapping", key)
+             addTextElement(entryNode, "button", value)
+ 
 +        # Add motion control
 +        if (system.isOptSet('cemuhook_server_port')):
 +            motionControllerNode = ET.SubElement(root, 'controller')
@@ -290,14 +315,9 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 +            addTextElement(motionControllerNode, 'ip', getOption('cemuhook_server_ip', DEFAULT_IP))
 +            addTextElement(motionControllerNode, 'port', getOption('cemuhook_server_port', DEFAULT_PORT))
 +
-+        # Save to file
-+        with open(getConfigFileName(nplayer), 'wb') as handle:
-+            tree = ET.ElementTree(root)
-+            ET.indent(tree, space="  ", level=0)
-+            tree.write(handle, encoding='UTF-8', xml_declaration=True)
-+            handle.close()
-+
-         nplayer+=1
+         # Save to file
+         with open(getConfigFileName(nplayer), 'wb') as handle:
+             tree = ET.ElementTree(root)
 EOF
 
 echo >&2 "Cemu Generator was patched for cemuhook."
