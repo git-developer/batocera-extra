@@ -15,7 +15,5 @@ if [ "${host-}" ] && [ "${port-}" ]; then
                    | cut -b 1-4)" ]; then
     comment='online'
     printf '%s,%s\n' "${pid}" "${comment}"
-  else
-    echo >&2 "${host}:${port} is offline"
   fi
 fi
