@@ -35,6 +35,9 @@ add_desktop_integration() {
   cd - >/dev/null
   rm -r "${work_dir}"
 
+  sed -i 's:</applications>:\t<application groupname="sc-controller">\n\t\t<fullscreen>no</fullscreen>\n\t</application>\n</applications>:g' /etc/openbox/rc.xml
+  DISPLAY=:0 openbox --reconfigure
+
   cat >"/usr/share/applications/${app_name}-config.desktop" << EOF
 [Desktop Entry]
 Version=1.0
