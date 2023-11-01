@@ -5,5 +5,16 @@ set -eu
 if "${base_dir}/service" status | grep .; then
   log "${app_name} is already running."
 else
+
+  # Note on 'quirk':
+  #
+  # Under the hood, https://github.com/lirannl/dsdrv-cemuhook[ds4rv]
+  # uses `hcitool` for bluetooth management which is deprecated
+  # (see https://github.com/chrippa/ds4drv/issues/123[chrippa/ds4drv #123] for details).
+  # `dsdrv-cemuhook` calls `hcitool clock` to check if bluetooth is up and running.
+  # This command returns an `Input/output error` on some machines although bluetooth is working fine.
+  # To workaround this, the script `quirk/hcitool` is used
+  # to simply ignore this single call and delegate everything else to the `hcitool`.
+
   PATH="${base_dir}/quirk:$PATH" "${app_name}" --udp ${host:+--udp-host "${host}"} ${port:+--udp-port "${port}"} >>"${log_file}" 2>&1 &
 fi

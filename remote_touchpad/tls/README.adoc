@@ -1,9 +1,10 @@
-This directory contains files required for TLS, e.g. `batocera.key` and `batocera.cert`. These files are usually referenced from the `.env` file in the base directory:
+This directory contains files required for TLS, e.g. `batocera.key` and `batocera.cert`.
+These files are usually referenced from the `.env` file in the base directory:
 
 ..env
 [source,shell]
 ----
-base_dir="$(dirname $(readlink -f "$0"))"
+base_dir="$(readlink -f "$(dirname "$0")")"
 tls_home="${base_dir}/tls"
 tls_cert="${tls_home}/batocera.crt"
 tls_key="${tls_home}/batocera.key"
