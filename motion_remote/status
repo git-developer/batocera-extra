@@ -14,8 +14,8 @@ if [ "${host-}" ] && [ "${port-}" ]; then
                    | timeout "${timeout:-1}" netcat -u "${host}" "${port}" 2>/dev/null \
                    | cut -b 1-4)" ]; then
     comment='online'
+    printf '%s,%s\n' "${pid}" "${comment}"
   else
-    comment='offline'
+    echo >&2 "${host}:${port} is offline"
   fi
-  printf '%s,%s\n' "${pid}" "${comment}"
 fi
