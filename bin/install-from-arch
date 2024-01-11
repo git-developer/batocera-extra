@@ -24,9 +24,11 @@ find_package_url() {
         if [ -r "${known_packages}" ]; then
           cp -a "${known_packages}" "${packages}"
         else
-          curl -fsSL "https://archive.archlinux.org/${path}" \
-          | sed -nE 's/.*href="([^"]+\.pkg\.tar\.zst)".*/\1/p' \
-          | grep . >"${packages}"
+          # use a temp file to avoid an incomplete file on curl errors
+          index="$(mktemp --tmpdir "${revision}.${repo}.packages.XXXXXX")"
+          curl -fsSL "https://archive.archlinux.org/${path}/" >>"${index}"
+          <"${index}" sed -nE 's/.*href="([^"]+\.pkg\.tar\.zst)".*/\1/p' | grep . >"${packages}"
+          rm "${index}"
         fi
       fi
       filename="$(grep -P "^${name}-(\d.+)-${arch}\.pkg\.tar\.zst$" "${packages}" | sort -V | tail -1)"
