@@ -207,3 +207,139 @@ Scripts are located in the `bin/` directory. They are optional and not related t
 ----
 KEY_F12 1 /userdata/extra/bin/system-summary | sed 's/°/ /' | HOME=/userdata/system XAUTHORITY=/var/lib/.Xauthority DISPLAY=:0.0 osd_cat -f -*-*-bold-*-*-*-38-120-*-*-*-*-*-* -cred -s 3 -d 4
 ----
+
+## Troubleshooting
+> "Everything is installed and configured, but I have no motion. How can I find out what's wrong?"
+
+* If something went wrong, you can reset the motion configuration:
++
+  .. Enter the Services menu (Main Menu / System Settings / Services)
+  .. Disable all motion services
+  .. Leave the Services menu
+  .. Enter the Services menu
+  .. Enable the motion service of your choice
+  .. Leave the Services menu
++
+If motion control still doesn't work after reset, try one of the following commands in a terminal (via SSH or File Manager).
+
+
+* `batocera-services list` lists each Batocera service and shows whether it's enabled.
++
+.Example: List all Batocera services
+----
+# batocera-services list
+extra_patches *
+motion_evdev *
+motion_nintendo -
+motion_remote -
+motion_sony -
+motion_steam_controller -
+motion_steam_deck -
+motion_wiimote -
+remote_touchpad *
+ledspicer  -
+syncthing  -
+----
+
+* `extra-services status` lists all running batocera-extra services.
++
+.Example: List running batocera-extra services
+----
+# /userdata/extra/bin/extra-services status
+Service                 PID     Name                    Port    Comment
+motion_evdev            2801    evdevhook2              26766
+motion_evdev            2807    evdevhook2
+----
+
+* Each batocera-extra service has its own log file, possibly containing error messages.
++
+.Example: Show log file of `extra_patches`
+----
+# cat ~/logs/extra_patches.log
+Installing archlinux package patch in revision 2023-08-03
+Using locally cached file /userdata/system/.cache/arch-packages/patch-2.7.6-10-x86_64.pkg.tar.zst
+Installing package from /userdata/system/.cache/arch-packages/patch-2.7.6-10-x86_64.pkg.tar.zst
+patching file /usr/lib/python3.11/site-packages/configgen/generators/cemu/cemuControllers.py
+patching file /usr/lib/python3.11/site-packages/configgen/generators/cemu/cemuControllers.py
+Cemu Generator was patched for cemuhook.
+patching file /usr/lib/python3.11/site-packages/configgen/generators/citra/citraGenerator.py
+Citra Generator was patched for cemuhook.
+----
++
+.Example: Show log file of `motion_evdev`
+----
+# cat ~/logs/motion_evdev.log
+Using up-to-date local file /userdata/system/.cache/evdevhook2/evdevhook2-v1.0.1-x86_64.AppImage
+Installing archlinux package upower in revision 2023-08-03 from repo extra
+Using locally cached file /userdata/system/.cache/arch-packages/upower-1.90.2-1-x86_64.pkg.tar.zst
+Installing package from /userdata/system/.cache/arch-packages/upower-1.90.2-1-x86_64.pkg.tar.zst
+Installing archlinux package libimobiledevice in revision 2023-08-03 from repo extra
+Using locally cached file /userdata/system/.cache/arch-packages/libimobiledevice-1.3.0-9-x86_64.pkg.tar.zst
+Installing package from /userdata/system/.cache/arch-packages/libimobiledevice-1.3.0-9-x86_64.pkg.tar.zst
+Installing archlinux package libplist in revision 2023-08-03 from repo extra
+Using locally cached file /userdata/system/.cache/arch-packages/libplist-2.3.0-2-x86_64.pkg.tar.zst
+Installing package from /userdata/system/.cache/arch-packages/libplist-2.3.0-2-x86_64.pkg.tar.zst
+Installing archlinux package openssl in revision 2023-08-03
+Using locally cached file /userdata/system/.cache/arch-packages/openssl-3.1.2-1-x86_64.pkg.tar.zst
+Installing package from /userdata/system/.cache/arch-packages/openssl-3.1.2-1-x86_64.pkg.tar.zst
+Installing archlinux package libusbmuxd in revision 2023-08-03 from repo extra
+Using locally cached file /userdata/system/.cache/arch-packages/libusbmuxd-2.0.2-3-x86_64.pkg.tar.zst
+Installing package from /userdata/system/.cache/arch-packages/libusbmuxd-2.0.2-3-x86_64.pkg.tar.zst
+Marked dbus-python==1.2.18 as installed.
+Found device Sony Computer Entertainment Wireless Controller Motion Sensors (unique identifier '84:17:66:61:8e:e3') - connecting... done!
+----
+
+* The Batocera configuration should contain the port of the enabled motion service.
++
+.Example: Show motion port in Batocera configuration
+----
+# grep cemuhook ~/batocera.conf
+3ds.citra_motion_device=engine:cemuhookudp
+wiiu.cemuhook_server_ip=localhost
+wiiu.cemuhook_server_port=26766 // <1>
+----
+<1> Motion Port
+
+* When motion is enabled and Cemu was started at least once, the Cemu controller config should contain the motion port:
++
+.Example: Cemu controller configuration
+----
+# cat ~/configs/cemu/controllerProfiles/controller0.xml
+<?xml version='1.0' encoding='UTF-8'?>
+<emulated_controller>
+<type>Wii U GamePad</type>
+<controller>
+   <api>SDLController</api>
+   <uuid>0_030000004c050000c405000011810000</uuid>
+   <display_name>Sony Computer Entertainment Wireless Controller</display_name>
+   <rumble>0</rumble>
+   <axis>
+      <deadzone>0.25</deadzone>
+      <range>1</range>
+   </axis>
+   <rotation>
+      <deadzone>0.25</deadzone>
+      <range>1</range>
+   </rotation>
+   <trigger>
+      <deadzone>0.25</deadzone>
+      <range>1</range>
+   </trigger>
+   <mappings>
+      <entry>
+      <mapping>1</mapping>
+      <button>1</button>
+      </entry>
+      ...
+   </mappings>
+</controller>
+<controller> // <1>
+   <api>DSUController</api>
+   <uuid>0</uuid>
+   <motion>true</motion>
+   <ip>localhost</ip>
+   <port>26766</port> // <2>
+</controller>
+----
+<1> `controller` element for motion configuration
+<2> Motion Port

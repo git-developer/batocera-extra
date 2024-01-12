@@ -3,6 +3,7 @@ set -eu
 
 ARCH_PACKAGE_CACHE="${ARCH_PACKAGE_CACHE:-${XDG_CACHE_HOME:-/userdata/system/.cache}/arch-packages}"
 ARCH_PACKAGE_CACHE="${ARCH_PACKAGE_CACHE%/}"
+arch_metadata="$(dirname "$0")/.arch"
 
 log() {
   echo >&2 "${@}"
@@ -19,9 +20,16 @@ find_package_url() {
       mkdir -p "${ARCH_PACKAGE_CACHE}"
       packages="${ARCH_PACKAGE_CACHE}/${revision}.${repo}.packages"
       if [ ! -s "${packages}" ]; then
-        curl -fsSL "https://archive.archlinux.org/${path}" \
-        | sed -nE 's/.*href="([^"]+\.pkg\.tar\.zst)".*/\1/p' \
-        | grep . >"${packages}"
+        known_packages="${arch_metadata}/${arch}/${revision}.${repo}.packages"
+        if [ -r "${known_packages}" ]; then
+          cp -a "${known_packages}" "${packages}"
+        else
+          # use a temp file to avoid an incomplete file on curl errors
+          index="$(mktemp --tmpdir "${revision}.${repo}.packages.XXXXXX")"
+          curl -fsSL "https://archive.archlinux.org/${path}/" >>"${index}"
+          <"${index}" sed -nE 's/.*href="([^"]+\.pkg\.tar\.zst)".*/\1/p' | grep . >"${packages}"
+          rm "${index}"
+        fi
       fi
       filename="$(grep -P "^${name}-(\d.+)-${arch}\.pkg\.tar\.zst$" "${packages}" | sort -V | tail -1)"
     else
@@ -81,7 +89,7 @@ Usage: ${name} <package-spec>...
   - is missing, the latest package is used.
   - is '?', the actual revision is
     - read from env variable ARCH_REVISION if set, else
-    - read from file '.arch_revision' in the directory of this script if existing, else
+    - read from file '.arch/revision' in the directory of this script if existing, else
     - set to latest.
   - has date format 'YYYY-MM-DD', the package is read from archive by date.
   - has no date format, the package is read from archive by version.
@@ -116,7 +124,7 @@ main() {
   for package in "${@}"; do
     echo "${package}" | while IFS== read -r name revision repo arch; do
       if [ "${revision}" = '?' ]; then
-        revision="${ARCH_REVISION:-$(cat "$(dirname "$0")/.arch_revision" 2>/dev/null || true)}"
+        revision="${ARCH_REVISION:-$(cat "${arch_metadata}/revision" 2>/dev/null || true)}"
       fi
       log "Installing archlinux package ${name}${revision:+ in revision ${revision}}${repo:+ from repo ${repo}}${arch:+ for arch ${arch}}"
       url="$(find_package_url "${name}" "${revision}" "${repo}" "${arch}")"
