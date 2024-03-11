@@ -21,10 +21,17 @@ so it may well run on other architectures, too, but this is currently untested.
 .. either via SSH
 .. or by pressing F1 in the main menu to open the file manager and then F4 to open a terminal
 . Copy this directory to `/userdata/extra` to your batocera host:
+.. For the default version of batocera:
 +
 [source,console]
 ----
 $ mkdir -p /userdata/extra && wget -O - https://github.com/git-developer/batocera-extra/tarball/main | gunzip | tar x --strip-components 1 -C /userdata/extra
+----
+.. For a specific version of batocera, replace `main` in the URL with the branch or tag for the target version. Example:
++
+[source,console]
+----
+$ mkdir -p /userdata/extra && wget -O - https://github.com/git-developer/batocera-extra/tarball/batocera-38 | gunzip | tar x --strip-components 1 -C /userdata/extra
 ----
 . Register the desired features as batocera service.
 .. (Optional)
