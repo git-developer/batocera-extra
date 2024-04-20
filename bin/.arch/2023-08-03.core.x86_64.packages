@@ -237,6 +237,7 @@ sqlite-doc-3.42.0-1-x86_64.pkg.tar.zst
 sqlite-tcl-3.42.0-1-x86_64.pkg.tar.zst
 sudo-1.9.14.p3-1-x86_64.pkg.tar.zst
 sysfsutils-2.1.1-1-x86_64.pkg.tar.zst
+syslinux-6.04.pre2.r11.gbf6db5b4-3-x86_64.pkg.tar.xz
 systemd-254-1-x86_64.pkg.tar.zst
 systemd-libs-254-1-x86_64.pkg.tar.zst
 systemd-resolvconf-254-1-x86_64.pkg.tar.zst
