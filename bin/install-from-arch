@@ -3,32 +3,44 @@ set -eu
 
 ARCH_PACKAGE_CACHE="${ARCH_PACKAGE_CACHE:-${XDG_CACHE_HOME:-/userdata/system/.cache}/arch-packages}"
 ARCH_PACKAGE_CACHE="${ARCH_PACKAGE_CACHE%/}"
+TARGET_ARCHITECTURE="${TARGET_ARCHITECTURE:-$(uname -m)}"
 arch_metadata="$(dirname "$0")/.arch"
 
 log() {
   echo >&2 "${@}"
 }
 
+cancel() {
+  log "Error: ${@}"
+  return 1
+}
+
 find_package_url() {
-  local name="${1}" revision="${2}" repo="${3:-core}" arch="${4:-$(uname -m)}"
+  local name="${1}" revision="${2}" repo="${3}" arch="${4}" os_arch="${5}"
 
   if echo "${revision}" | grep -qP '^\d{4}.\d{2}.\d{2}$'; then
     date="$(printf %s "${revision}" | tr -c '[:digit:]' '/')"
   fi
 
-  case "${arch}" in
-    x86_64|any)   url="$(find_url_x86 "${name}" "${date-}" "${revision}" "${repo}" "${arch}")" ;;
-    aarch64|arm*) url="$(find_url_arm "${name}" "${date-}" "${revision}" "${repo}" "${arch}")" ;;
-    *) log "Error: Unsupported architecture '${arch}'"; return 1 ;;
+  if [ "${arch}" = any ]; then
+    target_arch="${os_arch}"
+  else
+    target_arch="${arch}"
+  fi
+
+  case "${target_arch}" in
+    x86_64)       url="$(find_url_x86 "${name}" "${date-}" "${revision}" "${repo}" "${arch}" "${target_arch}")" ;;
+    aarch64|arm*) url="$(find_url_arm "${name}" "${date-}" "${revision}" "${repo}" "${arch}" "${target_arch}")" ;;
+    *) cancel "Unsupported architecture '${arch}'"
   esac
   printf '%s\n' "${url}"
 }
 
 find_url_x86() {
-  local name="${1}" date="${2}" revision="${3}" repo="${4}" arch="${5}" archive_url="https://archive.archlinux.org"
+  local name="${1}" date="${2}" revision="${3}" repo="${4}" arch="${5}" os_arch="${6}" archive_url="https://archive.archlinux.org"
 
   if [ "${date-}" ]; then
-    find_url_by_date "${name}" "${date}" "${repo}" "${arch}" "${archive_url}/repos/${date}/${repo}/os/${arch}"
+    find_url_by_date "${name}" "${date}" "${repo}" "${arch}" "${os_arch}" "${archive_url}/repos/${date}/${repo}/os/${os_arch}"
   elif [ "${revision}" ]; then
     find_url_by_revision "${name}" "${revision}" "${arch}" zst "${archive_url}"
   else
@@ -40,14 +52,14 @@ find_url_x86() {
 }
 
 find_url_arm() {
-  local name="${1}" date="${2}" revision="${3}" repo="${4}" arch="${5}" archive_url="http://tardis.tiny-vps.com/aarm"
+  local name="${1}" date="${2}" revision="${3}" repo="${4}" arch="${5}" os_arch="${6}" archive_url="http://tardis.tiny-vps.com/aarm"
 
-  if [ "${arch#arm}" != "${arch}" ]; then
-    arch=armv7h;
+  if [ "${os_arch#arm}" != "${os_arch}" ]; then
+    os_arch=armv7h;
   fi
 
   if [ "${date-}" ]; then
-    find_url_by_date "${name}" "${date}" "${repo}" "${arch}" "${archive_url}/repos/${date}/${arch}/${repo}"
+    find_url_by_date "${name}" "${date}" "${repo}" "${arch}" "${os_arch}" "${archive_url}/repos/${date}/${os_arch}/${repo}"
   elif [ "${revision}" ]; then
     find_url_by_revision "${name}" "${revision}" "${arch}" xz "${archive_url}"
   else
@@ -58,10 +70,10 @@ find_url_arm() {
 }
 
 find_url_by_date() {
-  local name="${1}" date="${2}" repo="${3}" arch="${4}" url="${5}"
+  local name="${1}" date="${2}" repo="${3}" arch="${4}" os_arch="${5}" url="${6}"
 
   mkdir -p "${ARCH_PACKAGE_CACHE}"
-  index_name="$(printf %s "${date}" | tr -c '[:digit:]' '-').${repo}.${arch}.packages"
+  index_name="$(printf %s "${date}" | tr -c '[:digit:]' '-').${repo}.${os_arch}.packages"
   packages="${ARCH_PACKAGE_CACHE}/${index_name}"
   if [ ! -s "${packages}" ]; then
     known_packages="${arch_metadata}/${index_name}"
@@ -76,12 +88,7 @@ find_url_by_date() {
     fi
   fi
 
-  path="$(grep -P "^${name}-(\d.+)-${arch}\.pkg\.tar\.\w+$" "${packages}" | sort -V | tail -1)"
-  if [ -z "${path}" ]; then
-    log "Error: No URL found in repo '${repo}' for package '${name}', date '${date}' and arch '${arch}'"
-    return 1
-  fi
-
+  path="$(grep -P "^${name}-(\d.+)-${arch}\.pkg\.tar\.\w+$" "${packages}" | sort -V | tail -1 | grep .)"
   echo "${url}/${path}"
 }
 
@@ -114,9 +121,11 @@ install_package() {
   case "${package}" in
     *.zst) unpack=zstd ;;
     *.xz)  unpack=xz   ;;
-    *) log "Unsupported type of package ${package}"; return 1 ;;
+    *) cancel "Unsupported type of package ${package}"
   esac
-  "${unpack}" -d <"${package}" | tar x -C / --exclude '.*'
+  if [ "${INSTALL:-true}" = 'true' ]; then
+    "${unpack}" -d <"${package}" | tar x -C / --exclude '.*'
+  fi
 }
 
 print_usage() {
@@ -168,14 +177,14 @@ main() {
       if [ "${revision}" = '?' ]; then
         revision="${ARCH_REVISION:-$(cat "${arch_metadata}/revision" 2>/dev/null || true)}"
       fi
-      log "Installing archlinux package ${name}${revision:+ in revision ${revision}}${repo:+ from repo ${repo}}${arch:+ for arch ${arch}}"
-      url="$(find_package_url "${name}" "${revision}" "${repo}" "${arch}")"
-      local_file="$(provide_package "${url}")"
-      if [ "${INSTALL:-true}" = 'true' ]; then
-        install_package "${local_file}"
-      else
-        echo "${local_file}"
+      repo="${repo:-core}"
+      arch="${arch:-${TARGET_ARCHITECTURE}}"
+      log "Installing archlinux package '${name}'${revision:+ in revision '${revision}'} from repo '${repo}' for arch '${arch}'"
+      if ! url="$(find_package_url "${name}" "${revision}" "${repo}" "${arch}" "${TARGET_ARCHITECTURE}")"; then
+        cancel "No URL found for this package-spec."
       fi
+      local_file="$(provide_package "${url}")"
+      install_package "${local_file}"
     done
   done
 }
