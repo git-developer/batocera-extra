@@ -42,7 +42,7 @@ add_desktop_integration() {
 [Desktop Entry]
 Version=1.0
 Icon=${icon_path}/${icon_file}
-Exec=/usr/bin/${app_name} gui
+Exec="/usr/bin/${app_name}" gui
 Terminal=false
 Type=Application
 Categories=Game;batocera.linux;
@@ -59,8 +59,6 @@ main() {
 
   prepare_profiles "${@}"
   add_desktop_integration
-
-  "${base_dir}/../bin/install-from-arch" libffi=3.3-4 bluez-libs=?=extra binutils=? libelf=? jansson=?
 }
 
 main "${@}"
