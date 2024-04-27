@@ -5,8 +5,11 @@ set -eu
 if "${base_dir}/service" status | grep .; then
   log "${app_name} is already running."
 else
-  [ -z "${ip}" ] || export SCC_SERVER_IP="${ip}"
-  [ -z "${port}" ] || export SCC_SERVER_PORT="${port}"
+  # AppImage requires FUSE, missing for v39 on aarch64
+  "${base_dir}/../bin/fuse-start"
+
+  [ -z "${ip-}" ] || export SCC_SERVER_IP="${ip}"
+  [ -z "${port-}" ] || export SCC_SERVER_PORT="${port}"
   "${app_name}" daemon --alone "${profile}" debug >"${log_file}" 2>&1 &
   sleep 2
 fi
