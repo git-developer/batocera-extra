@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+
+extra_root="$(readlink -f "$(dirname -- "$0")/..")"
+
+if [ ! -r /usr/lib/libfuse.so.2 ]; then
+  "${extra_root}/bin/install-from-arch" fuse2=?=extra
+  modprobe fuse
+fi
