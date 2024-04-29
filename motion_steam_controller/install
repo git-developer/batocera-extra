@@ -36,13 +36,13 @@ add_desktop_integration() {
   rm -r "${work_dir}"
 
   sed -i 's:</applications>:\t<application groupname="sc-controller">\n\t\t<fullscreen>no</fullscreen>\n\t</application>\n</applications>:g' /etc/openbox/rc.xml
-  DISPLAY=:0 openbox --reconfigure
+  DISPLAY=:0 openbox --reconfigure || true
 
   cat >"/usr/share/applications/${app_name}-config.desktop" << EOF
 [Desktop Entry]
 Version=1.0
 Icon=${icon_path}/${icon_file}
-Exec=/usr/bin/${app_name} gui
+Exec="/usr/bin/${app_name}" gui
 Terminal=false
 Type=Application
 Categories=Game;batocera.linux;
@@ -59,8 +59,6 @@ main() {
 
   prepare_profiles "${@}"
   add_desktop_integration
-
-  "${base_dir}/../bin/install-from-arch" libffi=3.3-4 bluez-libs=?=extra binutils=? libelf=? jansson=?
 }
 
 main "${@}"

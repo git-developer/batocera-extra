@@ -3,53 +3,100 @@ set -eu
 
 ARCH_PACKAGE_CACHE="${ARCH_PACKAGE_CACHE:-${XDG_CACHE_HOME:-/userdata/system/.cache}/arch-packages}"
 ARCH_PACKAGE_CACHE="${ARCH_PACKAGE_CACHE%/}"
+TARGET_ARCHITECTURE="${TARGET_ARCHITECTURE:-$(uname -m)}"
 arch_metadata="$(dirname "$0")/.arch"
 
 log() {
   echo >&2 "${@}"
 }
 
+cancel() {
+  log "Error: ${@}"
+  return 1
+}
+
 find_package_url() {
-  local name="${1}" revision="${2}" repo="${3:-core}" arch="${4:-$(uname -m)}"
+  local name="${1}" revision="${2}" repo="${3}" arch="${4}" os_arch="${5}"
 
-  if [ "${revision}" ]; then
-    if echo "${revision}" | grep -qP '^\d{4}.\d{2}.\d{2}$'; then
-      date="$(printf %s "${revision}" | tr -c '[:digit:]' '/')"
-      path="repos/${date}/${repo}/os/${arch}"
+  if echo "${revision}" | grep -qP '^\d{4}.\d{2}.\d{2}$'; then
+    date="$(printf %s "${revision}" | tr -c '[:digit:]' '/')"
+  fi
 
-      mkdir -p "${ARCH_PACKAGE_CACHE}"
-      packages="${ARCH_PACKAGE_CACHE}/${revision}.${repo}.packages"
-      if [ ! -s "${packages}" ]; then
-        known_packages="${arch_metadata}/${arch}/${revision}.${repo}.packages"
-        if [ -r "${known_packages}" ]; then
-          cp -a "${known_packages}" "${packages}"
-        else
-          # use a temp file to avoid an incomplete file on curl errors
-          index="$(mktemp --tmpdir "${revision}.${repo}.packages.XXXXXX")"
-          curl -fsSL "https://archive.archlinux.org/${path}/" >>"${index}"
-          <"${index}" sed -nE 's/.*href="([^"]+\.pkg\.tar\.zst)".*/\1/p' | grep . >"${packages}"
-          rm "${index}"
-        fi
-      fi
-      filename="$(grep -P "^${name}-(\d.+)-${arch}\.pkg\.tar\.zst$" "${packages}" | sort -V | tail -1)"
-    else
-      first_letter="${name%"${name#?}"}"
-      path="packages/${first_letter}/${name}"
-      filename="${name}-${revision}-${arch}.pkg.tar.zst"
-    fi
-    if [ "${filename}" ]; then
-      url="https://archive.archlinux.org/${path}/${filename}"
-    fi
+  if [ "${arch}" = any ]; then
+    target_arch="${os_arch}"
   else
-    url="$(wget --quiet --spider --server-response "https://archlinux.org/packages/${repo}/${arch}/${name}/download/" 2>&1 \
-           | sed -nE 's/\s*Location:\s*(.+)/\1/p')"
+    target_arch="${arch}"
   fi
 
-  if [ -z "${url-}" ]; then
-    log "Error: No URL found in repo '${repo}' for package '${name}'${revision:+ in revision '${revision}'} and arch '${arch}'"
-    return 1
-  fi
+  case "${target_arch}" in
+    x86_64)       url="$(find_url_x86 "${name}" "${date-}" "${revision}" "${repo}" "${arch}" "${target_arch}")" ;;
+    aarch64|arm*) url="$(find_url_arm "${name}" "${date-}" "${revision}" "${repo}" "${arch}" "${target_arch}")" ;;
+    *) cancel "Unsupported architecture '${arch}'"
+  esac
   printf '%s\n' "${url}"
+}
+
+find_url_x86() {
+  local name="${1}" date="${2}" revision="${3}" repo="${4}" arch="${5}" os_arch="${6}" archive_url="https://archive.archlinux.org"
+
+  if [ "${date-}" ]; then
+    find_url_by_date "${name}" "${date}" "${repo}" "${arch}" "${os_arch}" "${archive_url}/repos/${date}/${repo}/os/${os_arch}"
+  elif [ "${revision}" ]; then
+    find_url_by_revision "${name}" "${revision}" "${arch}" zst "${archive_url}"
+  else
+    curl -fsSL -D - "https://archlinux.org/packages/${repo}/${arch}/${name}/download/" \
+      | sed -nE 's/\s*location:\s*(.+)/\1/p' \
+      | tr -d '\r' \
+      | grep .
+  fi
+}
+
+find_url_arm() {
+  local name="${1}" date="${2}" revision="${3}" repo="${4}" arch="${5}" os_arch="${6}" archive_url="http://tardis.tiny-vps.com/aarm"
+
+  if [ "${os_arch#arm}" != "${os_arch}" ]; then
+    os_arch=armv7h;
+  fi
+
+  if [ "${date-}" ]; then
+    find_url_by_date "${name}" "${date}" "${repo}" "${arch}" "${os_arch}" "${archive_url}/repos/${date}/${os_arch}/${repo}"
+  elif [ "${revision}" ]; then
+    find_url_by_revision "${name}" "${revision}" "${arch}" xz "${archive_url}"
+  else
+    curl -fsSL "https://archlinuxarm.org/packages/${arch}/${name}" \
+    | sed -nE 's/.*"(http[^"]+)">Download.*/\1/p' \
+    | grep .
+  fi
+}
+
+find_url_by_date() {
+  local name="${1}" date="${2}" repo="${3}" arch="${4}" os_arch="${5}" url="${6}"
+
+  mkdir -p "${ARCH_PACKAGE_CACHE}"
+  index_name="$(printf %s "${date}" | tr -c '[:digit:]' '-').${repo}.${os_arch}.packages"
+  packages="${ARCH_PACKAGE_CACHE}/${index_name}"
+  if [ ! -s "${packages}" ]; then
+    known_packages="${arch_metadata}/${index_name}"
+    if [ -r "${known_packages}" ]; then
+      cp -a "${known_packages}" "${packages}"
+    else
+      # use a temp file to avoid an incomplete file on curl errors
+      index="$(mktemp --tmpdir "${index_name}.XXXXXX")"
+      curl -fsSL "${url}/" >>"${index}"
+      <"${index}" sed -nE 's/.*href="([^"]+\.pkg\.tar\.\w+)".*/\1/p' | grep . >"${packages}"
+      rm "${index}"
+    fi
+  fi
+
+  path="$(grep -P "^${name}-(\d.+)-${arch}\.pkg\.tar\.\w+$" "${packages}" | sort -V | tail -1 | grep .)"
+  echo "${url}/${path}"
+}
+
+find_url_by_revision() {
+  local name="${1}" revision="${2}" arch="${3}" suffix="${4}" url="${5}"
+
+  first_letter="${name%"${name#?}"}"
+  echo "${url}/packages/${first_letter}/${name}/${name}-${revision}-${arch}.pkg.tar.${suffix}"
 }
 
 provide_package() {
@@ -62,10 +109,7 @@ provide_package() {
     log "Downloading package from ${url}"
     if [ "${DOWNLOAD:-true}" = 'true' ]; then
       mkdir -p "${ARCH_PACKAGE_CACHE}"
-      wget --quiet "--output-document=${package}" "${url}" || {
-        log "Error: Download was not successful (wget returned $?)"
-        return 1
-      }
+      curl -fsSLR -o "${package}" "${url}"
     fi
   fi
   echo "${package}"
@@ -74,7 +118,14 @@ provide_package() {
 install_package() {
   package="${1}"
   log "Installing package from ${package}"
-  zstd -d <"${package}" | tar x -C / --exclude '.*'
+  case "${package}" in
+    *.zst) unpack=zstd ;;
+    *.xz)  unpack=xz   ;;
+    *) cancel "Unsupported type of package ${package}"
+  esac
+  if [ "${INSTALL:-true}" = 'true' ]; then
+    "${unpack}" -d <"${package}" | tar x -C / --exclude '.*'
+  fi
 }
 
 print_usage() {
@@ -106,11 +157,11 @@ ${pad} Command                                      Package       Revision      
 ${pad} -------                                      -------       -------          ----------  -------------
   ${name} util-linux                 'util-linux'  latest           Core        current
   ${name} unrar=1:6.2.6-1            'unrar'       '1:6.2.6-1'      Archive     current
-  ${name} unrar=2023-02-05           'unrar'       from 2023/02/05  Archive     current
+  ${name} unrar=2023-02-05=extra     'unrar'       from 2023/02/05  Extra       current
   ${name} iotop=0.6-9==any           'iotop'       '0.6-9'          Archive     'any'
   ${name} base===any                 'base'        latest           Core        'any'
-  ${name} unrar==extra               'unrar'       latest           Extra       current
-  ${name} iotop==community=any       'iotop'       latest           Community   'any'
+  ${name} unrar==extra=aarch64       'unrar'       latest           Extra       'aarch64'
+  ${name} iotop==extra=any           'iotop'       latest           Extra       'any'
 EOF
 )
   log "${usage}"
@@ -126,14 +177,14 @@ main() {
       if [ "${revision}" = '?' ]; then
         revision="${ARCH_REVISION:-$(cat "${arch_metadata}/revision" 2>/dev/null || true)}"
       fi
-      log "Installing archlinux package ${name}${revision:+ in revision ${revision}}${repo:+ from repo ${repo}}${arch:+ for arch ${arch}}"
-      url="$(find_package_url "${name}" "${revision}" "${repo}" "${arch}")"
-      local_file="$(provide_package "${url}")"
-      if [ "${INSTALL:-true}" = 'true' ]; then
-        install_package "${local_file}"
-      else
-        echo "${local_file}"
+      repo="${repo:-core}"
+      arch="${arch:-${TARGET_ARCHITECTURE}}"
+      log "Installing archlinux package '${name}'${revision:+ in revision '${revision}'} from repo '${repo}' for arch '${arch}'"
+      if ! url="$(find_package_url "${name}" "${revision}" "${repo}" "${arch}" "${TARGET_ARCHITECTURE}")"; then
+        cancel "No URL found for this package-spec."
       fi
+      local_file="$(provide_package "${url}")"
+      install_package "${local_file}"
     done
   done
 }
