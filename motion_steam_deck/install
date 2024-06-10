@@ -15,7 +15,7 @@ main() {
   unzip -j -o "${package}" "SteamDeckGyroDSUSetup/${app_name}" -d /usr/bin/
   chmod +x "/usr/bin/${app_name}"
 
-  "${base_dir}/../bin/install-from-arch" ncurses=? systemd-libs=?
+  "${base_dir}/../bin/install-from-arch" ncurses=? systemd-libs=? hidapi=?=extra
 }
 
 main "${@}"
