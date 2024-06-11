@@ -3,6 +3,7 @@ set -eu
 . "$(readlink -f "$(dirname "$0")")/.env"
 
 main() {
+  url="$(find_url)"
   timestamp="$(
     wget -q --spider -S "${url}" 2>&1 \
     | sed -nE 's/\s*Last-Modified: ([^\s].+)/\1/p' \
