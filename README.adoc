@@ -109,7 +109,7 @@ Each time a motion service is started or stopped, the batocera configuration is 
 |Supports touch via link:motion_steam_controller/README.adoc[button mapping profiles]
 |USB Dongle
 |https://github.com/kozec/sc-controller[sc-controller]
-| 26760
+| 26768
 | `motion_steam_controller.log`
 
 |Steam Deck
