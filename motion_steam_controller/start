@@ -10,6 +10,6 @@ else
 
   [ -z "${ip-}" ] || export SCC_SERVER_IP="${ip}"
   [ -z "${port-}" ] || export SCC_SERVER_PORT="${port}"
-  "${app_name}" daemon --alone "${profile}" debug >"${log_file}" 2>&1 &
+  "${app_name}" daemon --alone "${profile}" debug >>"${log_file}" 2>&1 &
   sleep 2
 fi
