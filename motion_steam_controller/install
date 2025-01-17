@@ -25,13 +25,17 @@ prepare_profiles() {
 }
 
 add_desktop_integration() {
-  icon_path=/usr/share/icons/hicolor/512x512/apps
+  icon_path=/usr/share/icons/hicolor/symbolic/apps
   icon_file="${app_name}.png"
+  icon_source="usr/share/scc/images/menu-icons/system/${icon_file}"
 
   work_dir="$(mktemp -d)"
   cd "${work_dir}"
-  "${app_name}" --appimage-extract "${icon_file}"
-  mv "squashfs-root/${icon_file}" "${icon_path}"
+  if "${app_name}" --appimage-extract "${icon_source}" | grep -q .; then
+    mv "squashfs-root/${icon_source}" "${icon_path}"
+  else
+    echo >&2 "Warning: Missing icon for desktop file: ${icon_source}"
+  fi
   cd - >/dev/null
   rm -r "${work_dir}"
 

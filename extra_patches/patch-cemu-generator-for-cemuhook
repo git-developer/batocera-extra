@@ -10,18 +10,24 @@ generator="$(find /usr/lib/python*.*/site-packages/configgen/generators/cemu -na
 patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 --- "${generator}"
 +++ cemuControllers.py
-@@ -20,7 +20,10 @@
+@@ -27,6 +27,7 @@
      WIIMOTE = "Wiimote"
  
      API_SDL = "SDLController"
 +    API_DSU = "DSUController"
+     API_WIIMOTE = "Wiimote"
+ 
+     # from https://github.com/cemu-project/Cemu/blob/main/src/input/emulated/WPADController.h
+@@ -43,6 +44,8 @@
+     WIIMOTE_NAME_NUNCHUK    = WIIMOTE_NAME + ' Nunchuk'
+     WIIMOTE_NAME_CLASSIC    = WIIMOTE_NAME + ' Classic Controller'
  
 +    DEFAULT_IP             = 'localhost'
 +    DEFAULT_PORT           = '26760'
      DEFAULT_DEADZONE       = '0.25'
      DEFAULT_RANGE          = '1'
  
-@@ -212,6 +215,15 @@
+@@ -285,6 +288,15 @@
              addTextElement(entryNode, "mapping", key)
              addTextElement(entryNode, "button", value)
  
@@ -35,7 +41,7 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 +            addTextElement(motionControllerNode, 'port', getOption('cemuhook_server_port', DEFAULT_PORT))
 +
          # Save to file
-         with open(getConfigFileName(nplayer), 'wb') as handle:
+         with getConfigFileName(nplayer).open('wb') as handle:
              tree = ET.ElementTree(root)
 EOF
 
