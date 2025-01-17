@@ -4,7 +4,7 @@ set -eu
 extra_root="$(readlink -f "$(dirname -- "$0")/..")"
 
 # install and prepare upower with dependencies
-"${extra_root}/bin/install-from-arch" upower=?=extra libimobiledevice=?=extra libplist=?=extra openssl=? libusbmuxd=?=extra
+"${extra_root}/bin/install-from-arch" upower=?=extra libimobiledevice=?=extra libimobiledevice-glue=?=extra libplist=?=extra openssl=? libusbmuxd=?=extra
 
 # without this dbus patch, upowerd fails with error messages
 "${extra_root}/extra_patches/mark-dbus-python-as-installed"
