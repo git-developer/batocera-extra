@@ -42,7 +42,7 @@ By default, all features are registered. If you'd like to shorten the list of av
 ----
 $ /userdata/extra/<feature>/service hide
 ----
-.. Create services and activate patches (required for Cemu and Citra):
+.. Create services and activate patches (required for Cemu and Azahar):
 +
 [source,console]
 ----
@@ -62,13 +62,13 @@ image::services.png[Batocera Services,800]
 - The configuration has to be performed once only, it will be persisted across boots and batocera updates.
 
 - Make sure that _EXTRA_PATCHES_ is enabled as batocera service.
-The configuration generators for Cemu and Citra in current batocera don't offer support for motion and touch control.
+The configuration generators for Cemu and Azahar in current batocera don't offer support for motion and touch control.
 Thus, the included patches are required as batocera service.
 ====
 
 Each time a service is started (manually or on boot), it will check for updates of the provider and download it to a cache directory if required, then install it and start it as background daemon.
 
-Each time a motion service is started or stopped, the batocera configuration is updated so that Cemu and Citra will read
+Each time a motion service is started or stopped, the batocera configuration is updated so that Cemu and Azahar will read
 
 * motion input from the first enabled motion provider (i.e. top-most in the Services menu) and
 * touch input from the emulator window.
@@ -138,7 +138,7 @@ Each time a motion service is started or stopped, the batocera configuration is 
 
 |===
 
-To use a motion provider with an emulator other than Cemu or Citra, configure the emulator to listen to `localhost` and the provider's UDP port. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
+To use a motion provider with an emulator other than Cemu or Azahar, configure the emulator to listen to `localhost` and the provider's UDP port. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
 
 #### Implementation details
 
@@ -146,10 +146,10 @@ Whenever a motion provider is started or stopped, the following settings are wri
 
 ./userdata/system/batocera.conf
 ----
-3ds.citra_motion_device=engine:cemuhookudp
-3ds.citra_touch_device=engine:emu_window
-3ds.citra_udp_input_address=<provider-host>
-3ds.citra_udp_input_port=<provider-port>
+3ds.azahar_motion_device=engine:cemuhookudp
+3ds.azahar_touch_device=engine:emu_window
+3ds.azahar_udp_input_address=<provider-host>
+3ds.azahar_udp_input_port=<provider-port>
 
 wiiu.cemu_touchpad=1
 wiiu.cemuhook_server_ip=<provider-host>
@@ -263,14 +263,14 @@ motion_evdev            2807    evdevhook2
 .Example: Show log file of `extra_patches`
 ----
 # cat ~/logs/extra_patches.log
-Installing archlinux package patch in revision 2023-08-03
+Installing archlinux package patch in revision 2025-02-03
 Using locally cached file /userdata/system/.cache/arch-packages/patch-2.7.6-10-x86_64.pkg.tar.zst
 Installing package from /userdata/system/.cache/arch-packages/patch-2.7.6-10-x86_64.pkg.tar.zst
-patching file /usr/lib/python3.11/site-packages/configgen/generators/cemu/cemuControllers.py
-patching file /usr/lib/python3.11/site-packages/configgen/generators/cemu/cemuControllers.py
+patching file /usr/lib/python3.12/site-packages/configgen/generators/cemu/cemuControllers.py
+patching file /usr/lib/python3.12/site-packages/configgen/generators/cemu/cemuControllers.py
 Cemu Generator was patched for cemuhook.
-patching file /usr/lib/python3.11/site-packages/configgen/generators/citra/citraGenerator.py
-Citra Generator was patched for cemuhook.
+patching file /usr/lib/python3.12/site-packages/configgen/generators/azahar/azaharGenerator.py
+Azahar Generator was patched for cemuhook.
 ----
 +
 .Example: Show log file of `motion_evdev`
@@ -301,7 +301,7 @@ Found device Sony Computer Entertainment Wireless Controller Motion Sensors (uni
 .Example: Show motion port in Batocera configuration
 ----
 # grep cemuhook ~/batocera.conf
-3ds.citra_motion_device=engine:cemuhookudp
+3ds.azahar_motion_device=engine:cemuhookudp
 wiiu.cemuhook_server_ip=localhost
 wiiu.cemuhook_server_port=26766 // <1>
 ----

@@ -4,7 +4,7 @@ set -eu
 
 main() {
   "${base_dir}/patch-cemu-generator-for-cemuhook"
-  "${base_dir}/patch-citra-generator-for-cemuhook"
+  "${base_dir}/patch-azahar-generator-for-cemuhook"
   "${base_dir}/patch-joycond-for-flatpak"
   "${base_dir}/patch-sony-controllers-for-flatpak"
   "${base_dir}/relocate-root-dotfiles-to-home"

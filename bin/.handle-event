@@ -11,7 +11,7 @@ CEMUHOOK_DEFAULT_PORT=26760
 
 #
 # Update the batocera configuration to use the
-# first started motion provider for Cemu and Citra.
+# first started motion provider for Cemu and Azahar.
 #
 sync_motion_configuration() {
 
@@ -27,10 +27,10 @@ sync_motion_configuration() {
     port="${port:-${CEMUHOOK_DEFAULT_PORT}}"
 
     batocera-settings-set \
-      3ds.citra_touch_device engine:emu_window \
-      3ds.citra_motion_device engine:cemuhookudp \
-      3ds.citra_udp_input_address "${host}" \
-      3ds.citra_udp_input_port "${port}" \
+      3ds.azahar_touch_device engine:emu_window \
+      3ds.azahar_motion_device engine:cemuhookudp \
+      3ds.azahar_udp_input_address "${host}" \
+      3ds.azahar_udp_input_port "${port}" \
       wiiu.cemu_touchpad 1 \
       wiiu.cemuhook_server_ip "${host}" \
       wiiu.cemuhook_server_port "${port}"

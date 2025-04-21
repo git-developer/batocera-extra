@@ -27,7 +27,7 @@ Port=26763
 [0xFEDCBA987654]
 ----
 
-. To automatically configure Cemu and Citra for a Wiimote motion provider,
+. To automatically configure Cemu and Azahar for a Wiimote motion provider,
   set the port in the `.env` file. Example:
 +
 .env

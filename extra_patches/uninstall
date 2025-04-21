@@ -8,8 +8,8 @@ main() {
     mv "${backup}" "${backup%.backup-cemuhook}"
   done
 
-  # patch-citra-generator-for-cemuhook
-  find /usr/lib/python*.*/site-packages/configgen/generators/citra -name citraGenerator.py.backup-cemuhook | while read backup; do
+  # patch-azahar-generator-for-cemuhook
+  find /usr/lib/python*.*/site-packages/configgen/generators/azahar -name azaharGenerator.py.backup-cemuhook | while read backup; do
     mv "${backup}" "${backup%.backup-cemuhook}"
   done
 

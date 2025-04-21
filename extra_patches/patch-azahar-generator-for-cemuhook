@@ -1,0 +1,26 @@
+#!/bin/sh
+set -eu
+
+if ! command -V patch >/dev/null 2>&1; then
+  extra_root="$(readlink -f "$(dirname -- "$0")/..")"
+  "${extra_root}/bin/install-from-arch" patch=?
+fi
+
+generator="$(find /usr/lib/python*.*/site-packages/configgen/generators/azahar -name azaharGenerator.py)"
+patch -b -z .backup-cemuhook "${generator}" << 'EOF'
+--- "${generator}"
++++ azaharGenerator.py
+@@ -198,6 +198,10 @@
+                 azaharConfig.set("Controls", f"profiles\\1\\{x}", f'"{AzaharGenerator.setButton(azaharButtons[x], controller.guid, controller.inputs)}"')
+             for x in azaharAxis:
+                 azaharConfig.set("Controls", f"profiles\\1\\{x}", f'"{AzaharGenerator.setAxis(azaharAxis[x], controller.guid, controller.inputs)}"')
++            for x in ["motion_device", "touch_device", "udp_input_address", "udp_input_port"]:
++                if system.isOptSet("azahar_{x}"):
++                    azaharConfig.set("Controls", f"profiles\\1\\{x}", system.config["azahar_{x}"])
++                    azaharConfig.set("Controls", f"profiles\\1\\{x}\\default", "false")
+
+         ## Update the configuration file
+         with ensure_parents_and_open(azaharConfigFile, 'w') as configfile:
+EOF
+
+echo >&2 "Azahar Generator was patched for cemuhook."
