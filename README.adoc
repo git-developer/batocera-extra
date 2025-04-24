@@ -263,7 +263,7 @@ motion_evdev            2807    evdevhook2
 .Example: Show log file of `extra_patches`
 ----
 # cat ~/logs/extra_patches.log
-Installing archlinux package patch in revision 2025-02-03
+Installing archlinux package patch in revision 2024-12-21
 Using locally cached file /userdata/system/.cache/arch-packages/patch-2.7.6-10-x86_64.pkg.tar.zst
 Installing package from /userdata/system/.cache/arch-packages/patch-2.7.6-10-x86_64.pkg.tar.zst
 patching file /usr/lib/python3.12/site-packages/configgen/generators/cemu/cemuControllers.py
