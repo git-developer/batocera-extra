@@ -12,33 +12,33 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 +++ cemuControllers.py
 @@ -27,6 +27,7 @@
      WIIMOTE = "Wiimote"
- 
+
      API_SDL = "SDLController"
 +    API_DSU = "DSUController"
      API_WIIMOTE = "Wiimote"
- 
+
      # from https://github.com/cemu-project/Cemu/blob/main/src/input/emulated/WPADController.h
 @@ -43,6 +44,8 @@
-     WIIMOTE_NAME_NUNCHUK    = WIIMOTE_NAME + ' Nunchuk'
-     WIIMOTE_NAME_CLASSIC    = WIIMOTE_NAME + ' Classic Controller'
- 
+     WIIMOTE_NAME_NUNCHUK    = f'{WIIMOTE_NAME} Nunchuk'
+     WIIMOTE_NAME_CLASSIC    = f'{WIIMOTE_NAME} Classic Controller'
+
 +    DEFAULT_IP             = 'localhost'
 +    DEFAULT_PORT           = '26760'
      DEFAULT_DEADZONE       = '0.25'
      DEFAULT_RANGE          = '1'
- 
-@@ -285,6 +288,15 @@
+
+@@ -274,6 +277,15 @@
              addTextElement(entryNode, "mapping", key)
              addTextElement(entryNode, "button", value)
- 
+
 +        # Add motion control
 +        if (system.isOptSet('cemuhook_server_port')):
 +            motionControllerNode = ET.SubElement(root, 'controller')
 +            addTextElement(motionControllerNode, 'api', API_DSU)
 +            addTextElement(motionControllerNode, 'uuid', '0')
 +            addTextElement(motionControllerNode, 'motion', 'true')
-+            addTextElement(motionControllerNode, 'ip', getOption('cemuhook_server_ip', DEFAULT_IP))
-+            addTextElement(motionControllerNode, 'port', getOption('cemuhook_server_port', DEFAULT_PORT))
++            addTextElement(motionControllerNode, 'ip', system.config.get('cemuhook_server_ip', DEFAULT_IP))
++            addTextElement(motionControllerNode, 'port', system.config.get('cemuhook_server_port', DEFAULT_PORT))
 +
          # Save to file
          with getConfigFileName(nplayer).open('wb') as handle:
