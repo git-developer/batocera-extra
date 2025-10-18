@@ -10,13 +10,13 @@ generator="$(find /usr/lib/python*.*/site-packages/configgen/generators/azahar -
 patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 --- "${generator}"
 +++ azaharGenerator.py
-@@ -198,6 +198,10 @@
-                 azaharConfig.set("Controls", f"profiles\\1\\{x}", f'"{AzaharGenerator.setButton(azaharButtons[x], controller.guid, controller.inputs)}"')
+@@ -233,6 +233,10 @@
              for x in azaharAxis:
                  azaharConfig.set("Controls", f"profiles\\1\\{x}", f'"{AzaharGenerator.setAxis(azaharAxis[x], controller.guid, controller.inputs)}"')
+                 azaharConfig.set("Controls", r"profiles\\1\\{x}\default", "false")
 +            for x in ["motion_device", "touch_device", "udp_input_address", "udp_input_port"]:
-+                if system.isOptSet("azahar_{x}"):
-+                    azaharConfig.set("Controls", f"profiles\\1\\{x}", system.config["azahar_{x}"])
++                if system.isOptSet(f"azahar_{x}"):
++                    azaharConfig.set("Controls", f"profiles\\1\\{x}", system.config[f"azahar_{x}"])
 +                    azaharConfig.set("Controls", f"profiles\\1\\{x}\\default", "false")
 
          ## Update the configuration file
