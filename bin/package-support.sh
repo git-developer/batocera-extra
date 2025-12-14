@@ -2,12 +2,33 @@ log() {
   echo >&2 "${@}"
 }
 
+apply_cache() {
+  cache="${1}" key="${2}" value="${3}"
+
+  if [ "${value}" ]; then
+    entry="$(printf '%s\t%s' "${key}" "${value}")"
+    if ! grep -q -F "${entry}" "${cache}" 2>/dev/null; then
+      if [ -r "${cache}" ] && grep -q -F "${key}" "${cache}"; then
+        other_entries="$(grep -v -F "${key}" "${cache}")"
+        echo "${other_entries}" >"${cache}"
+      fi
+      log "Adding cache entry: ${entry}"
+      echo "${entry}" >>"${cache}"
+    fi
+    echo "${value}"
+  elif [ -r "${cache}" ]; then
+    log "${key} not found, reading from cache:"
+    grep -F "${key}" "${cache}" | cut -f 2 | tee -a /dev/stderr
+  fi
+}
+
 provide_package() {
   source="${1}" target="${2}"
 
   package="${source}"
   if [ ! -r "${source}" ]; then
     filename="$(wget --quiet --spider --server-response "${source}" 2>&1 | sed -nE 's/\s*content-disposition.+filename=(.+)/\1/pi')"
+    filename="$(apply_cache "${target}/.url-cache" "${source}" "${filename}")"
     filename="${filename:-${source##*/}}"
     if [ "${filename}" ]; then
       package="${target}/${filename}"
