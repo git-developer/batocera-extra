@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+rm "${rom_path}"
