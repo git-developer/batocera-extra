@@ -51,7 +51,7 @@ service_install_unattended() {
 
 service_uninstall() {
   if [ -x "${base_dir}/uninstall" ]; then
-    "${base_dir}/uninstall"
+    "${base_dir}/uninstall" "${@}"
   else
     rm -f "/usr/bin/${app_name}"
   fi
