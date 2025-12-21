@@ -1,0 +1,49 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+extract_root_file() {
+  source="${1}"
+  extension="${2}"
+  target_path="${3}"
+  target_basename="${4}"
+
+  tar x -zf "${source}" -C "${target_path}" \
+    --exclude '*/*' \
+    --wildcards "*.${extension}" \
+    --xform "s/^.*\.${extension}$/${target_basename}.${extension}/"
+}
+
+install_libretro_core() {
+  package="${1}"
+
+  extract_root_file "${package}" so /usr/lib/libretro/ "${core_name}"
+  extract_root_file "${package}" info /usr/share/libretro/info/ "${core_name}"
+  batocera-settings-set "${system_id}.emulator" libretro "${system_id}.core" "${system_id}"
+}
+
+install_metadata() {
+  package="${1}"
+  images_path="${roms_path}/images"
+
+  if [ ! -e "${images_path}/${system_id}.png" ]; then
+   mkdir -p "${images_path}"
+   extract_root_file "${package}" png "${images_path}" "${system_id}"
+  fi
+
+  gamelist="${roms_path}/gamelist.xml"
+  if [ ! -e "${gamelist}" ]; then
+    "${base_dir}/install_xml" gamelist "${gamelist}" "${system_id}"
+  fi
+}
+
+main() {
+  target="${XDG_CACHE_HOME:-/userdata/system/.cache}/${app_name}"
+  package="$(provide_package "$(find_url)" "${target}")"
+
+  install_libretro_core "${package}"
+  install_metadata "${package}"
+  "${base_dir}/install_xml" es-config "${es_config_path}" "${system_id}"
+}
+
+main "${@}"
