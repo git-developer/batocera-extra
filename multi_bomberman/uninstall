@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+main() {
+  rm -f "/usr/lib/libretro/${core_name}.so"
+  rm -f "/usr/share/libretro/info/${core_name}.info"
+  rm -f "${es_config_path}"
+  if [ "${1-}" = '--delete-roms' ] && [ -d "${roms_path}" ]; then
+    echo >&2 "Please confirm to permanently delete all files in '${roms_path}'"
+    rm -r -I "${roms_path}"
+  fi
+}
+
+main "${@}"

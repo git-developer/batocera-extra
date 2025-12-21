@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+. "$(readlink -f "$(dirname "$0")")/.env"
+
+printf 'File used at game startup' | install -D --mode=+r /dev/stdin "${rom_path}"
