@@ -1,0 +1,76 @@
+#!/usr/bin/python3
+
+import sys
+import xml.etree.cElementTree as ET
+from pathlib import Path
+
+def writeXML(root: ET.Element, targetFile: str) -> None:
+  with Path(targetFile).open('wb') as handle:
+    tree = ET.ElementTree(root)
+    ET.indent(tree, space=' ' * 4, level=0)
+    tree.write(handle, encoding='UTF-8', xml_declaration=True)
+    handle.write(b'\n')
+    handle.close()
+
+def addTextElement(parent: ET.Element, name: str, value: str) -> ET.Element:
+  element = ET.SubElement(parent, name)
+  element.text = value
+  return element
+
+def createEmulationStationConfig(systemName: str) -> ET.Element:
+  root = ET.Element('systemList')
+  systemNode = ET.SubElement(root, 'system')
+  def add(name: str, value: str) -> None:
+    addTextElement(systemNode, name, value)
+
+  add('fullname', 'Multi Bomberman')
+  add('name', systemName)
+  add('manufacturer', 'Ports')
+  add('release', 'None')
+  add('hardware', 'port')
+  add('path', f"/userdata/roms/{systemName}")
+  add('extension', '.libretro')
+  add('command', 'emulatorlauncher %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%')
+  add('platform', 'pc')
+  add('theme', systemName)
+  add('group', 'ports')
+  emulatorsNode = ET.SubElement(systemNode, 'emulators')
+  emulatorNode = ET.SubElement(emulatorsNode, 'emulator')
+  emulatorNode.set('name', 'libretro')
+  coresNode = ET.SubElement(emulatorNode, 'cores')
+  addTextElement(coresNode, 'core', systemName).set('default', 'true')
+
+  return root
+
+def createGameList(systemName: str) -> None:
+  root = ET.Element('gameList')
+  gameNode = ET.SubElement(root, 'game')
+  def add(name: str, value: str) -> None:
+    addTextElement(gameNode, name, value)
+
+  add('path', './MultiBomberman.libretro')
+  add('name', 'Multi Bomberman')
+  add('desc', 'Bomberman oriented multiplayer (16 players, max of retroarch) Library core for Retroarch emulator.')
+  add('developer', 'Alexis Puskarczyk')
+  add('publisher', 'Libretro')
+  add('players', '16')
+  add('lang', 'en')
+  add('image', f"./images/{systemName}.png")
+  add('genre', 'Action')
+
+  return root
+
+def main() -> None:
+  type, targetFile, systemName = (sys.argv[1:4])
+  xmlFactories = {
+    'es-config': createEmulationStationConfig,
+    'gamelist':  createGameList
+  }
+  xmlFactory = xmlFactories.get(type)
+  if xmlFactory is None:
+    raise ValueError('Unsupported option: "{}". Supported: {}'.format(type, list(xmlFactories.keys())))
+
+  xml = xmlFactory(systemName)
+  writeXML(xml, targetFile)
+
+main()
