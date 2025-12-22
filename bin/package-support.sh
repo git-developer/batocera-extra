@@ -36,7 +36,11 @@ provide_package() {
         log "Using up-to-date local file ${package}"
       else
         mkdir -p "${target}"
-        wget --quiet "--output-document=${package}" "${source}"
+        wget --quiet "--output-document=${package}" "${source}" || {
+          rc="$?"
+          log "Error downloading ${source}"
+          return "$rc"
+        }
       fi
     fi
   fi
