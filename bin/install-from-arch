@@ -4,6 +4,7 @@ set -eu
 ARCH_PACKAGE_CACHE="${ARCH_PACKAGE_CACHE:-${XDG_CACHE_HOME:-/userdata/system/.cache}/arch-packages}"
 ARCH_PACKAGE_CACHE="${ARCH_PACKAGE_CACHE%/}"
 TARGET_ARCHITECTURE="${TARGET_ARCHITECTURE:-$(uname -m)}"
+TARGET_DIRECTORY="${TARGET_DIRECTORY:-/}"
 arch_metadata="$(dirname "$0")/.arch"
 
 log() {
@@ -18,7 +19,7 @@ cancel() {
 find_package_url() {
   local name="${1}" revision="${2}" repo="${3}" arch="${4}" os_arch="${5}"
 
-  if echo "${revision}" | grep -qP '^\d{4}.\d{2}.\d{2}$'; then
+  if echo "${revision}" | grep -q '^[0-9]\{4\}.[0-9]\{2\}.[0-9]\{2\}$'; then
     date="$(printf %s "${revision}" | tr -c '[:digit:]' '/')"
   fi
 
@@ -88,7 +89,7 @@ find_url_by_date() {
     fi
   fi
 
-  path="$(grep -P "^${name}-(\d.+)-${arch}\.pkg\.tar\.\w+$" "${packages}" | sort -V | tail -1 | grep .)"
+  path="$(grep "^${name}-r\?[0-9].\+-${arch}\.pkg\.tar\.\w\+$" "${packages}" | sort -V | tail -1 | grep .)"
   echo "${url}/${path}"
 }
 
@@ -124,7 +125,7 @@ install_package() {
     *) cancel "Unsupported type of package ${package}"
   esac
   if [ "${INSTALL:-true}" = 'true' ]; then
-    "${unpack}" -d <"${package}" | tar x -C / --exclude '.*'
+    "${unpack}" -d <"${package}" | tar x -C "${TARGET_DIRECTORY}" --exclude '.*'
   fi
 }
 
