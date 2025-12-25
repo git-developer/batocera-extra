@@ -215,6 +215,12 @@ Scripts are located in the `bin/` directory. They are optional and not related t
 KEY_F12 1 /userdata/extra/bin/system-summary | sed 's/°/ /' | HOME=/userdata/system XAUTHORITY=/var/lib/.Xauthority DISPLAY=:0.0 osd_cat -f -*-*-bold-*-*-*-38-120-*-*-*-*-*-* -cred -s 3 -d 4
 ----
 
+### Games
+#### multi_bomberman
+* A batocera service for https://github.com/alexis-puska/lr-multi-bomberman[lr-multi-bomberman],
+  a Bomberman clone for up to 16 local players. Will be listed in group _Ports_
+  after enabling the service and reloading the game list.
+
 ## Troubleshooting
 > "Everything is installed and configured, but I have no motion. How can I find out what's wrong?"
 
