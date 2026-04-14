@@ -7,7 +7,8 @@ main() {
   if [ "${package_source}" ]; then
     "${base_dir}/../extra_patches/mark-dbus-python-as-installed"
 
-    pip install --root-user-action=ignore "${package_source}"
+    # transitive dependency 'PyGObject_stubs' requires gcc from 2.17
+    pip install --root-user-action=ignore 'PyGObject_stubs<2.17' "${package_source}"
   fi
 }
 
