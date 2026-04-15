@@ -59,7 +59,7 @@ service_uninstall() {
 }
 
 service_register() {
- printf 'exec '\''%s/service'\'' "${1}" %s\n' "${base_dir}" '--unattended' | install /dev/stdin "${service_path}"
+ printf 'exec '\''%s/service'\'' "${1}" %s\n' "${base_dir}" '--unattended' | install -D /dev/stdin "${service_path}"
 }
 
 service_unregister() {
