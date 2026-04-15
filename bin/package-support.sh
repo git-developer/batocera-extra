@@ -27,6 +27,7 @@ provide_package() {
 
   package="${source}"
   if [ ! -r "${source}" ]; then
+    mkdir -p "${target}"
     filename="$(wget --quiet --spider --server-response "${source}" 2>&1 | sed -nE 's/\s*content-disposition.+filename=(.+)/\1/pi')"
     filename="$(apply_cache "${target}/.url-cache" "${source}" "${filename}")"
     filename="${filename:-${source##*/}}"
@@ -35,7 +36,6 @@ provide_package() {
       if [ -s "${package}" ]; then
         log "Using up-to-date local file ${package}"
       else
-        mkdir -p "${target}"
         wget --quiet "--output-document=${package}" "${source}"
       fi
     fi
