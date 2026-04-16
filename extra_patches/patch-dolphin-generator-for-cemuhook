@@ -1,0 +1,47 @@
+#!/bin/sh
+set -eu
+
+if ! command -V patch >/dev/null 2>&1; then
+  extra_root="$(readlink -f "$(dirname -- "$0")/..")"
+  "${extra_root}/bin/install-from-arch" patch=?
+fi
+
+generator="$(find /usr/lib/python*.*/site-packages/configgen/generators/dolphin -name dolphinControllers.py)"
+patch -b -z .backup-cemuhook "${generator}" << 'EOF'
+--- "${generator}"
++++ dolphinControllers.py
+@@ -42,6 +42,15 @@
+         else:
+             generateControllerConfig_realwiimotes("WiimoteNew.ini", "Wiimote")
+             generateControllerConfig_gamecube(system, playersControllers, {}, rom)           # You can use the gamecube pads on the wii together with wiimotes
++        if system.config.get("cemuhook_server_port"):
++            configFileName = DOLPHIN_CONFIG / "DSUClient.ini"
++            with codecs.open(str(configFileName), "w", encoding="utf_8_sig") as f:
++                cemuhook_server_ip = system.config.get("cemuhook_server_ip")
++                cemuhook_server_port = system.config.get("cemuhook_server_port")
++                f.write(f"[Server]\n")
++                f.write(f"Enabled = True\n")
++                f.write(f"Entries = batocera-extra:{cemuhook_server_ip}:{cemuhook_server_port};\n")
++
+     elif system.name == "gamecube":
+         used_wheels: DeviceInfoMapping = {}
+         if system.config.use_wheels and wheels:
+@@ -562,6 +572,14 @@
+             case 'larger':
+                 f.write("Main Stick/Gate Size = 95.0\n")
+                 f.write("C-Stick/Gate Size = 88.0\n")
++        # Cemuhook motion control
++        if system.config.get("cemuhook_server_port"):
++            f.write(f"IMUGyroscope/Pitch Up = `DSUClient/0/evdev:Gyro Pitch Up`\n")
++            f.write(f"IMUGyroscope/Pitch Down = `DSUClient/0/evdev:Gyro Pitch Down`\n")
++            f.write(f"IMUGyroscope/Roll Left = `DSUClient/0/evdev:Gyro Roll Left`\n")
++            f.write(f"IMUGyroscope/Roll Right = `DSUClient/0/evdev:Gyro Roll Right`\n")
++            f.write(f"IMUGyroscope/Yaw Left = `DSUClient/0/evdev:Gyro Yaw Left`\n")
++            f.write(f"IMUGyroscope/Yaw Right = `DSUClient/0/evdev:Gyro Yaw Right`\n")
+ 
+ def generateControllerConfig_any_from_profiles(f: codecs.StreamReaderWriter, pad: Controller, system: Emulator) -> bool:
+     glob_path: Path | None = None
+EOF
+
+echo >&2 "Dolphin generator was patched for cemuhook."
+

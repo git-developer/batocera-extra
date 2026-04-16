@@ -45,4 +45,4 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
              tree = ET.ElementTree(root)
 EOF
 
-echo >&2 "Cemu Generator was patched for cemuhook."
+echo >&2 "Cemu generator was patched for cemuhook."

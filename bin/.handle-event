@@ -33,7 +33,9 @@ sync_motion_configuration() {
       3ds.azahar_udp_input_port "${port}" \
       wiiu.cemu_touchpad 1 \
       wiiu.cemuhook_server_ip "${host}" \
-      wiiu.cemuhook_server_port "${port}"
+      wiiu.cemuhook_server_port "${port}" \
+      wii.cemuhook_server_ip "${host}" \
+      wii.cemuhook_server_port "${port}"
   fi
 }
 
