@@ -218,6 +218,11 @@ Scripts are located in the `bin/` directory. They are optional and not related t
 KEY_F12 1 /userdata/extra/bin/system-summary | sed 's/°/ /' | HOME=/userdata/system XAUTHORITY=/var/lib/.Xauthority DISPLAY=:0.0 osd_cat -f -*-*-bold-*-*-*-38-120-*-*-*-*-*-* -cred -s 3 -d 4
 ----
 
+### Games
+#### multi_bomberman
+_MULTI_BOMBERMAN_ integrates https://github.com/alexis-puska/lr-multi-bomberman[alexis-puska/lr-multi-bomberman],
+a Bomberman game for up to 16 players. Once enabled, it will be found within _Ports_.
+
 ## Troubleshooting
 > "Everything is installed and configured, but I have no motion. How can I find out what's wrong?"
 
