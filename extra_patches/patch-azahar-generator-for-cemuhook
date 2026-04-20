@@ -23,4 +23,4 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
          with ensure_parents_and_open(azaharConfigFile, 'w') as configfile:
 EOF
 
-echo >&2 "Azahar Generator was patched for cemuhook."
+echo >&2 "Azahar generator was patched for cemuhook."

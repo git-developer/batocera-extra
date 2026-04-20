@@ -42,7 +42,7 @@ By default, all features are registered. If you'd like to shorten the list of av
 ----
 $ /userdata/extra/<feature>/service hide
 ----
-.. Create services and activate patches (required for Cemu and Azahar):
+.. Create services and activate patches (required for Cemu, Azahar and Dolphin):
 +
 [source,console]
 ----
@@ -62,13 +62,13 @@ image::services.png[Batocera Services,800]
 - The configuration has to be performed once only, it will be persisted across boots and batocera updates.
 
 - Make sure that _EXTRA_PATCHES_ is enabled as batocera service.
-The configuration generators for Cemu and Azahar in current batocera don't offer support for motion and touch control.
+The configuration generators for Cemu, Azahar and Dolphin in current batocera don't offer support for motion and touch control (besides DS4 support in Dolphin).
 Thus, the included patches are required as batocera service.
 ====
 
 Each time a service is started (manually or on boot), it will check for updates of the provider and download it to a cache directory if required, then install it and start it as background daemon.
 
-Each time a motion service is started or stopped, the batocera configuration is updated so that Cemu and Azahar will read
+Each time a motion service is started or stopped, the batocera configuration is updated so that Cemu, Azahar and Dolphin will read
 
 * motion input from the first enabled motion provider (i.e. top-most in the Services menu) and
 * touch input from the emulator window.
@@ -138,7 +138,7 @@ Each time a motion service is started or stopped, the batocera configuration is 
 
 |===
 
-To use a motion provider with an emulator other than Cemu or Azahar, configure the emulator to listen to `localhost` and the provider's UDP port. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
+To use a motion provider with an emulator other than Cemu, Azahar or Dolphin, configure the emulator to listen to `localhost` and the provider's UDP port. The https://github.com/joaorb64/joycond-cemuhook/wiki[joycond-cemuhook wiki] has detailed explanations for popular emulators.
 
 #### Implementation details
 
@@ -154,6 +154,9 @@ Whenever a motion provider is started or stopped, the following settings are wri
 wiiu.cemu_touchpad=1
 wiiu.cemuhook_server_ip=<provider-host>
 wiiu.cemuhook_server_port=<provider-port>
+
+wii.cemuhook_server_ip=<provider-host>
+wii.cemuhook_server_port=<provider-port>
 ----
 
 The host is `localhost` unless you run a remote provider (e.g. on a smartphone). The port is read from the first enabled service.
@@ -267,10 +270,11 @@ Installing archlinux package patch in revision 2024-12-21
 Using locally cached file /userdata/system/.cache/arch-packages/patch-2.7.6-10-x86_64.pkg.tar.zst
 Installing package from /userdata/system/.cache/arch-packages/patch-2.7.6-10-x86_64.pkg.tar.zst
 patching file /usr/lib/python3.12/site-packages/configgen/generators/cemu/cemuControllers.py
-patching file /usr/lib/python3.12/site-packages/configgen/generators/cemu/cemuControllers.py
 Cemu Generator was patched for cemuhook.
 patching file /usr/lib/python3.12/site-packages/configgen/generators/azahar/azaharGenerator.py
 Azahar Generator was patched for cemuhook.
+patching file /usr/lib/python3.12/site-packages/configgen/generators/dolphin/dolphinControllers.py
+Dolphin generator was patched for cemuhook.
 ----
 +
 .Example: Show log file of `motion_evdev`
@@ -304,6 +308,8 @@ Found device Sony Computer Entertainment Wireless Controller Motion Sensors (uni
 3ds.azahar_motion_device=engine:cemuhookudp
 wiiu.cemuhook_server_ip=localhost
 wiiu.cemuhook_server_port=26766 // <1>
+wii.cemuhook_server_ip=localhost
+wii.cemuhook_server_port=26766 // <1>
 ----
 <1> Motion Port
 
