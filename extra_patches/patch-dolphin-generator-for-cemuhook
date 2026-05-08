@@ -26,7 +26,7 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
      elif system.name == "gamecube":
          used_wheels: DeviceInfoMapping = {}
          if system.config.use_wheels and wheels:
-@@ -562,6 +572,20 @@
+@@ -646,6 +655,20 @@
              case 'larger':
                  f.write("Main Stick/Gate Size = 95.0\n")
                  f.write("C-Stick/Gate Size = 88.0\n")
