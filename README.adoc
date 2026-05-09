@@ -108,7 +108,7 @@ Each time a motion service is started or stopped, the batocera configuration is 
 |MOTION_STEAM_CONTROLLER
 |Supports touch via link:motion_steam_controller/README.adoc[button mapping profiles]
 |USB Dongle
-|https://github.com/kozec/sc-controller[sc-controller]
+|https://github.com/C0rn3j/sc-controller[sc-controller]
 | 26768
 | `motion_steam_controller.log`
 
@@ -181,7 +181,7 @@ The host is `localhost` unless you run a remote provider (e.g. on a smartphone).
 |Steam Controller
 |MOTION_STEAM_CONTROLLER
 |link:motion_steam_controller/README.adoc[Configuration] is optional.
-|https://github.com/kozec/sc-controller[sc-controller]
+|https://github.com/C0rn3j/sc-controller[sc-controller]
 | `motion_steam_controller.log`
 
 |Remote devices (e.g. smartphones)
