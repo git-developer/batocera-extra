@@ -17,14 +17,14 @@ cancel() {
 }
 
 find_package_url() {
-  local name="${1}" revision="${2}" repo="${3}" arch="${4}" os_arch="${5}"
+  local name="${1}" revision="${2}" repo="${3}" arch="${4}" repo_arch="${5}"
 
   if echo "${revision}" | grep -q '^[0-9]\{4\}.[0-9]\{2\}.[0-9]\{2\}$'; then
     date="$(printf %s "${revision}" | tr -c '[:digit:]' '/')"
   fi
 
   if [ "${arch}" = any ]; then
-    target_arch="${os_arch}"
+    target_arch="${repo_arch}"
   else
     target_arch="${arch}"
   fi
@@ -38,10 +38,10 @@ find_package_url() {
 }
 
 find_url_x86() {
-  local name="${1}" date="${2}" revision="${3}" repo="${4}" arch="${5}" os_arch="${6}" archive_url="https://archive.archlinux.org"
+  local name="${1}" date="${2}" revision="${3}" repo="${4}" arch="${5}" repo_arch="${6}" archive_url="https://archive.archlinux.org"
 
   if [ "${date-}" ]; then
-    find_url_by_date "${name}" "${date}" "${repo}" "${arch}" "${os_arch}" "${archive_url}/repos/${date}/${repo}/os/${os_arch}"
+    find_url_by_date "${name}" "${date}" "${repo}" "${arch}" "${repo_arch}" "${archive_url}" "repos/${date}/${repo}/os/${repo_arch}"
   elif [ "${revision}" ]; then
     find_url_by_revision "${name}" "${revision}" "${arch}" zst "${archive_url}"
   else
@@ -53,14 +53,26 @@ find_url_x86() {
 }
 
 find_url_arm() {
-  local name="${1}" date="${2}" revision="${3}" repo="${4}" arch="${5}" os_arch="${6}" archive_url="http://tardis.tiny-vps.com/aarm"
+  local name="${1}" date="${2}" revision="${3}" repo="${4}" arch="${5}" repo_arch="${6}"
 
-  if [ "${os_arch#arm}" != "${os_arch}" ]; then
-    os_arch=armv7h;
+  #
+  # ARM archives:
+  # - sametimetomorrow.net begins 2026-04-27, odd days only, provides aarch64, packages available from both /${date} and /packages
+  # - tiny-vps.com ends 2025-06-12, provides aarch64 and armv7h, packages available from /${date} (/packages only <= 2022)
+  #
+  if [ "$(date -d "${date}" +%s)" -ge "$(date -d '2026/04/27' +%s)" ]; then
+    archive_url="https://pkgmirror.sametimetomorrow.net/aarch64"
+    repos_path="repos/${date}/${repo}"
+  else
+    archive_url="http://tardis.tiny-vps.com/aarm"
+    if [ "${repo_arch}" != "${repo_arch#arm*}" ]; then
+      repo_arch=armv7h
+    fi
+    repos_path="repos/${date}/${repo_arch}/${repo}"
   fi
 
   if [ "${date-}" ]; then
-    find_url_by_date "${name}" "${date}" "${repo}" "${arch}" "${os_arch}" "${archive_url}/repos/${date}/${os_arch}/${repo}"
+    find_url_by_date "${name}" "${date}" "${repo}" "${arch}" "${repo_arch}" "${archive_url}" "${repos_path}" "${repos_path}"
   elif [ "${revision}" ]; then
     find_url_by_revision "${name}" "${revision}" "${arch}" xz "${archive_url}"
   else
@@ -71,10 +83,10 @@ find_url_arm() {
 }
 
 find_url_by_date() {
-  local name="${1}" date="${2}" repo="${3}" arch="${4}" os_arch="${5}" url="${6}"
+  local name="${1}" date="${2}" repo="${3}" arch="${4}" repo_arch="${5}" archive_url="${6}" index_path="${7}" packages_path="${8:-packages/${name%"${name#?}"}/${name}}"
 
   mkdir -p "${ARCH_PACKAGE_CACHE}"
-  index_name="$(printf %s "${date}" | tr -c '[:digit:]' '-').${repo}.${os_arch}.packages"
+  index_name="$(printf %s "${date}" | tr -c '[:digit:]' '-').${repo}.${repo_arch}.packages"
   packages="${ARCH_PACKAGE_CACHE}/${index_name}"
   if [ ! -s "${packages}" ]; then
     known_packages="${arch_metadata}/${index_name}"
@@ -83,14 +95,19 @@ find_url_by_date() {
     else
       # use a temp file to avoid an incomplete file on curl errors
       index="$(mktemp --tmpdir "${index_name}.XXXXXX")"
-      curl -fsSL "${url}/" >>"${index}"
-      <"${index}" sed -nE 's/.*href="([^"]+\.pkg\.tar\.\w+)".*/\1/p' | grep . >"${packages}"
+      index_url="${archive_url}/${index_path}"
+      # .db files since 2025-11-23 for x86_64
+      if curl -fsSL -o "${index}" -w "%{http_code}" "${index_url}/${repo}.db" 2>/dev/null | grep -q '^2'; then
+        tar x -z --wildcards '*/desc' -f "${index}" --to-stdout | awk '/^%FILENAME%$/{getline; print}'
+      elif curl -fsSL -o "${index}" "${index_url}"; then
+        sed -nE 's:.*href="(\./)?([^"]+\.pkg\.tar\.\w+)".*:\2:p' "${index}"
+      fi | grep . >"${packages}"
       rm "${index}"
     fi
   fi
 
-  path="$(grep "^${name}-r\?[0-9].\+-${arch}\.pkg\.tar\.\w\+$" "${packages}" | sort -V | tail -1 | grep .)"
-  echo "${url}/${path}"
+  path="$(grep "^${name}-r\?[0-9].\+-${repo_arch}\.pkg\.tar\.\w\+$" "${packages}" | sort -V | tail -1 | grep .)"
+  echo "${archive_url}/${packages_path}/${path}"
 }
 
 find_url_by_revision() {
