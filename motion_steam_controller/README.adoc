@@ -1,5 +1,5 @@
 = sc-controller
-:url-sc-controller: https://github.com/kozec/sc-controller
+:url-sc-controller: https://github.com/C0rn3j/sc-controller
 Motion control for the Steam Controllers
 
 == Configuration
@@ -36,4 +36,4 @@ run the install script with the argument `--with-default-profiles` (existing pro
 ```
 
 ==== Examples
-Additional profiles can be found in {url-sc-controller}/tree/master/profile_examples[profile_examples].
+Additional profiles can be found in {url-sc-controller}/tree/main/profile_examples[profile_examples].
