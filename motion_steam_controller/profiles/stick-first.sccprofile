@@ -16,6 +16,9 @@
         "LB": {
             "action": "button(Keys.BTN_TL)"
         },
+        "LSTICKPRESS": {
+            "action": "button(Keys.BTN_THUMBL)"
+        },
         "RB": {
             "action": "button(Keys.BTN_TR)"
         },
@@ -31,9 +34,6 @@
         "START": {
             "action": "button(Keys.BTN_START)"
         },
-        "STICKPRESS": {
-            "action": "button(Keys.BTN_THUMBL)"
-        },
         "X": {
             "action": "button(Keys.BTN_NORTH)"
         },
@@ -47,6 +47,9 @@
         "action": "cemuhook()"
     },
     "is_template": false,
+    "lstick": {
+        "action": "sens(1.2, 1.2, XY(axis(Axes.ABS_X), raxis(Axes.ABS_Y)))"
+    },
     "menus": {},
     "pad_left": {
         "action": "click(dpad(hatup(Axes.ABS_HAT0Y), hatdown(Axes.ABS_HAT0Y), hatleft(Axes.ABS_HAT0X), hatright(Axes.ABS_HAT0X)))"
@@ -55,14 +58,11 @@
         "action": "mode(LGRIP, smooth(8, 0.78, 2.0, ball(mouse())), XY(axis(Axes.ABS_RX), raxis(Axes.ABS_RY)))"
     },
     "rstick": {},
-    "stick": {
-        "action": "sens(1.2, 1.2, XY(axis(Axes.ABS_X), raxis(Axes.ABS_Y)))"
-    },
     "trigger_left": {
         "action": "axis(Axes.ABS_Z)"
     },
     "trigger_right": {
         "action": "axis(Axes.ABS_RZ)"
     },
-    "version": 1.5
+    "version": 1.6
 }
