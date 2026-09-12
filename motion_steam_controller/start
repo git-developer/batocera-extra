@@ -11,5 +11,5 @@ else
   [ -z "${ip-}" ] || export SCC_SERVER_IP="${ip}"
   [ -z "${port-}" ] || export SCC_SERVER_PORT="${port}"
   "${app_name}" daemon --foreground --alone "${profile}" start >>"${log_file}" 2>&1 &
-  sleep 2
+  sleep 3
 fi
