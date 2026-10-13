@@ -6,43 +6,43 @@ if ! command -V patch >/dev/null 2>&1; then
   "${extra_root}/bin/install-from-arch" patch=?
 fi
 
-generator="$(find /usr/lib/python*.*/site-packages/configgen/generators/cemu -name cemuControllers.py)"
+generator="$(find /usr/lib/python*.*/site-packages/batocera_launch/emulators -name cemu.py)"
 patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 --- "${generator}"
-+++ cemuControllers.py
++++ cemu.py
 @@ -27,6 +27,7 @@
-     WIIMOTE = "Wiimote"
-
-     API_SDL = "SDLController"
-+    API_DSU = "DSUController"
-     API_WIIMOTE = "Wiimote"
-
-     # from https://github.com/cemu-project/Cemu/blob/main/src/input/emulated/WPADController.h
+ _WIIMOTE: Final = 'Wiimote'
+ 
+ _API_SDL: Final = 'SDLController'
++_API_DSU: Final = 'DSUController'
+ _API_WIIMOTE: Final = 'Wiimote'
+ 
+ # from https://github.com/cemu-project/Cemu/blob/main/src/input/emulated/WPADController.h
 @@ -43,6 +44,8 @@
-     WIIMOTE_NAME_NUNCHUK    = f'{WIIMOTE_NAME} Nunchuk'
-     WIIMOTE_NAME_CLASSIC    = f'{WIIMOTE_NAME} Classic Controller'
-
-+    DEFAULT_IP             = 'localhost'
-+    DEFAULT_PORT           = '26760'
-     DEFAULT_DEADZONE       = '0.25'
-     DEFAULT_RANGE          = '1'
-
-@@ -274,6 +277,15 @@
-             addTextElement(entryNode, "mapping", key)
-             addTextElement(entryNode, "button", value)
-
-+        # Add motion control
-+        if (system.isOptSet('cemuhook_server_port')):
-+            motionControllerNode = ET.SubElement(root, 'controller')
-+            addTextElement(motionControllerNode, 'api', API_DSU)
-+            addTextElement(motionControllerNode, 'uuid', '0')
-+            addTextElement(motionControllerNode, 'motion', 'true')
-+            addTextElement(motionControllerNode, 'ip', system.config.get('cemuhook_server_ip', DEFAULT_IP))
-+            addTextElement(motionControllerNode, 'port', system.config.get('cemuhook_server_port', DEFAULT_PORT))
+ _WIIMOTE_NAME_NUNCHUK: Final = f'{_WIIMOTE_NAME} Nunchuk'
+ _WIIMOTE_NAME_CLASSIC: Final = f'{_WIIMOTE_NAME} Classic Controller'
+ 
++_DEFAULT_IP: Final = 'localhost'
++_DEFAULT_PORT: Final = '26760'
+ _DEFAULT_DEADZONE: Final = '0.25'
+ _DEFAULT_RANGE: Final = '1'
+ 
+@@ -531,6 +534,15 @@
+                 ET.SubElement(entry_node, 'mapping').text = key
+                 ET.SubElement(entry_node, 'button').text = value
+ 
++            # Add motion control
++            if 'cemuhook_server_port' in self.config:
++                motion_controller_node = ET.SubElement(root, 'controller')
++                ET.SubElement(motion_controller_node, 'api').text = _API_DSU
++                ET.SubElement(motion_controller_node, 'uuid').text = '0'
++                ET.SubElement(motion_controller_node, 'motion').text = 'true'
++                ET.SubElement(motion_controller_node, 'ip').text = self.config.get_str('cemuhook_server_ip', _DEFAULT_IP)
++                ET.SubElement(motion_controller_node, 'port').text = self.config.get_str('cemuhook_server_port', _DEFAULT_PORT)
 +
-         # Save to file
-         with getConfigFileName(nplayer).open('wb') as handle:
-             tree = ET.ElementTree(root)
+             # Save to file
+             with (self.controller_profiles_dir / f'controller{nplayer}.xml').open('wb') as handle:
+                 tree = ET.ElementTree(root)
 EOF
 
 echo >&2 "Cemu generator was patched for cemuhook."

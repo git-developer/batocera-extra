@@ -4,12 +4,17 @@ set -eu
 
 main() {
   # patch-cemu-generator-for-cemuhook
-  find /usr/lib/python*.*/site-packages/configgen/generators/cemu -name cemuControllers.py.backup-cemuhook | while read backup; do
+  find /usr/lib/python*.*/site-packages/batocera_launch/emulators -name cemu.py.backup-cemuhook | while read backup; do
     mv "${backup}" "${backup%.backup-cemuhook}"
   done
 
   # patch-azahar-generator-for-cemuhook
-  find /usr/lib/python*.*/site-packages/configgen/generators/azahar -name azaharGenerator.py.backup-cemuhook | while read backup; do
+  find /usr/lib/python*.*/site-packages/batocera_launch/emulators -name azahar.py.backup-cemuhook | while read backup; do
+    mv "${backup}" "${backup%.backup-cemuhook}"
+  done
+
+  # patch-dolphin-generator-for-cemuhook
+  find /usr/lib/python*.*/site-packages/batocera_launch_dolphin -name controllers.py.backup-cemuhook | while read backup; do
     mv "${backup}" "${backup%.backup-cemuhook}"
   done
 

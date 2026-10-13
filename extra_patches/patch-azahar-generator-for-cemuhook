@@ -6,21 +6,25 @@ if ! command -V patch >/dev/null 2>&1; then
   "${extra_root}/bin/install-from-arch" patch=?
 fi
 
-generator="$(find /usr/lib/python*.*/site-packages/configgen/generators/azahar -name azaharGenerator.py)"
+generator="$(find /usr/lib/python*.*/site-packages/batocera_launch/emulators -name azahar.py)"
 patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 --- "${generator}"
-+++ azaharGenerator.py
-@@ -240,6 +240,10 @@
-             for x in azaharAxis:
-                 azaharConfig.set("Controls", f"profiles\\1\\{x}", f'"{AzaharGenerator.setAxis(azaharAxis[x], controller.guid, controller.inputs)}"')
-                 azaharConfig.set("Controls", f"profiles\\1\\{x}\\default", "false")
-+            for x in ["motion_device", "touch_device", "udp_input_address", "udp_input_port"]:
-+                if system.isOptSet(f"azahar_{x}"):
-+                    azaharConfig.set("Controls", f"profiles\\1\\{x}", system.config[f"azahar_{x}"])
-+                    azaharConfig.set("Controls", f"profiles\\1\\{x}\\default", "false")
-
++++ azahar.py
+@@ -379,6 +379,14 @@
+                     f'"{_set_axis(axis, controller.guid, controller.inputs)}"',
+                 )
+                 azahar_config.set('Controls', f'profiles\\1\\{option}\\default', 'false')
++            for option in ['motion_device', 'touch_device', 'udp_input_address', 'udp_input_port']:
++                if self.config.get_str(f'azahar_{option}'):
++                    azahar_config.set(
++                        'Controls',
++                        f'profiles\\1\\{option}',
++                        self.config.get_str(f'azahar_{option}'),
++                    )
++                    azahar_config.set('Controls', f'profiles\\1\\{option}\\default', 'false')
+ 
          ## Update the configuration file
-         with ensure_parents_and_open(azaharConfigFile, 'w') as configfile:
+         self.config_dir.mkdir(parents=True, exist_ok=True)
 EOF
 
 echo >&2 "Azahar generator was patched for cemuhook."
