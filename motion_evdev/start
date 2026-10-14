@@ -5,7 +5,6 @@ set -eu
 if "${base_dir}/service" status | grep .; then
   log "${app_name} is already running."
 else
-  "${base_dir}/../bin/upowerd-start" || true
   # AppImage requires FUSE, missing for v39 on aarch64
   "${base_dir}/../bin/fuse-start"
 
