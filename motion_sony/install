@@ -3,7 +3,7 @@ set -eu
 . "$(readlink -f "$(dirname "$0")")/.env"
 
 main() {
-  package_source="$(find_package_source "${package_name}" "${url}")"
+  package_source="$(find_package_source "${package_name}" "$(find_url)")"
   if [ "${package_source}" ]; then
     "${base_dir}/../extra_patches/mark-dbus-python-as-installed"
 
