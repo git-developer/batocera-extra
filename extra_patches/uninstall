@@ -25,6 +25,9 @@ main() {
   rm /etc/udev/rules.d/99-sony-controllers.rules
 
   # no uninstall for 'relocate-root-dotfiles-to-home'
+
+  # avoid-polkit-errors-in-syslog
+  rmdir {/run,/usr/local/share}/polkit-1/rules.d
 }
 
 main "${@}"
