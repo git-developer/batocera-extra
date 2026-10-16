@@ -8,6 +8,11 @@ main() {
     "${base_dir}/../extra_patches/mark-dbus-python-as-installed"
 
     pip install --root-user-action=ignore --use-pep517 "${package_source}"
+
+    dsdrv_home=$(find /usr/lib/python*/site-packages -type d -name dsdrv)
+    sed -i 's/SafeConfigParser/ConfigParser/g' "${dsdrv_home}/config.py"
+    sed -i 's/joystick.device.device.fn/joystick.device.device.path/g' "${dsdrv_home}/actions/input.py"
+
     ln -s "${package_name}" "/usr/bin/${app_name}"
   fi
 }
