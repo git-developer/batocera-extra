@@ -233,7 +233,7 @@ pkg_lib() {
 
   package="${2-}"
   if [ -z "${package}" ]; then
-    package=$(echo "${library}" | sed -nE -e 's/([0-9])\.so\./\1-/p' -e 's/\.so\.//p' | tr '[A-Z]' '[a-z]')
+    package=$(echo "${library}" | sed -nE -e 's/([0-9])\.so\./\1-/p' -e 's/\.so\.//p' | tr '[A-Z_]' '[a-z-]')
     if ! find_package_urls "${package}" | grep -q . && t64=$(find_package_urls "${package}t64"); then
       package=$(echo "${t64}" | cut -f 2)
     fi
