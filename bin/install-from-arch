@@ -12,7 +12,7 @@ log() {
 }
 
 cancel() {
-  log "❌ Error: ${@}"
+  log "Error: ${@}"
   return 1
 }
 
@@ -52,39 +52,26 @@ find_url_x86() {
   fi
 }
 
-find_min_subpath() {
-  base_url="${1%/}"
-  base_path="${2%/}"
-  base_path="${base_path#/}"
-  url="${base_url}/${base_path}"
-
-  path=$(curl -fsSL -H 'Accept: application/json' "${url}" | jq -r '([ .[].url ] | min)')
-  path="${path#./}"
-  path="${path%/}"
-  if [ -z "${path}" ]; then
-    cancel "No path found under ${url}"
-  fi
-  echo "${base_path}/${path}"
-}
-
 find_url_arm() {
   local name="${1}" date="${2}" revision="${3}" repo="${4}" arch="${5}" repo_arch="${6}"
 
-  archive_url="https://pkgmirror.sametimetomorrow.net/aarch64"
-  if [ "${date}" ]; then
-    if ! curl -IfsSL "${archive_url}/repos/${date}" >/dev/null 2>&1; then
-      log "⚠️  No repository found for date ${date}"
-      path=""
-      for i in year month day; do
-        path=$(find_min_subpath "${archive_url}/repos" "${path}")
-      done
-      date="${path}"
-      log "⚠️  Using repository for date ${date}"
-    fi
+  #
+  # ARM archives:
+  # - sametimetomorrow.net begins 2026-04-27, odd days only, provides aarch64, packages available from both /${date} and /packages
+  # - tiny-vps.com ends 2025-06-12, provides aarch64 and armv7h, packages available from /${date} (/packages only <= 2022)
+  #
+  if [ "$(date -d "${date}" +%s)" -ge "$(date -d '2026/04/27' +%s)" ]; then
+    archive_url="https://pkgmirror.sametimetomorrow.net/aarch64"
     repos_path="repos/${date}/${repo}"
+  else
+    archive_url="http://tardis.tiny-vps.com/aarm"
+    if [ "${repo_arch}" != "${repo_arch#arm*}" ]; then
+      repo_arch=armv7h
+    fi
+    repos_path="repos/${date}/${repo_arch}/${repo}"
   fi
 
-  if [ "${date}" ]; then
+  if [ "${date-}" ]; then
     find_url_by_date "${name}" "${date}" "${repo}" "${arch}" "${repo_arch}" "${archive_url}" "${repos_path}" "${repos_path}"
   elif [ "${revision}" ]; then
     find_url_by_revision "${name}" "${revision}" "${arch}" xz "${archive_url}"

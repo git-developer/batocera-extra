@@ -3,12 +3,28 @@ set -eu
 
 extra_root="$(readlink -f "$(dirname -- "$0")/..")"
 
-# install and prepare upower with dependencies
-"${extra_root}/bin/install-from-arch" upower=?=extra libimobiledevice=?=extra libimobiledevice-glue=?=extra libplist=?=extra libusbmuxd=?=extra
+# add upower
+# dependencies must be installed using 'add' (not 'lib'),
+# otherwise results in an incompatible library mix
+"${extra_root}/bin/pkg" add upower libupower-glib3 libimobiledevice-1.* libimobiledevice-glue-1.* libplist-2.* libusbmuxd-2.*
+
+# if 'libpolkit-gobject-1.so.0' does not come preinstalled (in `/usr/lib`):
+# install with dependencies (to `/usr/lib/$(uname -m)-linux-gnu`)
+if ! ldconfig -p | grep -q /usr/lib/libpolkit-gobject-1.so.0; then
+  "${extra_root}/bin/pkg" lib libpolkit-gobject-1.so.0
+  lib_path=$(ldconfig -p | sed -nE 's/[ \t]*libpolkit-gobject-1.so.0.* => (.+)/\1/p')
+  ldd "${lib_path}" | sed -nE 's/[ \t]*(.+) => not found/\1/p' | while read -r dependency; do
+    "${extra_root}/bin/pkg" lib "${dependency}"
+  done
+fi
 
 # without this dbus patch, upowerd fails with error messages
 "${extra_root}/extra_patches/mark-dbus-python-as-installed"
 
-if ! pgrep -f /usr/lib/upowerd >/dev/null; then
-  /usr/lib/upowerd 2>&1 | logger &
+find /usr/lib* -name upowerd -executable |
+if read -r upowerd && ! pgrep -f "${upowerd}" >/dev/null; then
+  # without setting the library path, upowerd fails with
+  # `undefined symbol: up_exported_device_complete_enable_charge_threshold`
+  LD_LIBRARY_PATH="/usr/lib/$(uname -m)-linux-gnu" "${upowerd}" 2>&1 | logger &
+  sleep 2
 fi

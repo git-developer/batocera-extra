@@ -1,0 +1,388 @@
+#!/bin/sh
+set -eu
+
+PKG_CONFIG_FILE="${PKG_CONFIG_FILE:-$(readlink -f "${0}" | sed -E "$(printf 's:(/bin)?(/%s)$:\\2.conf:' $(basename "${0}"))")}"
+if [ -r "${PKG_CONFIG_FILE}" ]; then
+  . "${PKG_CONFIG_FILE}"
+fi
+
+PKG_CACHE_BASE="${PKG_CACHE_BASE:-${XDG_CACHE_HOME:-${HOME}/.cache}/pkg}"
+PKG_RELEASES_FILE="${PKG_RELEASES_FILE:-${PKG_CACHE_BASE}/releases}"
+PKG_SOURCES_FILE="${PKG_SOURCES_FILE:-${PKG_CACHE_BASE}/sources.list}"
+PKG_INDEXES="${PKG_INDEXES:-${PKG_CACHE_BASE}/index}"
+PKG_PACKAGES_CACHE="${PKG_PACKAGES_CACHE:-${PKG_CACHE_BASE}/packages}"
+PKG_PACKAGES_CACHE="${PKG_PACKAGES_CACHE%/}"
+
+PKG_ARCH="${PKG_ARCH:-$(uname -m)}"
+PKG_PACKAGES_TARGET="${PKG_PACKAGES_TARGET:-${HOME}/.local}"
+
+log() {
+  echo >&2 "${@}"
+}
+
+info() {
+  log "💬 ${@}"
+}
+
+notify() {
+  log "ℹ️  ${@}"
+}
+
+success() {
+  log "✅ ${@}"
+}
+
+cancel() {
+  log "❌ Error: ${@}"
+  return 1
+}
+
+find_arch() {
+  source_arch="${1:-${PKG_ARCH}}"
+
+  case "${source_arch}" in
+    x86_64|amd64)  package_arch=amd64 ;;
+    aarch64|arm64) package_arch=arm64 ;;
+    armv7l|armhf)  package_arch=armhf ;;
+    *) package_arch="${source_arch}" ;;
+  esac
+
+  echo "${package_arch}"
+}
+
+provide_releases() {
+  if [ "${PKG_RELEASES_UPDATE-}" = 'true' ] || {
+    [ "${PKG_RELEASES_UPDATE-}" != 'false' ] && {
+      ldd=$(stat -L -c %Y "$(command -v ldd)")
+      last_check=$(stat -L -c %Y "${PKG_RELEASES_FILE}" 2>/dev/null || echo 0)
+      [ "${ldd}" -ge "${last_check}" ]
+    }
+  }; then
+    info "Updating Debian release list"
+    if [ -r "${PKG_RELEASES_FILE}" ]; then
+      releases_backup="${PKG_RELEASES_FILE}.$(date -Is | cut -d+ -f1 | tr -d -c [0-9T-]).backup"
+      mv "${PKG_RELEASES_FILE}" "${releases_backup}"
+    fi
+    curl -fsSL 'https://qa.debian.org/madison.php?package=glibc' |
+    sed -nE 's/.*glibc \| ([^- ]+)[^|]* \| ([^ -]+).*/\2:\1/p' |
+    grep -v '^\(sid\|experimental\)' |
+    sort -t: -k2 -V -r -u |
+    install -D -m u+rw,a+r /dev/stdin "${PKG_RELEASES_FILE}"
+    if [ "${releases_backup-}" ] && diff -q "${PKG_RELEASES_FILE}" "${releases_backup}"; then
+      rm "${releases_backup}"
+    fi
+  fi
+}
+
+find_release() {
+  if [ "${PKG_RELEASES-}" ]; then
+    echo "${PKG_RELEASES}"
+  else
+    provide_releases
+    cat "${PKG_RELEASES_FILE}"
+  fi | tr ' ' '\n' | {
+    target="${1:-$(ldd --version | sed -nE 's/^ldd.* ([^ ]+)$/\1/p')}"
+    while IFS=: read -r codename version; do
+      if [ "${version}" = "$(printf '%s\n%s\n' "${version}" "${target}" | sort -V | head -1)" ]; then
+        echo "${codename}"
+        break
+      fi
+    done
+  }
+}
+
+provide_sources() {
+  codename="$(find_release)"
+  if [ -r "${PKG_SOURCES_FILE}" ] && ! grep -q "${codename}" "${PKG_SOURCES_FILE}"; then
+    notify "Updating sources list to match compatible release '${codename}'."
+    mv -v "${PKG_SOURCES_FILE}" "${PKG_SOURCES_FILE}.$(date -Is | cut -d+ -f1 | tr -d -c [0-9T-]).backup"
+  fi
+
+  if [ ! -r "${PKG_SOURCES_FILE}" ]; then
+    install -D -m u+rw,a+r /dev/stdin "${PKG_SOURCES_FILE}" <<EOF
+deb http://deb.debian.org/debian ${codename} main non-free contrib
+deb http://deb.debian.org/debian ${codename}-updates main non-free contrib
+deb http://security.debian.org/debian-security ${codename}-security main non-free contrib
+EOF
+  fi
+}
+
+read_sources() {
+  # Syntax: https://manpages.debian.org/stable/apt/sources.list.5.en.html#ONE-LINE-STYLE_FORMAT
+  if [ "${PKG_SOURCES-}" ]; then
+    echo "${PKG_SOURCES}"
+  else
+    provide_sources
+    cat "${PKG_SOURCES_FILE}"
+  fi |
+  tr -s ' \t' ' ' |
+  sed -nE 's/^(deb)( +\[ *([^]]+)\])? +([^ ]+) +([^ ]+) +(.+)/\1|\3|\4|\5|\6|/p' |
+  while IFS='|' read -r type options location codename pools; do
+    pools=$(echo "${pools}" | tr ' ' ,)
+    archs=$(echo "${options}" | sed -nE 's/arch *= *([^] ]+).*/\1/p')
+    echo "${archs}" | tr , '\n' | { grep . || echo ''; } | while read -r arch; do
+      printf '%s|%s|%s|%s\n' "${arch}" "${location}" "${codename}" "${pools}"
+    done
+  done
+}
+
+find_package_urls() {
+  local name="${1-}" requested_codename="${2-}" requested_arch="${3-}" requested_pools="${4-}"
+
+  read_sources | while IFS='|' read -r sources_arch sources_location sources_codename sources_pools; do
+    arch="$(find_arch "${requested_arch}")"
+    codename="${requested_codename:-${sources_codename}}"
+    if [ "${arch}" = "${sources_arch:-${arch}}" ] && [ "${codename}" = "${sources_codename}" ]; then
+      for pool in $(echo "${requested_pools:-${sources_pools}}" | tr , ' '); do
+        find_package_url "${name}" "${codename}" "${arch}" "${pool}" "${sources_location}"
+      done
+    fi
+  done
+}
+
+find_package_url() {
+  local name="${1}" codename="${2}" arch="${3}" pool="${4}" location="${5}"
+
+  index_file="${PKG_INDEXES}/${codename}.${pool}.binary-${arch}.packages"
+  if [ "${PKG_INDEXES_UPDATE-}" = 'true' ] || { [ "${PKG_INDEXES_UPDATE-}" != 'false' ] && [ ! -r "${index_file}" ]; }; then
+    url="${location}/dists/${codename}/${pool}/binary-${arch}/Packages.xz"
+    if ! curl -fsSL -I "${url}" >/dev/null; then
+      cancel "Not available: ${url}"
+    fi
+    notify "Building package index '${index_file}' from ${url}"
+    curl -fsSL "${url}" |
+      xz -d |
+      awk '/^Package: / { pkg = $2 } /^Filename: / { print pkg, $2 }' |
+      install /dev/stdin -m a+r,u+rw -D "${index_file}"
+  fi
+
+  path=$(sed -nE "s/^${name} (.+)/\1/p" "${index_file}")
+  if [ "${path}" ]; then
+    printf '%s\t' "${path}" "$@"
+    printf '\n'
+  fi
+}
+
+provide_package() {
+  local url="${1}"
+  filename="${filename:-${url##*/}}"
+  package="${PKG_PACKAGES_CACHE}/${filename}"
+  if [ -s "${package}" ]; then
+    info "Using locally cached file ${package}"
+  else
+    if [ "${PKG_PACKAGES_DOWNLOAD:-true}" = 'true' ]; then
+      notify "Downloading package from ${url}"
+      mkdir -p "${PKG_PACKAGES_CACHE}"
+      curl -fsSLR -o "${package}" "${url}"
+    fi
+  fi
+  echo "${package}"
+}
+
+install_package() {
+  package="${1}"
+  if [ "${PKG_PACKAGES_INSTALL:-true}" = 'true' ]; then
+    if [ ! -r "${package}" ]; then
+      cancel "Missing package file: ${package}"
+    fi
+    mkdir -p "${PKG_PACKAGES_TARGET}"
+    bsdtar x -f "${package}" -O data.tar.xz | tar x --xz -C "${PKG_PACKAGES_TARGET}"
+    success "Installed package from ${package}"
+  fi
+}
+
+pkg_add() {
+  if [ "$#" -eq 0 ]; then
+    cancel "Missing package."
+  fi
+
+  for package in "${@}"; do
+    echo "${package}" | while IFS== read -r name codename arch pools; do
+      find_package_urls "${name}" "${codename}" "${arch}" "${pools}" |
+      sort -V -r | head -1 |
+      if read -r path actual_name actual_codename actual_arch pool location; then
+        info "Adding package '${actual_name}' of release '${actual_codename}' for arch '${actual_arch}' from pool '${pool}'"
+        url="${location}/${path}"
+        local_file="$(provide_package "${url}")"
+        install_package "${local_file}"
+      else
+        if [ "${name-}" ]; then
+          index_pattern="${codename:-*}.${pool:-*}.binary-$(find_arch "${arch}").packages"
+          notify "Similar packages in '${PKG_INDEXES}/${index_pattern}':"
+          find "${PKG_INDEXES}" -type f -name "${index_pattern}" |
+          while read index_file; do
+            index_name="${index_file#${PKG_INDEXES}/}"
+            index_name="${index_name%.packages}"
+            grep -h -oP -i "^(lib)?${name}[^ ]*" "${index_file}" | sort | sed 's/^/  /g' |
+            while read match; do
+              printf ' %s (from %s)\n' "${match}" "${index_name}"
+            done
+          done | { grep . || log "  None"; } | sort >&2
+        fi
+        cancel "No URL found for package '${name}'${codename:+ of release '${codename}'}${arch:+ for arch '${arch}'}${pool:+ from pool '${pool}'}."
+      fi
+    done
+  done
+}
+
+pkg_lib() {
+  library="${1-}"
+  if [ -z "${library}" ]; then
+    cancel "Missing arguments. Syntax: lib <library> [package]"
+  fi
+
+  package="${2-}"
+  if [ -z "${package}" ]; then
+    package=$(echo "${library}" | sed -nE -e 's/([0-9])\.so\./\1-/p' -e 's/\.so\.//p' | tr '[A-Z]' '[a-z]')
+    if ! find_package_urls "${package}" | grep -q . && t64=$(find_package_urls "${package}t64"); then
+      package=$(echo "${t64}" | cut -f 2)
+    fi
+    if [ -z "${package}" ]; then
+      cancel "No package found for library '${library}'."
+    fi
+  fi
+
+  if ! ldconfig -p | grep -q "${library}"; then
+    pkg_add "${package}"
+    find /usr/lib -name "${library}" -printf '%h\n' | sort | uniq | while read -r lib_path; do
+      if ! grep -q "^${lib_path}$" /etc/ld.so.conf; then
+        echo "${lib_path}" | tee -a /etc/ld.so.conf
+        notify "Addition to the system library path: '${lib_path}'"
+      fi
+    done
+    ldconfig
+    notify "System library path was updated."
+  fi
+
+  if ldconfig -p | grep -q "${library}"; then
+    info "Library '${library}' is available."
+  else
+    cancel "Library '${library}' is not available."
+  fi
+}
+
+pkg_list() {
+  pattern="${1-}"
+
+  if [ -z "${pattern}" ]; then
+    cancel "Missing package pattern"
+  fi
+
+  if [ "${pattern}" = "${pattern%%\**}" ]; then
+    pattern="${pattern}*"
+  fi
+  info "Listing contents of packages matching '${pattern}'"
+
+  find "${PKG_PACKAGES_CACHE}" -name "${pattern}" |
+    { grep . || cancel "No package found matching '${pattern}'."; } |
+    while read -r package; do
+      info "Contents of ${package}:"
+      bsdtar x -f "${package}" -O data.tar.xz | tar t --xz >&2
+    done
+}
+
+pkg_update() {
+  PKG_INDEXES_UPDATE=true find_package_urls
+}
+
+pkg_clean() {
+  release=$(find_release)
+
+  find "${PKG_INDEXES}" -type f ! -name  "${release}*" | xargs -r rm -v
+  find "${PKG_PACKAGES_CACHE}" -type f -name '*.deb' -printf '%f\t%p\n' | while read -r name path; do
+    if ! grep -q -r "${name}" "${PKG_INDEXES}"; then
+      rm -v "${path}"
+    fi
+  done
+  rm -f -v "${PKG_SOURCES_FILE}".*.backup
+  rm -f -v "${PKG_RELEASES_FILE}".*.backup
+}
+
+
+print_usage() {
+  name="$(basename "${0}")"
+  pad="$(printf -- ' %.0s' {1..${#name}})"
+  usage=$(cat <<EOF
+${name} - download and install packages from a Debian-style repository
+
+Usage:
+
+  ${name} add <package-spec>...         - Add packages to the system
+        <package-spec>: <name>['='<codename>['='<arch>['='<pools>]]]
+        Defaults: codename and pools are read from the sources list, arch from the machine.
+  ${name} lib <library> [package-spec]  - Add a library; install from package if missing.
+        If package-spec is omitted, the package name is derived from the library
+  ${name} list <package-pattern>...     - List contents of packages; pattern supports glob syntax.
+  ${name} update                        - Force an update of the package indexes.
+  ${name} clean                         - Remove unused packages, indexes and sources lists.
+
+Supported environment variables:
+
+$(
+  line() {
+    printf '  %-21s  %-36s  %-40s\n' "$@"
+  }
+  line "Name"                  "Description"                          "Value"
+  line "----"                  "-----------"                          "-------"
+  line "PKG_ARCH"              "Package architecture"                 "Machine architecture (here: ${PKG_ARCH})"
+  line "PKG_CACHE_BASE"        "Base directory containing all caches" "${PKG_CACHE_BASE}"
+  line "PKG_CONFIG_FILE"       "Configuration with env variables"     "${PKG_CONFIG_FILE}"
+  line "PKG_INDEXES"           "Directory containing package indexes" "${PKG_INDEXES}"
+  line "PKG_INDEXES_UPDATE"    "Update package indexes?"              "Only if missing (Options: true, false)"
+  line "PKG_PACKAGES_CACHE"    "Directory containing packages"        "${PKG_PACKAGES_CACHE}"
+  line "PKG_PACKAGES_DOWNLOAD" "Download packages?"                   "true (Options: true, false)"
+  line "PKG_PACKAGES_INSTALL"  "Install packages?"                    "true (Options: true, false)"
+  line "PKG_PACKAGES_TARGET"   "Package installation root directory"  "${PKG_PACKAGES_TARGET}"
+  line "PKG_RELEASES_FILE"     "File containing relevant releases"    "${PKG_RELEASES_FILE}"
+  line "PKG_RELEASES_UPDATE"   "Update releases?"                     "Only if missing (Options: true, false)"
+  line "PKG_RELEASES"          "Releases for package sources"         "Read from PKG_RELEASES_FILE"
+  line "PKG_SOURCES_FILE"      "File containing package sources"      "${PKG_SOURCES_FILE}"
+  line ""                      "  in one-line-style format"           ""
+  line "PKG_SOURCES"           "Package sources"                      "Read from PKG_SOURCES_FILE"
+)
+
+
+Updates:
+
+  By default, packages are not updated automatically.
+  Set PKG_INDEXES_UPDATE=true to enable package updates (within a release).
+  Set PKG_RELEASES_UPDATE=true to enable release updates.
+  Release updates respect compatibility to the system (glibc).
+  Use config file '${PKG_CONFIG_FILE}' to make these settings persistent.
+
+Examples:
+
+${pad} Command                                             Package        Codename      Architecture  Pools
+${pad} -------                                             -------        ------------  ------------  ------------
+  ${name} add util-linux                                  util-linux     from sources  current       from sources
+  ${name} add util-linux=trixie                           util-linux     Trixie        current       from sources
+  ${name} add util-linux==arm64                           util-linux     from sources  arm64         from sources
+  ${name} add unrar-nonfree===non-free                    unrar-nonfree  from sources  current       non-free
+  ${name} add unrar-nonfree=bullseye=arm64=main,non-free  unrar-nonfree  Bullseye      arm64         main, non-free
+
+${pad} Command                           Description
+${pad} -------                           -----------
+  ${name} lib libsystemd.so.0           Add library 'libsystemd.so.0' from package 'libsystemd0'
+  ${name} lib libfuse.so.2              Add library 'libfuse.so.2' from package 'libfuse2t64'
+  ${name} lib libpolkit-gobject-1.so.0  Add library 'libpolkit-gobject-1.so.0' from package 'libpolkit-gobject-1-0'
+
+EOF
+)
+  log "${usage}"
+}
+
+main() {
+  if [ "${#}" -eq 0 ]; then
+    print_usage
+    return 0
+  fi
+
+  command="${1}"
+  shift
+  case "${command}" in
+    list|update|clean|add|lib) "pkg_${command}" "$@" ;;
+    *) cancel "Unsupported command '${command}'"
+  esac
+}
+
+main "${@}"

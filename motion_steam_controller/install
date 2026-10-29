@@ -61,6 +61,9 @@ main() {
   chmod +x "${package}"
   ln -sf "${package}" "/usr/bin/${app_name}"
 
+  # AppImage requires FUSE 2
+  "${base_dir}/../bin/pkg" lib libfuse.so.2
+
   prepare_profiles "${@}"
   add_desktop_integration
 }

@@ -7,6 +7,9 @@ main() {
   package="$(provide_package "$(find_url)" "${target}")"
   chmod +x "${package}"
   ln -sf "${package}" "/usr/bin/${app_name}"
+
+  # AppImage requires FUSE 2
+  "${base_dir}/../bin/pkg" lib libfuse.so.2
 }
 
 main "${@}"

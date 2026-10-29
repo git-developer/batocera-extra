@@ -9,6 +9,7 @@ main() {
 
     pip install --root-user-action=ignore --use-pep517 "${package_source}"
 
+    # obsolete after merge of https://github.com/lirannl/dsdrv-cemuhook/pull/4
     dsdrv_home=$(find /usr/lib/python*/site-packages -type d -name dsdrv)
     sed -i 's/SafeConfigParser/ConfigParser/g' "${dsdrv_home}/config.py"
     sed -i 's/joystick.device.device.fn/joystick.device.device.path/g' "${dsdrv_home}/actions/input.py"

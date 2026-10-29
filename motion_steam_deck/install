@@ -14,8 +14,18 @@ main() {
   package="$(provide_package "${url}" "${target}")"
 
   unzip -j -o "${package}" "SteamDeckGyroDSUSetup/${app_name}" -d /usr/bin/
+  chmod +x "/usr/bin/${app_name}"
 
-  "${base_dir}/../bin/install-from-arch" ncurses=?
+  for lib in libtinfo.so.6 libncursesw.so.6 libsystemd.so.0; do
+    "${base_dir}/../bin/pkg" lib "${lib}"
+  done
+  if [ "$(uname -m)" != "x86_64" ]; then
+    # 'add' instead of 'lib' to avoid an architechture mix in system's library path
+    pkg add libhidapi-hidraw0==x86_64
+  fi
+  if [ ! -e /dev/usb ]; then
+    mkdir /dev/usb
+  fi
 }
 
 main "${@}"
