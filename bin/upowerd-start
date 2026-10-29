@@ -12,10 +12,11 @@ extra_root="$(readlink -f "$(dirname -- "$0")/..")"
 # install with dependencies (to `/usr/lib/$(uname -m)-linux-gnu`)
 if ! ldconfig -p | grep -q /usr/lib/libpolkit-gobject-1.so.0; then
   "${extra_root}/bin/pkg" lib libpolkit-gobject-1.so.0
-  lib_path=$(ldconfig -p | sed -nE 's/[ \t]*libpolkit-gobject-1.so.0.* => (.+)/\1/p')
-  ldd "${lib_path}" | sed -nE 's/[ \t]*(.+) => not found/\1/p' | while read -r dependency; do
-    "${extra_root}/bin/pkg" lib "${dependency}"
-  done
+  ldconfig -p |
+  sed -nE 's/[ \t]*libpolkit-gobject-1.so.0.* => (.+)/\1/p' |
+  xargs ldd |
+  sed -nE 's/[ \t]*(.+) => not found/\1/p' |
+  xargs -r "${extra_root}/bin/pkg" lib
 fi
 
 # without this dbus patch, upowerd fails with error messages

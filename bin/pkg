@@ -226,39 +226,41 @@ pkg_add() {
 }
 
 pkg_lib() {
-  library="${1-}"
-  if [ -z "${library}" ]; then
-    cancel "Missing arguments. Syntax: lib <library> [package]"
+  if [ "$#" -eq 0 ]; then
+    cancel "Missing library."
   fi
 
-  package="${2-}"
-  if [ -z "${package}" ]; then
-    package=$(echo "${library}" | sed -nE -e 's/([0-9])\.so\./\1-/p' -e 's/\.so\.//p' | tr '[A-Z_]' '[a-z-]')
-    if ! find_package_urls "${package}" | grep -q . && t64=$(find_package_urls "${package}t64"); then
-      package=$(echo "${t64}" | cut -f 2)
-    fi
-    if [ -z "${package}" ]; then
-      cancel "No package found for library '${library}'."
-    fi
-  fi
+  for lib_item in "${@}"; do
+    echo "${lib_item}" | while IFS== read -r library package; do
+      if [ -z "${package}" ]; then
+        package=$(echo "${library}" | sed -nE -e 's/([0-9])\.so\./\1-/p' -e 's/\.so\.//p' | tr '[A-Z_]' '[a-z-]')
+        if ! find_package_urls "${package}" | grep -q . && t64=$(find_package_urls "${package}t64"); then
+          package=$(echo "${t64}" | cut -f 2)
+        fi
+        if [ -z "${package}" ]; then
+          cancel "No package found for library '${library}'."
+        fi
+      fi
 
-  if ! ldconfig -p | grep -q "${library}"; then
-    pkg_add "${package}"
-    find /usr/lib -name "${library}" -printf '%h\n' | sort | uniq | while read -r lib_path; do
-      if ! grep -q "^${lib_path}$" /etc/ld.so.conf; then
-        echo "${lib_path}" | tee -a /etc/ld.so.conf
-        notify "Addition to the system library path: '${lib_path}'"
+      if ! ldconfig -p | grep -q "${library}"; then
+        pkg_add "${package}"
+        find /usr/lib -name "${library}" -printf '%h\n' | sort | uniq | while read -r lib_path; do
+          if ! grep -q "^${lib_path}$" /etc/ld.so.conf; then
+            echo "${lib_path}" | tee -a /etc/ld.so.conf
+            notify "Addition to the system library path: '${lib_path}'"
+          fi
+        done
+        ldconfig
+        notify "System library path was updated."
+      fi
+
+      if ldconfig -p | grep -q "${library}"; then
+        info "Library '${library}' is available."
+      else
+        cancel "Library '${library}' is not available."
       fi
     done
-    ldconfig
-    notify "System library path was updated."
-  fi
-
-  if ldconfig -p | grep -q "${library}"; then
-    info "Library '${library}' is available."
-  else
-    cancel "Library '${library}' is not available."
-  fi
+  done
 }
 
 pkg_list() {
@@ -307,14 +309,15 @@ ${name} - download and install packages from a Debian-style repository
 
 Usage:
 
-  ${name} add <package-spec>...         - Add packages to the system
+  ${name} add <package-spec>...       - Add packages to the system
         <package-spec>: <name>['='<codename>['='<arch>['='<pools>]]]
         Defaults: codename and pools are read from the sources list, arch from the machine.
-  ${name} lib <library> [package-spec]  - Add a library; install from package if missing.
-        If package-spec is omitted, the package name is derived from the library
-  ${name} list <package-pattern>...     - List contents of packages; pattern supports glob syntax.
-  ${name} update                        - Force an update of the package indexes.
-  ${name} clean                         - Remove unused packages, indexes and sources lists.
+  ${name} lib <library-spec>...       - Add a library; install from package if missing.
+        <library-spec>: <filename>['='<package-spec>]
+        If package-spec is omitted, the package name is derived from the filename.
+  ${name} list <package-pattern>...   - List contents of packages; pattern supports glob syntax.
+  ${name} update                      - Force an update of the package indexes.
+  ${name} clean                       - Remove unused packages, indexes and sources lists.
 
 Supported environment variables:
 
@@ -360,11 +363,12 @@ ${pad} -------                                             -------        ------
   ${name} add unrar-nonfree===non-free                    unrar-nonfree  from sources  current       non-free
   ${name} add unrar-nonfree=bullseye=arm64=main,non-free  unrar-nonfree  Bullseye      arm64         main, non-free
 
-${pad} Command                           Description
-${pad} -------                           -----------
-  ${name} lib libsystemd.so.0           Add library 'libsystemd.so.0' from package 'libsystemd0'
-  ${name} lib libfuse.so.2              Add library 'libfuse.so.2' from package 'libfuse2t64'
-  ${name} lib libpolkit-gobject-1.so.0  Add library 'libpolkit-gobject-1.so.0' from package 'libpolkit-gobject-1-0'
+${pad} Command                                         Description
+${pad} -------                                         -----------
+  ${name} lib libsystemd.so.0                         Add library 'libsystemd.so.0' from package 'libsystemd0'
+  ${name} lib libfuse.so.2                            Add library 'libfuse.so.2' from package 'libfuse2t64'
+  ${name} lib libpolkit-gobject-1.so.0                Add library 'libpolkit-gobject-1.so.0' from package 'libpolkit-gobject-1-0'
+  ${name} lib libcurl-gnutls.so.4=libcurl3t64-gnutls  Add library 'libcurl-gnutls.so.4' from package 'libcurl3t64-gnutls'
 
 EOF
 )

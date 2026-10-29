@@ -16,9 +16,7 @@ main() {
   unzip -j -o "${package}" "SteamDeckGyroDSUSetup/${app_name}" -d /usr/bin/
   chmod +x "/usr/bin/${app_name}"
 
-  for lib in libtinfo.so.6 libncursesw.so.6 libsystemd.so.0; do
-    "${base_dir}/../bin/pkg" lib "${lib}"
-  done
+  "${base_dir}/../bin/pkg" lib libtinfo.so.6 libncursesw.so.6 libsystemd.so.0
   if [ "$(uname -m)" != "x86_64" ]; then
     # 'add' instead of 'lib' to avoid an architechture mix in system's library path
     pkg add libhidapi-hidraw0==x86_64
