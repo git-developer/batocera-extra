@@ -4,10 +4,9 @@ set -eu
 
 prepare_profiles() {
   if [ "${1-}" = '--with-default-profiles' ]; then
-    path=usr/share/scc/default_profiles
+    path=share/scc/default_profiles
     work_dir="$(mktemp -d)"
     cd "${work_dir}"
-    mkdir -p "squashfs-root/${path}"
     "${cmd_name}" --appimage-extract "${path}/*.sccprofile"
     find "squashfs-root/${path}" -name '*.sccprofile' -exec mv -n '{}' "${base_dir}/profiles/" \;
     cd - >/dev/null
@@ -27,13 +26,12 @@ prepare_profiles() {
 add_desktop_integration() {
   icon_path=/usr/share/icons/hicolor/symbolic/apps
   icon_file="${app_name}.png"
-  icon_source="usr/share/scc/images/menu-icons/system/${icon_file}"
+  icon_source="share/scc/images/menu-icons/system/${icon_file}"
 
   work_dir="$(mktemp -d)"
   cd "${work_dir}"
-  if "${cmd_name}" --appimage-extract "${icon_source}" | grep -q .; then
-    mv "squashfs-root/${icon_source}" "${icon_path}"
-  else
+  "${cmd_name}" --appimage-extract "${icon_source}" >/dev/null
+  if ! mv "squashfs-root/${icon_source}" "${icon_path}"; then
     echo >&2 "Warning: Missing icon for desktop file: ${icon_source}"
   fi
   cd - >/dev/null
@@ -66,9 +64,6 @@ main() {
   package="$(provide_package "$(find_url)" "${target}")"
   chmod +x "${package}"
   ln -sf "${package}" "/usr/bin/${cmd_name}"
-
-  # AppImage requires FUSE 2
-  "${base_dir}/../bin/pkg" lib libfuse.so.2
 
   prepare_profiles "${@}"
   add_desktop_integration
