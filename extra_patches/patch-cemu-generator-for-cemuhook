@@ -6,11 +6,12 @@ if ! command -V patch >/dev/null 2>&1; then
   "${extra_root}/bin/pkg" add patch
 fi
 
-generator="$(find /usr/lib/python*.*/site-packages/batocera_launch/emulators -name cemu.py)"
+GENERATORS_PATH="${GENERATORS_PATH:-$(find /usr/lib/python*.*/site-packages/batocera_launch/emulators -maxdepth 0 -type d)}"
+generator="$(find "${GENERATORS_PATH}" -name cemu.py)"
 patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 --- "${generator}"
 +++ cemu.py
-@@ -27,6 +27,7 @@
+@@ -47,6 +47,7 @@
  _WIIMOTE: Final = 'Wiimote'
  
  _API_SDL: Final = 'SDLController'
@@ -18,7 +19,7 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
  _API_WIIMOTE: Final = 'Wiimote'
  
  # from https://github.com/cemu-project/Cemu/blob/main/src/input/emulated/WPADController.h
-@@ -43,6 +44,8 @@
+@@ -63,6 +64,8 @@
  _WIIMOTE_NAME_NUNCHUK: Final = f'{_WIIMOTE_NAME} Nunchuk'
  _WIIMOTE_NAME_CLASSIC: Final = f'{_WIIMOTE_NAME} Classic Controller'
  
@@ -27,7 +28,7 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
  _DEFAULT_DEADZONE: Final = '0.25'
  _DEFAULT_RANGE: Final = '1'
  
-@@ -531,6 +534,15 @@
+@@ -554,6 +557,15 @@
                  ET.SubElement(entry_node, 'mapping').text = key
                  ET.SubElement(entry_node, 'button').text = value
  

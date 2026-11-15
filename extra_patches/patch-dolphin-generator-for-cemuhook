@@ -6,11 +6,12 @@ if ! command -V patch >/dev/null 2>&1; then
   "${extra_root}/bin/pkg" add patch
 fi
 
-generator="$(find /usr/lib/python*.*/site-packages/batocera_launch_dolphin -name controllers.py)"
+GENERATORS_PATH="${GENERATORS_PATH:-$(find /usr/lib/python*.*/site-packages/batocera_launch_dolphin -maxdepth 0 -type d)}"
+generator="$(find "${GENERATORS_PATH}" -name controllers.py)"
 patch -b -z .backup-cemuhook "${generator}" << 'EOF'
 --- "${generator}"
 +++ controllers.py
-@@ -65,6 +65,14 @@
+@@ -86,6 +86,14 @@
          else:
              generate_controller_config_realwiimotes('WiimoteNew.ini', 'Wiimote')
              generate_controller_config_gamecube(emulator, players_controllers, {}, rom)
@@ -25,7 +26,7 @@ patch -b -z .backup-cemuhook "${generator}" << 'EOF'
      elif emulator.system == 'gamecube':
          used_wheels: DeviceInfoMapping = {}
          if (
-@@ -731,6 +739,20 @@
+@@ -760,6 +768,20 @@
              f.write(f'IMUAccelerometer/Backward = `{dev}:Accel Z+`\n')
              f.write(f'IMUAccelerometer/Up = `{dev}:Accel Y-`\n')
              f.write(f'IMUAccelerometer/Down = `{dev}:Accel Y+`\n')
