@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eu
 
-mkdir -p {/run,/usr/local/share}/polkit-1/rules.d
+mkdir -p /run/polkit-1/rules.d /usr/local/share/polkit-1/rules.d
