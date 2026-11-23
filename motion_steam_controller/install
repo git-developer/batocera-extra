@@ -39,8 +39,14 @@ add_desktop_integration() {
   cd - >/dev/null
   rm -r "${work_dir}"
 
-  sed -i 's:</applications>:\t<application groupname="sc-controller">\n\t\t<fullscreen>no</fullscreen>\n\t</application>\n</applications>:g' /etc/openbox/rc.xml
-  DISPLAY=:0 openbox --reconfigure || true
+  if command -v openbox >/dev/null; then
+    sed -i 's:</applications>:\t<application groupname="sc-controller">\n\t\t<fullscreen>no</fullscreen>\n\t</application>\n</applications>:g' /etc/openbox/rc.xml
+    openbox_cache="${XDG_CACHE_HOME:-/userdata/system/.cache}/openbox"
+    if [ -L "${openbox_cache}" ] && [ ! -e "${openbox_cache}" ]; then
+      rm "${openbox_cache}"
+    fi
+    DISPLAY=:0 openbox --reconfigure || true
+  fi
 
   cat >"/usr/share/applications/${app_name}-config.desktop" << EOF
 [Desktop Entry]
