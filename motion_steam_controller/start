@@ -3,13 +3,13 @@ set -eu
 . "$(readlink -f "$(dirname "$0")")/.env"
 
 if "${base_dir}/service" status | grep .; then
-  log "${app_name} is already running."
+  log "${cmd_name} is already running."
 else
   [ -z "${ip-}" ] || export SCC_SERVER_IP="${ip}"
   [ -z "${port-}" ] || export SCC_SERVER_PORT="${port}"
   if [ -z "${DISPLAY-}" ] && [ -z "${WAYLAND_DISPLAY-}" ]; then
     export DISPLAY=:0
   fi
-  "${app_name}" daemon --foreground --alone --profile "${profile}" start >>"${log_file}" 2>&1 &
+  "${cmd_name}" daemon --foreground --alone --profile "${profile}" start >>"${log_file}" 2>&1 &
   sleep 3
 fi

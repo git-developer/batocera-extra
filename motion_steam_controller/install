@@ -8,7 +8,7 @@ prepare_profiles() {
     work_dir="$(mktemp -d)"
     cd "${work_dir}"
     mkdir -p "squashfs-root/${path}"
-    "${app_name}" --appimage-extract "${path}/*.sccprofile"
+    "${cmd_name}" --appimage-extract "${path}/*.sccprofile"
     find "squashfs-root/${path}" -name '*.sccprofile' -exec mv -n '{}' "${base_dir}/profiles/" \;
     cd - >/dev/null
     rm -r "${work_dir}"
@@ -31,7 +31,7 @@ add_desktop_integration() {
 
   work_dir="$(mktemp -d)"
   cd "${work_dir}"
-  if "${app_name}" --appimage-extract "${icon_source}" | grep -q .; then
+  if "${cmd_name}" --appimage-extract "${icon_source}" | grep -q .; then
     mv "squashfs-root/${icon_source}" "${icon_path}"
   else
     echo >&2 "Warning: Missing icon for desktop file: ${icon_source}"
@@ -52,7 +52,7 @@ add_desktop_integration() {
 [Desktop Entry]
 Version=1.0
 Icon=${icon_path}/${icon_file}
-Exec="/usr/bin/${app_name}" gui
+Exec="/usr/bin/${cmd_name}" gui
 Terminal=false
 Type=Application
 Categories=Game;batocera.linux;
@@ -65,7 +65,7 @@ main() {
   target="${XDG_CACHE_HOME:-/userdata/system/.cache}/${app_name}"
   package="$(provide_package "$(find_url)" "${target}")"
   chmod +x "${package}"
-  ln -sf "${package}" "/usr/bin/${app_name}"
+  ln -sf "${package}" "/usr/bin/${cmd_name}"
 
   # AppImage requires FUSE 2
   "${base_dir}/../bin/pkg" lib libfuse.so.2
