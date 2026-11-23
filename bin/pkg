@@ -246,7 +246,7 @@ pkg_lib() {
         pkg_add "${package}"
         find /usr/lib -name "${library}" -printf '%h\n' | sort | uniq | while read -r lib_path; do
           if ! grep -q "^${lib_path}$" /etc/ld.so.conf; then
-            echo "${lib_path}" | tee -a /etc/ld.so.conf
+            echo "${lib_path}" >>/etc/ld.so.conf
             notify "Addition to the system library path: '${lib_path}'"
           fi
         done
